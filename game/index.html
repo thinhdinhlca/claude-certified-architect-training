@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architect's Ascent</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a1a;
+  color: #e0e0e0;
+  font-family: 'Press Start 2P', monospace;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  image-rendering: pixelated;
+}
+
+#game {
+  width: 800px;
+  height: 600px;
+  border: 4px solid #4a9;
+  background: #111122;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(68,170,153,0.3);
+}
+
+/* SCREENS */
+.screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+.screen.active { display: flex; flex-direction: column; }
+
+/* TITLE SCREEN */
+#title-screen {
+  background: linear-gradient(180deg, #0a0a2e 0%, #1a1a3e 50%, #0a0a1a 100%);
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+#title-screen h1 {
+  font-size: 24px;
+  color: #4af;
+  text-shadow: 0 0 20px rgba(68,170,255,0.5);
+  margin-bottom: 8px;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+#title-screen .subtitle {
+  font-size: 10px;
+  color: #8ad;
+  margin-bottom: 40px;
+}
+@keyframes glow {
+  from { text-shadow: 0 0 10px rgba(68,170,255,0.3); }
+  to { text-shadow: 0 0 30px rgba(68,170,255,0.8), 0 0 60px rgba(68,170,255,0.3); }
+}
+.tower-art {
+  font-size: 10px;
+  line-height: 1.2;
+  color: #4a9;
+  margin-bottom: 30px;
+  white-space: pre;
+}
+.blink {
+  animation: blink 1s step-end infinite;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* MAP SCREEN */
+#map-screen { background: #0d0d20; }
+.map-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #1a1a30;
+  border-bottom: 3px solid #333;
+  font-size: 8px;
+}
+.map-header .stats { display: flex; gap: 20px; }
+.stat-label { color: #888; }
+.stat-val { color: #4f4; }
+.stat-val.xp { color: #ff4; }
+.map-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow-y: auto;
+}
+.floor-row {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 3px 0;
+  border: 2px solid #333;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 8px;
+  transition: all 0.2s;
+}
+.floor-row:hover { border-color: #4a9; background: #1a1a30; }
+.floor-row.locked { opacity: 0.4; cursor: not-allowed; }
+.floor-row.locked:hover { border-color: #333; background: transparent; }
+.floor-row.cleared { border-color: #4f4; }
+.floor-row.current { border-color: #ff4; background: #2a2a10; }
+.floor-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-right: 12px;
+}
+.floor-info { flex: 1; }
+.floor-name { color: #fff; margin-bottom: 4px; }
+.floor-domain { color: #888; font-size: 7px; }
+.floor-score { color: #4f4; font-size: 8px; min-width: 80px; text-align: right; }
+
+/* BATTLE SCREEN */
+#battle-screen { background: #0a0a1a; }
+.battle-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1a1a30;
+  border-bottom: 3px solid #333;
+}
+.enemy-info, .player-info { font-size: 8px; }
+.hp-bar {
+  width: 160px;
+  height: 12px;
+  background: #333;
+  border: 2px solid #555;
+  margin-top: 4px;
+  position: relative;
+}
+.hp-fill {
+  height: 100%;
+  background: #4f4;
+  transition: width 0.5s;
+}
+.hp-fill.low { background: #f44; }
+.hp-fill.mid { background: #ff4; }
+.enemy-name { color: #f66; }
+.player-name { color: #4af; text-align: right; }
+
+.battle-arena {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  overflow-y: auto;
+}
+.enemy-sprite {
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.3;
+  color: #f66;
+  margin: 8px 0;
+  white-space: pre;
+  min-height: 80px;
+}
+.question-box {
+  background: #1a1a30;
+  border: 2px solid #4a9;
+  border-radius: 4px;
+  padding: 12px;
+  margin: 8px 0;
+  font-size: 8px;
+  line-height: 1.6;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.question-num { color: #ff4; margin-bottom: 8px; font-size: 7px; }
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.answer-btn {
+  background: #1a1a30;
+  border: 2px solid #444;
+  color: #ddd;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+  line-height: 1.5;
+  transition: all 0.15s;
+}
+.answer-btn:hover { border-color: #4af; background: #1a1a40; }
+.answer-btn.correct { border-color: #4f4; background: #1a3a1a; color: #4f4; }
+.answer-btn.wrong { border-color: #f44; background: #3a1a1a; color: #f44; }
+.answer-btn.reveal { border-color: #4f4; background: #1a3a1a; }
+.answer-btn.disabled { pointer-events: none; opacity: 0.6; }
+
+.battle-msg {
+  text-align: center;
+  font-size: 9px;
+  padding: 8px;
+  min-height: 24px;
+}
+.battle-msg.hit { color: #4f4; }
+.battle-msg.miss { color: #f44; }
+
+/* RESULT SCREEN */
+#result-screen {
+  background: #0d0d20;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.result-title { font-size: 20px; margin-bottom: 16px; }
+.result-title.win { color: #4f4; }
+.result-title.lose { color: #f44; }
+.result-stats { font-size: 9px; line-height: 2.5; margin-bottom: 24px; }
+.result-xp { color: #ff4; font-size: 12px; margin-bottom: 30px; }
+
+/* EXPLANATION POPUP */
+.explanation-overlay {
+  display: none;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 10;
+  justify-content: center;
+  align-items: center;
+}
+.explanation-overlay.active { display: flex; }
+.explanation-box {
+  background: #1a1a30;
+  border: 3px solid #4a9;
+  border-radius: 6px;
+  padding: 20px;
+  max-width: 600px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 8px;
+  line-height: 1.8;
+}
+.explanation-box h3 { color: #4af; margin-bottom: 12px; font-size: 10px; }
+.explanation-box .correct-label { color: #4f4; margin-bottom: 8px; }
+
+/* BUTTONS */
+.game-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  padding: 12px 24px;
+  background: #1a1a30;
+  border: 3px solid #4a9;
+  color: #4a9;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.game-btn:hover { background: #4a9; color: #111; }
+.game-btn.small { font-size: 8px; padding: 8px 16px; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #4a9; }
+</style>
+</head>
+<body>
+
+<div id="game">
+  <!-- TITLE SCREEN -->
+  <div id="title-screen" class="screen active">
+    <div class="tower-art">       /\
+      /  \
+     / ** \
+    /______\
+    |      |
+    | DOOR |
+    |______|
+   /________\</div>
+    <h1>ARCHITECT'S ASCENT</h1>
+    <div class="subtitle">Claude Certified Architect -- Foundations</div>
+    <br><br>
+    <div class="blink" onclick="startGame()">[ PRESS START ]</div>
+  </div>
+
+  <!-- MAP SCREEN -->
+  <div id="map-screen" class="screen">
+    <div class="map-header">
+      <div>
+        <span class="stat-label">TITLE:</span>
+        <span class="stat-val" id="map-title">Apprentice</span>
+      </div>
+      <div class="stats">
+        <div><span class="stat-label">LV</span> <span class="stat-val" id="map-level">1</span></div>
+        <div><span class="stat-label">XP</span> <span class="stat-val xp" id="map-xp">0</span></div>
+        <div><span class="stat-label">STREAK</span> <span class="stat-val" id="map-streak">0</span></div>
+        <div><span class="stat-label">W/L</span> <span class="stat-val" id="map-record">0/0</span></div>
+      </div>
+    </div>
+    <div class="map-body" id="floor-list"></div>
+  </div>
+
+  <!-- BATTLE SCREEN -->
+  <div id="battle-screen" class="screen">
+    <div class="battle-top">
+      <div class="enemy-info">
+        <div class="enemy-name" id="enemy-name">???</div>
+        <div class="hp-bar"><div class="hp-fill" id="enemy-hp" style="width:100%"></div></div>
+        <div style="font-size:7px;color:#888;margin-top:2px;" id="enemy-hp-text">10/10 HP</div>
+      </div>
+      <div class="player-info">
+        <div class="player-name" id="player-name">Apprentice</div>
+        <div class="hp-bar"><div class="hp-fill" id="player-hp" style="width:100%"></div></div>
+        <div style="font-size:7px;color:#888;margin-top:2px;text-align:right;" id="player-hp-text">10/10 HP</div>
+      </div>
+    </div>
+    <div class="battle-arena">
+      <div class="enemy-sprite" id="enemy-sprite"></div>
+      <div class="battle-msg" id="battle-msg"></div>
+      <div class="question-box">
+        <div class="question-num" id="q-num">Q1/10</div>
+        <div id="q-text"></div>
+      </div>
+      <div class="answers" id="answers"></div>
+    </div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result-screen" class="screen">
+    <div class="result-title" id="result-title">VICTORY</div>
+    <div class="result-stats" id="result-stats"></div>
+    <div class="result-xp" id="result-xp"></div>
+    <br>
+    <button class="game-btn" onclick="showMap()">CONTINUE</button>
+  </div>
+
+  <!-- EXPLANATION OVERLAY -->
+  <div class="explanation-overlay" id="explanation-overlay">
+    <div class="explanation-box" id="explanation-box">
+      <h3>EXPLANATION</h3>
+      <div class="correct-label" id="expl-correct"></div>
+      <div id="expl-text"></div>
+      <br>
+      <button class="game-btn small" id="expl-btn" onclick="closeExplanation()">NEXT</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== GAME STATE ====================
+const state = {
+  xp: 0, level: 1, streak: 0, wins: 0, losses: 0,
+  floors: Array(11).fill(null).map(() => ({ cleared: false, bestScore: 0 })),
+  currentFloor: 0,
+  // battle state
+  battleQuestions: [], currentQ: 0, score: 0,
+  playerHP: 10, playerMaxHP: 10,
+  enemyHP: 10, enemyMaxHP: 10,
+};
+
+// Load saved state
+try {
+  const saved = localStorage.getItem('architects-ascent');
+  if (saved) Object.assign(state, JSON.parse(saved));
+} catch(e) {}
+
+function saveState() {
+  localStorage.setItem('architects-ascent', JSON.stringify(state));
+}
+
+// ==================== FLOOR DATA ====================
+const floors = [
+  { name: "The Loop Chamber", domain: "D1: Agentic Loops", icon: "~", enemy: "Loop Terminator", sprite: `  [@@]
+ /|##|\\
+  |##|
+ / \\/ \\
+STOP_REASON?`, color: "#f66" },
+  { name: "Coordination Hall", domain: "D1: Multi-Agent", icon: "*", enemy: "Rogue Subagent", sprite: `  (00)
+ <|__|>
+  |  |
+ _/  \\_
+HUB-SPOKE!`, color: "#f84" },
+  { name: "The Hook Forge", domain: "D1: Hooks & Workflows", icon: "J", enemy: "Prompt Whisperer", sprite: `  {^^}
+  |/\\|
+  |\\/|
+ /    \\
+JUST PROMPT IT`, color: "#fa4" },
+  { name: "The Tool Armory", domain: "D2: Tool Design & MCP", icon: "+", enemy: "Tool Hoarder", sprite: `  [**]
+ /|18|\\
+  |18|
+ / !! \\
+ALL THE TOOLS`, color: "#ff4" },
+  { name: "The Config Maze", domain: "D3: Claude Code Config", icon: "#", enemy: "Config Phantom", sprite: `  (~~)
+  |??|
+  |..|
+ _/  \\_
+~/.claude/???`, color: "#4f4" },
+  { name: "The Pipeline Forge", domain: "D3: Plan Mode & CI/CD", icon: "|", enemy: "CI Gremlin", sprite: `  [!!]
+ <|--|>
+  |--|
+ /    \\
+claude -p ???`, color: "#4fa" },
+  { name: "Prompt Workshop", domain: "D4: Prompt Engineering", icon: "?", enemy: "Vague Instructor", sprite: `  (  )
+  |be|
+  |ok|
+ _/  \\_
+BE CONSERVATIVE`, color: "#4af" },
+  { name: "Validation Gauntlet", domain: "D4: Validation & Batch", icon: "!", enemy: "Self-Review Shadow", sprite: `  {==}
+  |me|
+  |ok|
+ /    \\
+I REVIEWED MYSELF`, color: "#84f" },
+  { name: "The Memory Halls", domain: "D5: Context & Reliability", icon: "~", enemy: "Context Glutton", sprite: `  [##]
+ /|40|\\
+  |FL|
+ / DS \\
+DUMP EVERYTHING`, color: "#f4f" },
+  { name: "Synthesis Chamber", domain: "D5: Advanced Context", icon: "^", enemy: "Accuracy Mirage", sprite: `  (97)
+  |%%|
+  |OK|
+ _/  \\_
+97% SHIP IT!`, color: "#f48" },
+  { name: "THE FINAL TOWER", domain: "ALL DOMAINS", icon: "X", enemy: "THE ARCHITECT", sprite: `  /\\
+ /  \\
+/EXAM\\
+|    |
+|PASS|
+|____|`, color: "#fff" },
+];
+
+// ==================== QUESTIONS ====================
+const questions = [
+  // FLOOR 0: Agentic Loops
+  [
+    { q: "Your agentic loop checks if the response contains 'I've completed the task' to stop iterating. The agent sometimes says this mid-conversation while still needing tools. What should you change?", a: ["Add more termination phrases for robustness.", "Check stop_reason: continue on 'tool_use', terminate on 'end_turn'.", "Set a max iteration count as the primary stop.", "Parse the response for tool call JSON."], c: 1, e: "stop_reason is the reliable API mechanism. Parsing natural language is an anti-pattern." },
+    { q: "Your loop does not append tool results to conversation history. The agent re-calls the same tools repeatedly. Why?", a: ["Context window is too small.", "Tool results must be appended so the model can reason about them next iteration.", "The model needs a prompt instruction not to repeat calls.", "You need a deduplication layer."], c: 1, e: "Without appending results, the model has no record of previous outputs and cannot incorporate them." },
+    { q: "A developer uses max_iterations=5 as the PRIMARY stopping condition. The agent hits it mid-task. The fix proposed is max=20. What is better?", a: ["Use stop_reason=='end_turn' as primary, iteration cap as safety fallback only.", "Set max_iterations=50.", "Remove the cap entirely.", "Use a timer-based cutoff instead."], c: 0, e: "stop_reason should drive the loop. Iteration caps are safety fallbacks, not primary control." },
+    { q: "After the model returns stop_reason:'tool_use', you execute the tool. What happens next?", a: ["Send only the tool result as the next user message.", "Append assistant response + tool result to history, send full updated history.", "Summarize the tool result in the system prompt.", "Store the result in a database with a reference ID."], c: 1, e: "Full conversation history including the tool call and result must be sent in the next request." },
+    { q: "Your loop terminates when response.content[0].type=='text'. Why is this wrong?", a: ["Content can have both text and tool_use blocks. The model often explains reasoning alongside tool calls.", "Text content only appears in errors.", "Content always has exactly one element.", "Tool calls never mix with text."], c: 0, e: "A response can contain both text and tool_use blocks. Check stop_reason, not content type." },
+    { q: "What distinguishes model-driven decision-making from a pre-configured decision tree?", a: ["Model-driven is slower but more accurate.", "Claude reasons about which tool to call based on context, rather than following a fixed sequence.", "Decision trees use the API, model-driven uses local inference.", "Model-driven requires fewer tools."], c: 1, e: "Model-driven loops dynamically decide based on context. Decision trees follow hard-coded logic." },
+    { q: "The response has stop_reason:'max_tokens'. What does this mean?", a: ["The model finished normally.", "The response was truncated -- increase max_tokens or continue the conversation.", "The model hit an error.", "The model wants a tool but ran out of space."], c: 1, e: "max_tokens means the response was cut off before the model finished. It needs continuation." },
+    { q: "Which is the correct agentic loop control flow?", a: ["Check if response has tool JSON -> execute -> loop until no JSON.", "Check stop_reason -> if tool_use: execute, append, next request -> if end_turn: return.", "Execute all defined tools -> append -> check for 'done' in text.", "If text content: return -> if tool content: execute and loop."], c: 1, e: "The canonical flow: send request, check stop_reason, handle tool_use or end_turn accordingly." },
+    { q: "Your agent enters an infinite loop calling the same two tools alternately. Best mitigation?", a: ["Parse tool results for the word 'error' and terminate.", "Keep a safety iteration cap as fallback; monitor for repeated identical calls to diagnose root cause.", "Ask the model 'Are you done?' after each call.", "Limit each tool to one call per session."], c: 1, e: "Safety caps prevent runaway loops. Monitoring repeated calls identifies prompt or tool design issues." },
+    { q: "For a billing dispute agent, a junior dev suggests hard-coding the tool call sequence. What is the tradeoff?", a: ["Hard-coding is always better for guaranteed order.", "Hard-coding ensures sequence but loses adaptability. A hybrid (programmatic for critical steps, model-driven for adaptive) is often best.", "Model-driven is always better for flexibility.", "No difference -- the model follows the same sequence either way."], c: 1, e: "Hybrid: programmatic enforcement for non-negotiable steps, model-driven for adaptive decisions." },
+  ],
+  // FLOOR 1: Multi-Agent
+  [
+    { q: "Your synthesis agent misses document analysis findings. The coordinator passes web search results directly but only a summary reference for doc analysis. Fix?", a: ["Increase synthesis context window.", "Include complete doc analysis findings directly in the synthesis subagent's prompt.", "Have synthesis call doc analysis directly.", "Reword the coordinator prompt."], c: 1, e: "Subagent context must be explicitly provided. Subagents do not inherit parent context." },
+    { q: "Web search and doc analysis can run independently; fact-checking needs both results. Optimal pattern?", a: ["Run all three sequentially.", "Emit two Task calls in one response for parallel execution, then invoke fact-checking with both results.", "Run all three in parallel with polling.", "Pipeline: web search -> doc analysis -> fact check."], c: 1, e: "Parallel via multiple Task calls in one response. Fact-checking waits for both to complete." },
+    { q: "Coordinator's allowedTools does not include 'Task'. What happens when it tries to spawn subagents?", a: ["Falls back to inline processing.", "Cannot spawn subagents -- Task not in allowed tools.", "Spawns with restricted permissions.", "Automatically gains Task access."], c: 1, e: "allowedTools must explicitly include 'Task' for subagent spawning." },
+    { q: "Three subagents research overlapping topics producing duplicates. Best fix?", a: ["Deduplicate after all complete.", "Partition scope (distinct subtopics or source types) to minimize overlap.", "Reduce to one subagent.", "Each subagent checks with coordinator first."], c: 1, e: "Partitioning at assignment time prevents duplication more efficiently than post-hoc filtering." },
+    { q: "A subagent sends an error message directly to another subagent. Why is this problematic?", a: ["All inter-subagent communication must route through the coordinator for observability and control.", "The other agent might not be running.", "Direct communication needs a different format.", "Errors should be logged to files instead."], c: 0, e: "Hub-and-spoke: coordinator manages all communication for observability, error handling, and control." },
+    { q: "What should an AgentDefinition include?", a: ["Only a system prompt -- everything else is inherited.", "Descriptions, system prompts, and tool restrictions for each subagent type.", "Only tool restrictions.", "A reference to the coordinator's configuration."], c: 1, e: "AgentDefinitions need descriptions, prompts, and tool restrictions. Subagents don't inherit from coordinator." },
+    { q: "Subagent results have metadata mixed into prose. Source attribution is lost after synthesis. Fix?", a: ["Use regex to find URLs in the text.", "Use structured data formats to separate content from metadata.", "Add attributions after synthesis.", "Tell synthesis to preserve URLs."], c: 1, e: "Structured formats (JSON, delimited sections) keep content and metadata separate through synthesis." },
+    { q: "The coordinator always routes through the full pipeline even for simple queries. Better approach?", a: ["Add timeouts to each agent.", "Analyze query requirements and dynamically select which subagents to invoke.", "Create a separate simple-query coordinator.", "Add a classifier model before the coordinator."], c: 1, e: "The coordinator should dynamically assess complexity and invoke only needed subagents." },
+    { q: "A colleague writes step-by-step procedural coordinator instructions. Why might this be suboptimal?", a: ["Procedural instructions are always better.", "Coordinator prompts should specify goals and quality criteria to enable adaptability.", "Procedural instructions use more tokens.", "The coordinator cannot follow steps."], c: 1, e: "Goal-oriented prompts let the coordinator adapt strategy. Procedures lock in one approach." },
+    { q: "You want to explore two testing strategies from a shared analysis baseline. Best approach?", a: ["Start two new sessions, re-running analysis in each.", "Use fork_session to branch from the shared baseline.", "Use one session sequentially, clearing context between.", "Create two subagents with copies of the analysis."], c: 1, e: "fork_session creates independent branches from a shared baseline -- purpose-built for this." },
+  ],
+  // FLOOR 2: Hooks & Workflows
+  [
+    { q: "The agent skips get_customer before process_refund 8% of the time despite prompt instructions. Strongest guarantee?", a: ["Add CAPITALIZED instructions.", "Add few-shot examples.", "Implement a programmatic prerequisite blocking process_refund until get_customer returns a verified ID.", "Add a confidence check."], c: 2, e: "Programmatic enforcement = deterministic. Prompt-based = probabilistic. Financial consequences need guarantees." },
+    { q: "Customer: 'Return my headphones AND change my shipping address.' Agent handles address but forgets the return. Fix?", a: ["Add 'address all parts' to prompt.", "Decompose multi-concern requests into distinct items, investigate each, synthesize unified resolution.", "Limit to one request per message.", "Add a checklist tool."], c: 1, e: "Explicit decomposition into distinct items with parallel handling prevents dropped concerns." },
+    { q: "PostToolUse hook gets dates in Unix, ISO 8601, and MM/DD/YYYY from different tools. What should it do?", a: ["Add format instructions to prompt.", "Normalize all dates to consistent format before model processes them.", "Create separate agents per tool.", "Store dates in a database."], c: 1, e: "PostToolUse hooks normalize heterogeneous data before the model sees it." },
+    { q: "Company caps automated refunds at $500. Agent occasionally processes $600+. Guaranteed compliance?", a: ["Bold the limit in the prompt.", "Implement a hook that blocks process_refund above $500 and redirects to escalation.", "Add a confirmation step.", "Log all refund amounts."], c: 1, e: "Tool call interception hooks deterministically enforce business rules." },
+    { q: "What is the key distinction between hooks and prompt instructions for enforcement?", a: ["Hooks are faster to implement.", "Hooks provide deterministic guarantees; prompts provide probabilistic compliance.", "Prompts are more reliable because models understand context.", "They provide equivalent compliance rates."], c: 1, e: "Hooks = deterministic (100%). Prompts = probabilistic (non-zero failure). Critical rules need hooks." },
+    { q: "Resuming a session after code changes. The context has stale analysis. What to do?", a: ["Trust the model to detect changes.", "Start completely fresh.", "Resume and inform the agent about specific file changes for targeted re-analysis.", "Delete the session and all state."], c: 2, e: "Inform the resumed session about specific changes for targeted updates, preserving valid context." },
+    { q: "Long investigation session has stale tool results from 3 hours ago. You want to continue in a new session. Best approach?", a: ["Resume the existing session.", "Start new session with structured summary of key findings injected into initial context.", "Export and paste the full transcript.", "Resume with --resume and hope."], c: 1, e: "Structured summaries preserve key findings while discarding stale data." },
+    { q: "Adding tests to a large legacy codebase with zero coverage. Best decomposition?", a: ["Write tests alphabetically by file.", "Map structure, identify high-impact areas, create prioritized plan that adapts as dependencies are found.", "Write all tests in one session.", "One test file per source file pipeline."], c: 1, e: "Dynamic decomposition: map, prioritize, adapt. Open-ended tasks need adaptive plans." },
+    { q: "When escalating to a human agent, your AI just says 'Transferring you.' The human has no transcript. What should the handoff include?", a: ["Just name and account number.", "Structured summary: customer ID, root cause, refund amount, recommended action, what was investigated.", "The entire conversation transcript.", "A sentiment score."], c: 1, e: "Structured handoffs give human agents actionable context without re-investigation." },
+    { q: "12-file PR review: per-file analysis vs cross-file integration. Which decomposition pattern?", a: ["Dynamic exploration in whatever order.", "Prompt chaining: analyze each file individually, then cross-file integration pass.", "All 12 files in a single pass.", "Random sample of 4 files."], c: 1, e: "Prompt chaining ensures consistent depth per-file, with a separate pass for cross-file issues." },
+  ],
+  // FLOOR 3: Tool Design & MCP
+  [
+    { q: "Two tools: analyze_content and analyze_document with near-identical descriptions. Agent calls the wrong one frequently. First step?", a: ["Add a routing classifier.", "Rename and update descriptions to clearly differentiate purpose, inputs, outputs, and when to use each.", "Consolidate into one tool.", "Add 20 few-shot examples."], c: 1, e: "Tool descriptions are the primary selection mechanism. Clear differentiation is highest-leverage." },
+    { q: "MCP tool returns generic 'Operation failed' for all errors. Agent wastes retries on non-retryable errors. Fix?", a: ["Add retry with exponential backoff for all.", "Return structured error metadata: errorCategory, isRetryable, human-readable description.", "Parse error message text to determine retry.", "Always return success with warnings."], c: 1, e: "Structured error metadata enables intelligent recovery decisions." },
+    { q: "Agent has 18 tools. Selection accuracy has degraded. Primary cause and fix?", a: ["Needs more training data.", "Too many tools degrades selection. Restrict to 4-5 tools per agent role.", "Add better descriptions to all 18.", "Pre-filter to 5 candidates per call."], c: 1, e: "Decision complexity increases with tool count. 4-5 scoped tools per agent is the guideline." },
+    { q: "Synthesis agent has web search tools 'for convenience' and keeps searching instead of synthesizing. Fix?", a: ["Add 'don't search' prompt instructions.", "Remove web search tools. Give only synthesis tools. Route verification through coordinator.", "Rename to discourage use.", "Add usage quota."], c: 1, e: "Remove cross-specialization tools. Agents misuse tools outside their role." },
+    { q: "You must ensure extract_metadata runs before enrichment tools. Which tool_choice config?", a: ["tool_choice:'auto' with prompt instructions.", "Force extract_metadata first turn, then switch to 'auto' for subsequent turns.", "tool_choice:'any'.", "List extract_metadata first in tools array."], c: 1, e: "Forced tool selection guarantees a specific tool runs. Switch to 'auto' after." },
+    { q: "Team MCP config should be shared via repo. Where to put it?", a: ["Each dev's ~/.claude.json.", "Project's .mcp.json with ${TOKEN} env var expansion.", "CLAUDE.md with connection strings.", "Shared Google Doc."], c: 1, e: "Project .mcp.json is version-controlled. Env vars keep credentials out of the repo." },
+    { q: "Personal experimental MCP server. Where to configure?", a: [".mcp.json with 'experimental' flag.", "~/.claude.json (user-scoped).", "Git-ignored .mcp.local.json.", "CLAUDE.md experimental section."], c: 1, e: "User-scoped ~/.claude.json for personal servers that don't affect teammates." },
+    { q: "MCP search_issues tool exists but agent keeps using Grep. Likely cause?", a: ["Built-in tools always take priority.", "MCP tool description is too vague -- agent defaults to familiar Grep.", "MCP server not connected.", "Grep is always better."], c: 1, e: "Vague MCP descriptions cause agents to prefer familiar built-in tools. Enhance descriptions." },
+    { q: "Find all *.test.tsx files. Which built-in tool?", a: ["Grep.", "Glob.", "Read.", "Bash with find."], c: 1, e: "Glob = file path pattern matching. Grep = content search." },
+    { q: "Understand how processRefund() is used across the codebase. Best approach?", a: ["Read every file.", "Start with Grep to find callers, then Read to trace imports and flows.", "Run a static analysis tool via Bash.", "Glob for JS files then Read each."], c: 1, e: "Incremental: Grep finds entry points, Read traces flows from those points." },
+  ],
+  // FLOOR 4: Claude Code Config
+  [
+    { q: "New team member doesn't get coding standards. Others do. Standards are in CLAUDE.md. Most likely issue?", a: ["They haven't pulled latest.", "Standards are in ~/.claude/CLAUDE.md (user-level) not project-level.", "File is too large.", "Claude Code version outdated."], c: 1, e: "User-level config isn't shared via version control. Must be project-level for team standards." },
+    { q: "500-line CLAUDE.md covering API, testing, deployment, security. Hard to maintain. Best refactoring?", a: ["Split into .claude/rules/ files by topic.", "Link to external docs.", "Add table of contents.", "Move to README.md."], c: 0, e: ".claude/rules/ is designed for topic-specific rule files as an alternative to monolithic CLAUDE.md." },
+    { q: "Test files spread everywhere (Button.test.tsx next to Button.tsx). Same conventions for all tests. Most maintainable config?", a: ["Root CLAUDE.md.", "Rule files in .claude/rules/ with glob: paths: ['**/*.test.tsx'].", "CLAUDE.md in every directory.", "Testing skill developers must invoke."], c: 1, e: "Path-scoped rules with glob patterns apply by file type regardless of directory location." },
+    { q: "Create a /deploy command only for you, not affecting teammates. Where?", a: [".claude/commands/ in project.", "~/.claude/commands/ in home directory.", ".claude/skills/ in project.", "Personal CLAUDE.md."], c: 1, e: "User-scoped commands in ~/.claude/commands/ are personal and not shared." },
+    { q: "Skill produces verbose output polluting main context. Frontmatter option?", a: ["output: hidden", "context: fork", "verbose: false", "context: isolated"], c: 1, e: "context: fork runs the skill in an isolated sub-agent context." },
+    { q: "Skill should generate code but NOT run shell commands. How to restrict?", a: ["Add 'don't use Bash' to the prompt.", "Configure allowed-tools in SKILL.md frontmatter.", "Create a reduced-permission profile.", "Use a lower-capability model."], c: 1, e: "allowed-tools in SKILL.md restricts tool access deterministically." },
+    { q: "Skill should prompt for PR number when invoked without args. Which frontmatter?", a: ["required-args: ['pr_number']", "argument-hint: 'PR number to review'", "prompt: 'Enter PR number'", "input-required: true"], c: 1, e: "argument-hint prompts developers for required parameters on invocation." },
+    { q: "Need always-loaded standards AND on-demand task workflows. Best organization?", a: ["Everything in CLAUDE.md.", "CLAUDE.md for universal standards, skills for on-demand workflows.", "Skills for everything.", ".claude/rules/ for workflows."], c: 1, e: "CLAUDE.md = always loaded, universal. Skills = on-demand, task-specific." },
+    { q: "Monorepo: React, Angular, Go packages. Each needs different standards. Most maintainable?", a: ["All in root CLAUDE.md with headers.", "Use @import in each package's CLAUDE.md for relevant standards.", "Duplicate CLAUDE.md per package.", "Runtime language detection."], c: 1, e: "@import enables selective inclusion per package without duplication." },
+    { q: "Verify which memory files are loaded. Diagnose inconsistent session behavior. Which command?", a: ["/status", "/memory", "/config", "/debug"], c: 1, e: "/memory shows loaded memory files -- the diagnostic tool for memory-related issues." },
+  ],
+  // FLOOR 5: Plan Mode & CI/CD
+  [
+    { q: "Add a null check to one function. Clear from stack trace. Which mode?", a: ["Plan mode to explore impact.", "Direct execution -- well-understood, single-file, clear scope.", "Plan mode then direct execution.", "Direct execution, switch to plan if complex."], c: 1, e: "Simple, well-scoped changes = direct execution. No need for plan mode overhead." },
+    { q: "Migrate from library X to Y across 45+ files. Multiple valid approaches. Which mode?", a: ["Direct execution with comprehensive instructions.", "Plan mode to explore, understand dependencies, design approach first.", "Direct execution changing files one at a time.", "Automated find-and-replace script."], c: 1, e: "Plan mode: large-scale, multiple approaches, architectural decisions." },
+    { q: "CI job runs 'claude \"Review PR\"' and hangs. Fix?", a: ["Set CLAUDE_HEADLESS=true.", "Use claude -p 'Review PR' with -p flag.", "Redirect stdin from /dev/null.", "Use --batch flag."], c: 1, e: "-p (--print) is the documented flag for non-interactive CI/CD mode." },
+    { q: "Same session generates code AND reviews it. Review finds nothing. Independent reviewer finds bugs. Why?", a: ["Review prompt inadequate.", "Model retains generation reasoning, biased toward confirming its own decisions.", "Model can't review code.", "Extended thinking not enabled."], c: 1, e: "Self-review bias: same-session reasoning context makes the model confirm its own choices." },
+    { q: "Manager wants to batch both pre-merge checks and overnight debt reports. Correct assessment?", a: ["Switch both for cost savings.", "Batch overnight reports only. Pre-merge needs real-time. Batch has up to 24h latency.", "Keep both synchronous.", "Batch both with polling fallback."], c: 1, e: "Batch API: 50% savings but up to 24h processing. Unsuitable for blocking workflows." },
+    { q: "14-file PR review: inconsistent depth, contradictory findings. Fix?", a: ["Larger context window model.", "Per-file local analysis passes plus separate cross-file integration pass.", "Require smaller PRs.", "Three reviews, majority vote."], c: 1, e: "Multi-pass addresses attention dilution: consistent depth per-file + integration pass." },
+    { q: "CI re-runs produce duplicate findings. Fix?", a: ["Delete previous comments.", "Include prior findings in context, report only new or unaddressed issues.", "Use different template for re-reviews.", "Only review newly changed files."], c: 1, e: "Context awareness of prior findings prevents duplicate reporting." },
+    { q: "Generated tests duplicate existing scenarios. Prevention?", a: ["Limit generated test count.", "Provide existing test files in context.", "Deduplication filter.", "Only generate for new code."], c: 1, e: "Context awareness of existing tests prevents duplication at generation time." },
+    { q: "Explore subagent used for verbose discovery. Why preferred over main conversation?", a: ["Has more tools.", "Isolates verbose output, returns summaries, preserving main context.", "Runs faster.", "Can access more files."], c: 1, e: "Context isolation: only summarized findings return to main conversation." },
+    { q: "Prose instructions produce inconsistent code transformations. Best technique?", a: ["More detailed prose.", "2-3 concrete input/output examples.", "Regular expressions.", "Stricter prompt tone."], c: 1, e: "Concrete examples communicate transformations when prose fails." },
+  ],
+  // FLOOR 6: Prompt Engineering
+  [
+    { q: "Code review has 40% false positives in 'comment accuracy'. Developers ignore ALL findings. Immediate action?", a: ["Add 'be conservative' to prompt.", "Add 'only high-confidence findings'.", "Temporarily disable the high false-positive category to restore trust.", "Switch to better model."], c: 2, e: "High false positives in one category undermine all categories. Disable, fix offline, re-enable." },
+    { q: "'Check that comments are accurate' flags imprecise but non-misleading comments. Better prompt?", a: ["'Carefully check, being conservative.'", "'Flag comments only when claimed behavior directly contradicts actual code. Do not flag imprecise terminology.'", "Remove comment checking.", "'Only flag if 95% confident.'"], c: 1, e: "Explicit criteria defining what to flag vs skip addresses the false positive source." },
+    { q: "Extraction output format is inconsistent despite detailed instructions. Best fix?", a: ["More detailed formatting instructions.", "2-4 few-shot examples showing exact desired format.", "Post-process to enforce formatting.", "Stricter system prompt."], c: 1, e: "Few-shot examples are most effective for format consistency." },
+    { q: "Need guaranteed schema-compliant structured output. Most reliable approach?", a: ["Add 'Return valid JSON' and parse text.", "Use tool_use with a JSON schema.", "Regex to fix JSON errors.", "Model self-validates JSON."], c: 1, e: "tool_use with schemas eliminates syntax errors. (Semantic errors still possible.)" },
+    { q: "Three doc types (invoice, contract, receipt). No type labels. Need structured output with correct schema. tool_choice?", a: ["tool_choice: 'auto'", "tool_choice: 'any' with three extraction tools.", "Force invoice schema always.", "One generic schema for all."], c: 1, e: "'any' guarantees a tool call while letting the model choose the correct schema." },
+    { q: "Schema has required vendor_address field. Model fabricates addresses for invoices missing them. Fix?", a: ["Add 'don't fabricate' to prompt.", "Make vendor_address optional/nullable.", "Post-validate against directory.", "Remove the field."], c: 1, e: "Nullable fields let the model return null instead of fabricating values." },
+    { q: "Key limitation of tool_use with JSON schemas?", a: ["Can't handle nested objects.", "Eliminates syntax errors but not semantic errors (wrong field values, sums don't match).", "Slower than text extraction.", "Only works with flat schemas."], c: 1, e: "Schema compliance != semantic correctness. Values in wrong fields, bad sums still possible." },
+    { q: "Category enum has 5 values. Occasionally docs don't fit. Design?", a: ["Force closest match.", "Add 'other' to enum plus a category_detail string field.", "Use free-text instead of enum.", "Add values on discovery."], c: 1, e: "'other' + detail string = extensible categorization." },
+    { q: "Few-shot examples cover common cases but fail on ambiguous requests. Improvement?", a: ["Add 20+ examples.", "Add 2-4 targeted examples for ambiguous cases showing reasoning for why one choice was made.", "Remove few-shot, rely on descriptions.", "Add catch-all 'ask for clarification'."], c: 1, e: "Ambiguous-case examples with reasoning teach judgment, enabling generalization." },
+    { q: "Metadata extraction must happen before enrichment tools. Configuration?", a: ["Prompt: 'always extract first'.", "Force extract_metadata first turn, then tool_choice:'auto' for subsequent.", "List it first in tools array.", "tool_choice:'any'."], c: 1, e: "Forced selection for first turn guarantees the specific tool runs." },
+  ],
+  // FLOOR 7: Validation & Multi-Pass
+  [
+    { q: "Validation retry sends same prompt. 10% success rate. Improvement?", a: ["Retry 5 times.", "Append the failed extraction and specific validation errors to the retry prompt.", "Use different model for retries.", "Lower validation thresholds."], c: 1, e: "Retry-with-error-feedback gives the model information about what went wrong." },
+    { q: "30% of retry failures: info simply absent from source doc. Model keeps failing. What to do?", a: ["More retries.", "Recognize retries are ineffective for absent info. Mark fields unavailable.", "Search external sources.", "Fabricate values."], c: 1, e: "Retries can't conjure information not in the source. Mark as null/unavailable." },
+    { q: "Developers dismiss review findings. Want to track which patterns trigger false positives. Add what?", a: ["Confidence score.", "detected_pattern field recording which code construct triggered the finding.", "Priority field.", "false_positive_likelihood."], c: 1, e: "detected_pattern enables systematic analysis of which patterns cause false positives." },
+    { q: "Invoice: stated_total and line_items don't sum. Both accurately extracted. How to handle?", a: ["Auto-adjust items.", "Extract calculated_total alongside stated_total with conflict_detected boolean.", "Discard and retry.", "Always trust stated total."], c: 1, e: "Self-correction validation: both values + conflict flag. Discrepancy may be in the source doc." },
+    { q: "Pre-merge checks AND weekly audits. Switch both to batch API? Assessment?", a: ["Yes, both for savings.", "Weekly audit to batch. Pre-merge stays synchronous. Batch has up to 24h latency.", "Both synchronous.", "Both batch with fallback."], c: 1, e: "Batch API: latency-tolerant only. Pre-merge is blocking -- needs real-time." },
+    { q: "Batch of 100: 3 fail (oversized context), 2 fail (transient). Handling?", a: ["Resubmit all 100.", "Resubmit 5 by custom_id: chunk the 3, retry the 2 as-is.", "Discard failures.", "Wait and retry without changes."], c: 1, e: "Targeted resubmission with appropriate modifications per failure type." },
+    { q: "Before batch-processing 10,000 docs, what should you do first?", a: ["Submit all immediately.", "Refine prompts on a sample set to maximize first-pass success.", "Split into 10 batches of 1000.", "Process first 100 synchronously."], c: 1, e: "Sample validation before scaling reduces costly resubmissions." },
+    { q: "14-file single-pass review: detailed for some, superficial for others, contradictory findings. Root cause?", a: ["Model can't handle 14 files.", "Attention dilution: inconsistent depth and judgment across large input.", "Review prompt too short.", "Files too similar."], c: 1, e: "Attention dilution = inconsistent depth and contradictory findings. Fix: multi-pass." },
+    { q: "'Review your code critically' or extended thinking doesn't improve same-session review. What architecture change?", a: ["More detailed review prompt.", "Use a second independent Claude instance without generator's reasoning context.", "Review twice in same session.", "Add issue checklist."], c: 1, e: "Independent instance starts fresh without self-review bias." },
+    { q: "30-hour SLA, batch API up to 24h. How to structure submissions?", a: ["Submit all at once.", "Submit with buffer for failure handling (e.g. 4h windows for resubmission time).", "Submit in batches of 10 hourly.", "Use synchronous API."], c: 1, e: "Account for failure resubmission time within the SLA window." },
+  ],
+  // FLOOR 8: Context & Reliability
+  [
+    { q: "After 15 turns, agent references '$47' instead of actual $147.23. Lost during summarization. Fix?", a: ["Bigger context window.", "Extract transactional facts into persistent 'case facts' block outside summarized history.", "Ask customer to repeat numbers.", "Store in database."], c: 1, e: "Case facts blocks persist exact values outside summarization." },
+    { q: "Customer has 3 issues. After resolving first, agent forgets the other two. Structural fix?", a: ["Add 'address all issues' to prompt.", "Extract structured issue data into a separate persistent context layer.", "Limit to one issue.", "Separate threads."], c: 1, e: "Structured issue tracking persists across turns regardless of summarization." },
+    { q: "Order lookup returns 40+ fields. Most requests need 5. Context growing fast. Fix?", a: ["Let model ignore irrelevant fields.", "Trim to only relevant fields before context accumulates.", "Paginate output.", "8 specialized lookup tools."], c: 1, e: "Trim verbose outputs to prevent disproportionate context consumption." },
+    { q: "5 subagent findings aggregated. Middle agents' findings underrepresented in synthesis. Cause?", a: ["Lower quality from middle agents.", "'Lost in the middle' effect. Place key summaries at beginning, use section headers.", "Context too small.", "Middle agents too slow."], c: 1, e: "LLMs attend more to beginning/end. Mitigate with key findings first + clear headers." },
+    { q: "Customer: 'I want to speak to a human.' Issue is simple order status. What should agent do?", a: ["Answer first to demonstrate capability.", "Honor the request immediately and transfer.", "Ask why they want a human.", "Provide answer and mention human option."], c: 1, e: "Explicit customer requests for humans must be honored immediately." },
+    { q: "Customer frustrated about simple return within policy. Agent escalates on sentiment. Correct?", a: ["Yes, frustration warrants escalation.", "No. Sentiment != complexity. Acknowledge frustration, offer resolution, escalate if they insist.", "Yes, err on caution.", "No, ignore sentiment entirely."], c: 1, e: "Sentiment doesn't correlate with case complexity. Acknowledge + resolve within capability." },
+    { q: "Multiple 'John Smith' records returned. Agent picks most recent by heuristic. Sometimes wrong. Better?", a: ["Pick account with most orders.", "Ask for additional identifiers (email, phone, order number) to disambiguate.", "Present all accounts to customer.", "Use caller ID."], c: 1, e: "Request additional identifiers rather than applying heuristics." },
+    { q: "Subagent returns 'search unavailable'. Coordinator can't recover. Better error response?", a: ["HTTP status code only.", "Structured context: failure type, attempted query, partial results, alternatives.", "Retry counter.", "Full stack trace."], c: 1, e: "Structured error context enables intelligent recovery decisions." },
+    { q: "Subagent handles transient timeout locally via retry (succeeds). Report to coordinator?", a: ["Yes, all errors must be reported.", "No. Handle transient failures locally. Only propagate unresolvable errors.", "Yes, for monitoring.", "No, silently swallow."], c: 1, e: "Local recovery for transient issues. Propagate only unresolvable errors with context." },
+    { q: "Query returns zero results. Subagent reports: status:'error', message:'No results'. Correct?", a: ["Yes, no results is an error.", "No. Successful query with zero matches is a valid empty result, not an error.", "Yes, coordinator should retry.", "No, fabricate a result."], c: 1, e: "Access failure (error) vs valid empty result (success, no matches) -- fundamentally different." },
+  ],
+  // FLOOR 9: Advanced Context
+  [
+    { q: "After 2 hours of exploration, model references 'typical patterns' instead of specific classes. What's happening?", a: ["Model bug.", "Context degradation: extended sessions degrade ability to reference earlier findings.", "Codebase too complex.", "Temperature too high."], c: 1, e: "Context degradation in extended sessions is a known issue, not a model capability problem." },
+    { q: "Maintain reliable access to key findings as context fills. Technique?", a: ["Restart session periodically.", "Have agent maintain scratchpad files with key findings, reference them as needed.", "Reduce response verbosity.", "Larger context window."], c: 1, e: "Scratchpad files persist externally and can be re-read fresh, counteracting degradation." },
+    { q: "Multi-agent system crashes. All state lost. Prevention?", a: ["Longer-running processes.", "Structured state exports (manifests): agents export state, coordinator loads on resume.", "Duplicate agents.", "Store everything in database."], c: 1, e: "Manifest pattern: agents export state, coordinator loads manifest on crash recovery." },
+    { q: "Extended session, context full of verbose discovery. Command to reduce?", a: ["/reset", "/compact", "/clear", "/trim"], c: 1, e: "/compact reduces context by summarizing verbose exploration output." },
+    { q: "97% aggregate accuracy. Users report errors on handwritten receipts. What went wrong?", a: ["Evaluation was flawed.", "Aggregate metrics mask per-document-type failures. Validate by type before deploying.", "Handwritten is impossible.", "Model not trained on handwriting."], c: 1, e: "Aggregate accuracy masks segment-specific failures. Always check per-type accuracy." },
+    { q: "Automated high-confidence extractions. Detect quality drift over time?", a: ["Wait for complaints.", "Stratified random sampling for ongoing error rate measurement.", "Monitor confidence trends.", "Fixed test set monthly."], c: 1, e: "Stratified sampling continuously monitors for degradation and novel error patterns." },
+    { q: "Two sources: 15% and 22% market growth. Synthesis should?", a: ["Average to 18.5%.", "Use more recent.", "Preserve both with source attribution and annotate the conflict.", "Report lower value."], c: 2, e: "Preserve both values, annotate the conflict, let readers evaluate sources." },
+    { q: "Subagent returns prose findings. Attribution lost after synthesis. Fix?", a: ["Tell synthesis to cite sources.", "Require subagents to output structured claim-source mappings.", "Regex for URLs.", "Post-processing attribution."], c: 1, e: "Structured claim-source mappings are the architectural fix for provenance." },
+    { q: "Two subagents report different values for same metric from 2023 and 2025. Flagged as contradictory. What metadata prevents this?", a: ["Confidence scores.", "Publication/data collection dates enabling temporal interpretation.", "Source credibility ratings.", "Word count of source."], c: 1, e: "Temporal metadata prevents time-period differences from being misinterpreted as contradictions." },
+    { q: "Investigate test files, refund flow, API endpoints, DB schemas across large codebase. Best approach?", a: ["Sequential investigation in main conversation.", "Spawn subagents for specific questions, main agent coordinates. Summarize between phases.", "Read all files first.", "Single subagent for everything."], c: 1, e: "Subagent delegation isolates verbose output. Main agent coordinates. Summarize between phases." },
+  ],
+  // FLOOR 10: Final Exam (mixed)
+  [
+    { q: "Agent uses max_iterations=3 as primary stop. Frequently incomplete. Fix?", a: ["Increase to 10.", "Use stop_reason as primary control, iteration cap as safety fallback.", "Remove the cap.", "Add timer-based cutoff."], c: 1, e: "stop_reason drives the loop. Iteration caps are safety nets." },
+    { q: "Coordinator assigns 'creative industries' research but only covers visual arts. Root cause?", a: ["Synthesis lacks gap detection.", "Coordinator decomposition too narrow -- missed music, writing, film.", "Web search too narrow.", "Doc analysis filtered out."], c: 1, e: "The coordinator's decomposition directly caused coverage gaps." },
+    { q: "Agent has 18 tools. Selection unreliable. Most likely cause?", a: ["Poor descriptions.", "Too many tools degrade selection reliability.", "Wrong model.", "Needs few-shot examples."], c: 1, e: "4-5 tools per agent max. Too many increases decision complexity." },
+    { q: "CLAUDE.md with standards only in ~/.claude/CLAUDE.md. New teammate doesn't get them. Why?", a: ["Hasn't pulled latest.", "User-level config isn't shared via version control.", "File too large.", "Version mismatch."], c: 1, e: "User-level is personal. Project-level is shared." },
+    { q: "Plan mode vs direct execution: adding a single validation check to one function?", a: ["Plan mode.", "Direct execution -- simple, single-file, clear scope.", "Plan then direct.", "Direct, switch if needed."], c: 1, e: "Well-understood, single-file = direct execution." },
+    { q: "Required 'phone' field. Source has no phone. Model fabricates. Fix?", a: ["Add 'don't fabricate' to prompt.", "Make phone optional/nullable.", "Post-validate.", "Remove field."], c: 1, e: "Nullable fields prevent fabrication by allowing null for absent information." },
+    { q: "Same session reviews its own generated code. Finds nothing wrong. Architecture fix?", a: ["Better review prompt.", "Second independent Claude instance without generator context.", "Review twice in same session.", "Checklist of issues."], c: 1, e: "Independent instance avoids self-review bias from retained reasoning context." },
+    { q: "Customer: 'This is frustrating!' about simple policy-covered return. Escalate?", a: ["Yes, always for frustration.", "No. Acknowledge frustration, resolve the simple issue, escalate only if they request human.", "Yes, err on caution.", "No, ignore sentiment."], c: 1, e: "Sentiment != complexity. Acknowledge + resolve within capability." },
+    { q: "Batch API: 50% savings, up to 24h processing. For pre-merge blocking checks?", a: ["Yes, savings justify it.", "No. Pre-merge checks need real-time responses. Batch for latency-tolerant only.", "Yes, with polling.", "Only if under 100 files."], c: 1, e: "Batch API has no latency SLA. Blocking workflows need synchronous API." },
+    { q: "tool_choice:'any' vs forced tool selection. When to use each?", a: ["'any' is always better.", "'any' guarantees A tool call (model picks which). Forced guarantees a SPECIFIC tool runs.", "'any' for one tool, forced for many.", "They're equivalent."], c: 1, e: "'any' = must call some tool. Forced = must call this exact tool." },
+  ],
+];
+
+// ==================== AUDIO ====================
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(freq, duration, type='square') {
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  gain.gain.value = 0.1;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+  osc.stop(audioCtx.currentTime + duration);
+}
+
+function sfxHit() { playSound(880, 0.1); setTimeout(()=>playSound(1320, 0.15), 50); }
+function sfxMiss() { playSound(200, 0.3, 'sawtooth'); }
+function sfxWin() { [0,100,200,300].forEach((d,i)=>setTimeout(()=>playSound(440*(i+1)/2, 0.2), d)); }
+function sfxLose() { [0,200,400].forEach((d,i)=>setTimeout(()=>playSound(300-i*80, 0.3, 'sawtooth'), d)); }
+function sfxSelect() { playSound(660, 0.05); }
+function sfxStart() { [0,80,160].forEach((d,i)=>setTimeout(()=>playSound(440+i*220, 0.1), d)); }
+
+// ==================== SCREENS ====================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ==================== TITLE ====================
+function startGame() {
+  sfxStart();
+  showMap();
+}
+
+// ==================== MAP ====================
+function getTitle() {
+  if (state.xp >= 25000) return "Certified Architect";
+  if (state.xp >= 20000) return "Master Architect";
+  if (state.xp >= 14000) return "Architect";
+  if (state.xp >= 9000) return "Builder";
+  if (state.xp >= 5000) return "Journeyman";
+  if (state.xp >= 2000) return "Apprentice II";
+  return "Apprentice";
+}
+
+function getLevel() {
+  if (state.xp >= 25000) return 6;
+  if (state.xp >= 20000) return 5;
+  if (state.xp >= 14000) return 4;
+  if (state.xp >= 9000) return 3;
+  if (state.xp >= 5000) return 2;
+  return 1;
+}
+
+function showMap() {
+  showScreen('map-screen');
+  state.level = getLevel();
+  document.getElementById('map-title').textContent = getTitle();
+  document.getElementById('map-level').textContent = state.level;
+  document.getElementById('map-xp').textContent = state.xp;
+  document.getElementById('map-streak').textContent = state.streak;
+  document.getElementById('map-record').textContent = `${state.wins}/${state.losses}`;
+
+  const list = document.getElementById('floor-list');
+  list.innerHTML = '';
+
+  floors.forEach((floor, i) => {
+    const fi = state.floors[i];
+    const isUnlocked = i === 0 || state.floors[i-1].cleared;
+    const isCurrent = isUnlocked && !fi.cleared;
+    const row = document.createElement('div');
+    row.className = `floor-row${fi.cleared ? ' cleared' : ''}${isCurrent ? ' current' : ''}${!isUnlocked ? ' locked' : ''}`;
+
+    row.innerHTML = `
+      <div class="floor-icon" style="color:${floor.color}">${fi.cleared ? '&#10003;' : floor.icon}</div>
+      <div class="floor-info">
+        <div class="floor-name">F${i+1}: ${floor.name}</div>
+        <div class="floor-domain">${floor.domain}</div>
+      </div>
+      <div class="floor-score">${fi.bestScore > 0 ? fi.bestScore+'/10' : isUnlocked ? 'ENTER' : 'LOCKED'}</div>
+    `;
+
+    if (isUnlocked) {
+      row.onclick = () => { sfxSelect(); startBattle(i); };
+    }
+    list.appendChild(row);
+  });
+  saveState();
+}
+
+// ==================== BATTLE ====================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startBattle(floorIdx) {
+  state.currentFloor = floorIdx;
+  const floorQs = questions[floorIdx];
+  // Shuffle questions and pick 10 (or all if fewer)
+  state.battleQuestions = shuffle(floorQs).slice(0, 10);
+  // Shuffle answer order for each question
+  state.battleQuestions = state.battleQuestions.map(q => {
+    const indices = q.a.map((_, i) => i);
+    const shuffled = shuffle(indices);
+    return {
+      q: q.q,
+      a: shuffled.map(i => q.a[i]),
+      c: shuffled.indexOf(q.c),
+      e: q.e
+    };
+  });
+  state.currentQ = 0;
+  state.score = 0;
+  state.playerHP = 10;
+  state.playerMaxHP = 10;
+  state.enemyHP = 10;
+  state.enemyMaxHP = 10;
+
+  const floor = floors[floorIdx];
+  document.getElementById('enemy-name').textContent = floor.enemy;
+  document.getElementById('enemy-name').style.color = floor.color;
+  document.getElementById('enemy-sprite').textContent = floor.sprite;
+  document.getElementById('enemy-sprite').style.color = floor.color;
+  document.getElementById('player-name').textContent = getTitle();
+
+  showScreen('battle-screen');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = state.battleQuestions[state.currentQ];
+  document.getElementById('q-num').textContent = `Q${state.currentQ + 1}/${state.battleQuestions.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('battle-msg').textContent = '';
+  document.getElementById('battle-msg').className = 'battle-msg';
+
+  const answersDiv = document.getElementById('answers');
+  answersDiv.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+  q.a.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = `${labels[i]}) ${a}`;
+    btn.onclick = () => selectAnswer(i);
+    answersDiv.appendChild(btn);
+  });
+
+  updateBars();
+}
+
+function selectAnswer(idx) {
+  const q = state.battleQuestions[state.currentQ];
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.classList.add('disabled'));
+
+  const isCorrect = idx === q.c;
+
+  if (isCorrect) {
+    btns[idx].classList.add('correct');
+    state.score++;
+    state.enemyHP = Math.max(0, state.enemyHP - 1);
+    sfxHit();
+    document.getElementById('battle-msg').textContent = 'HIT! Critical knowledge strike!';
+    document.getElementById('battle-msg').className = 'battle-msg hit';
+    shakeEnemy();
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.c].classList.add('reveal');
+    state.playerHP = Math.max(0, state.playerHP - 1);
+    sfxMiss();
+    document.getElementById('battle-msg').textContent = 'MISS! The enemy strikes back!';
+    document.getElementById('battle-msg').className = 'battle-msg miss';
+  }
+
+  updateBars();
+
+  // Show explanation
+  setTimeout(() => {
+    showExplanation(q, isCorrect);
+  }, 800);
+}
+
+function showExplanation(q, isCorrect) {
+  const labels = ['A', 'B', 'C', 'D'];
+  document.getElementById('expl-correct').textContent =
+    (isCorrect ? 'CORRECT!' : 'WRONG!') + ` Answer: ${labels[q.c]}) ${q.a[q.c]}`;
+  document.getElementById('expl-correct').style.color = isCorrect ? '#4f4' : '#f44';
+  document.getElementById('expl-text').textContent = q.e;
+
+  const isLast = state.currentQ >= state.battleQuestions.length - 1 || state.playerHP <= 0 || state.enemyHP <= 0;
+  document.getElementById('expl-btn').textContent = isLast ? 'SEE RESULTS' : 'NEXT QUESTION';
+
+  document.getElementById('explanation-overlay').classList.add('active');
+}
+
+function closeExplanation() {
+  document.getElementById('explanation-overlay').classList.remove('active');
+  state.currentQ++;
+
+  if (state.currentQ >= state.battleQuestions.length || state.playerHP <= 0 || state.enemyHP <= 0) {
+    endBattle();
+  } else {
+    showQuestion();
+  }
+}
+
+function shakeEnemy() {
+  const sprite = document.getElementById('enemy-sprite');
+  sprite.style.transition = 'transform 0.1s';
+  sprite.style.transform = 'translateX(-10px)';
+  setTimeout(() => { sprite.style.transform = 'translateX(10px)'; }, 100);
+  setTimeout(() => { sprite.style.transform = 'translateX(-5px)'; }, 200);
+  setTimeout(() => { sprite.style.transform = 'translateX(0)'; }, 300);
+}
+
+function updateBars() {
+  const ehp = document.getElementById('enemy-hp');
+  const php = document.getElementById('player-hp');
+  const epct = (state.enemyHP / state.enemyMaxHP) * 100;
+  const ppct = (state.playerHP / state.playerMaxHP) * 100;
+
+  ehp.style.width = epct + '%';
+  php.style.width = ppct + '%';
+
+  ehp.className = 'hp-fill' + (epct <= 30 ? ' low' : epct <= 60 ? ' mid' : '');
+  php.className = 'hp-fill' + (ppct <= 30 ? ' low' : ppct <= 60 ? ' mid' : '');
+
+  document.getElementById('enemy-hp-text').textContent = `${state.enemyHP}/${state.enemyMaxHP} HP`;
+  document.getElementById('player-hp-text').textContent = `${state.playerHP}/${state.playerMaxHP} HP`;
+}
+
+function endBattle() {
+  const total = state.battleQuestions.length;
+  const won = state.score >= 7;
+  const perfect = state.score === 10;
+
+  let xpGained = 0;
+  if (won) {
+    xpGained = perfect ? 1000 : 500;
+    state.wins++;
+    state.streak++;
+    state.floors[state.currentFloor].cleared = true;
+    if (state.score > state.floors[state.currentFloor].bestScore) {
+      state.floors[state.currentFloor].bestScore = state.score;
+    }
+    sfxWin();
+  } else {
+    xpGained = state.score * 25; // consolation XP
+    state.losses++;
+    state.streak = 0;
+    sfxLose();
+  }
+
+  // Streak multiplier
+  const mult = state.streak >= 30 ? 3 : state.streak >= 21 ? 2.5 : state.streak >= 14 ? 2 : state.streak >= 7 ? 1.5 : 1;
+  xpGained = Math.floor(xpGained * mult);
+  state.xp += xpGained;
+  state.level = getLevel();
+
+  document.getElementById('result-title').textContent = won ? (perfect ? 'PERFECT VICTORY!' : 'VICTORY!') : 'DEFEATED';
+  document.getElementById('result-title').className = 'result-title ' + (won ? 'win' : 'lose');
+
+  const floor = floors[state.currentFloor];
+  document.getElementById('result-stats').innerHTML = `
+    <div>Floor: ${floor.name}</div>
+    <div>Enemy: ${floor.enemy}</div>
+    <div>Score: ${state.score}/${total} ${won ? '(PASS)' : '(Need 7+)'}</div>
+    <div>Streak: ${state.streak} ${mult > 1 ? `(${mult}x multiplier!)` : ''}</div>
+  `;
+  document.getElementById('result-xp').textContent = `+${xpGained} XP`;
+
+  showScreen('result-screen');
+  saveState();
+}
+
+// ==================== KEYBOARD ====================
+document.addEventListener('keydown', (e) => {
+  if (document.getElementById('title-screen').classList.contains('active')) {
+    if (e.key === 'Enter' || e.key === ' ') startGame();
+    return;
+  }
+  if (document.getElementById('explanation-overlay').classList.contains('active')) {
+    if (e.key === 'Enter' || e.key === ' ') closeExplanation();
+    return;
+  }
+  if (document.getElementById('battle-screen').classList.contains('active')) {
+    const btns = document.querySelectorAll('.answer-btn:not(.disabled)');
+    if (btns.length === 0) return;
+    const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3, 'a': 0, 'b': 1, 'c': 2, 'd': 3 };
+    const idx = keyMap[e.key.toLowerCase()];
+    if (idx !== undefined && idx < btns.length) {
+      btns[idx].click();
+    }
+  }
+  if (document.getElementById('result-screen').classList.contains('active')) {
+    if (e.key === 'Enter' || e.key === ' ') showMap();
+  }
+});
+
+// ==================== INIT ====================
+// If returning player, go to map
+if (state.xp > 0) {
+  // Still show title on fresh page load
+}
+</script>
+
+</body>
+</html>
