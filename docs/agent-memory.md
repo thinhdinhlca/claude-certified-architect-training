@@ -50,6 +50,13 @@
   - `docs/obsidian-rules.md`
 - `./cca content` currently shows 150 parsable question headings across local banks.
 
+### 2026-05-09
+- Tuned `tools/cca-tool-use-quiz.html` with persisted pass tracking via `localStorage` (`cca_domain1_pass_count`) so 3-perfect-run progress survives page reloads.
+- Added one-time 5-minute timer warning (`window.alert`) before auto-submit at 0:00.
+- Added keyboard controls on quiz screen: `1-4`/`A-D` select options, `Enter` checks answer or advances after reveal, arrow keys navigate (`Left` previous, `Right` next after reveal).
+- Added per-topic results breakdown (grouped by `source`) to identify weak areas after each run.
+- Removed emoji-based status markers in results UI and replaced with text badges (`OK` / `MISS`) for cleaner, consistent rendering.
+
 ## Obsidian Integration Notes
 - Vault created at `/Users/thinh/Documents/Obsidian/Operator-HQ`.
 - CCA lane note: `/Users/thinh/Documents/Obsidian/Operator-HQ/02-Lanes/CCA-Cert/CCA-6Week-Execution.md`.
