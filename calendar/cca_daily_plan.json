@@ -24,164 +24,85 @@
     ]
   },
   "2026-05-11": {
-    "focus": "Week 1: Foundations + Domain 1 core",
+    "focus": "Week 2: Hooks, workflows, MCP integration",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/overview ; Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Course queue (Academy): Claude 101, AI Capabilities and Limitations, Building with the Claude API (https://anthropic.skilljar.com)",
+    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
     "test_sources": [
-      "practice-tests/test-01-agentic-loops.md",
-      "practice-tests/test-02-multi-agent.md"
+      "practice-tests/test-03-hooks-workflows.md",
+      "practice-tests/test-04-tool-design-mcp.md"
     ],
     "test_command": "python3 tools/cca_quiz.py --date 2026-05-11 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
   "2026-05-12": {
-    "focus": "Week 1: Foundations + Domain 1 core",
+    "focus": "Week 2: Hooks, workflows, MCP integration",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/overview ; Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Course queue (Academy): Claude 101, AI Capabilities and Limitations, Building with the Claude API (https://anthropic.skilljar.com)",
+    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
     "test_sources": [
-      "practice-tests/test-01-agentic-loops.md",
-      "practice-tests/test-02-multi-agent.md"
+      "practice-tests/test-03-hooks-workflows.md",
+      "practice-tests/test-04-tool-design-mcp.md"
     ],
     "test_command": "python3 tools/cca_quiz.py --date 2026-05-12 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
   "2026-05-13": {
-    "focus": "Week 1: Foundations + Domain 1 core",
+    "focus": "Week 2: Hooks, workflows, MCP integration",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/overview ; Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Course queue (Academy): Claude 101, AI Capabilities and Limitations, Building with the Claude API (https://anthropic.skilljar.com)",
+    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
     "test_sources": [
-      "practice-tests/test-01-agentic-loops.md",
-      "practice-tests/test-02-multi-agent.md"
+      "practice-tests/test-03-hooks-workflows.md",
+      "practice-tests/test-04-tool-design-mcp.md"
     ],
     "test_command": "python3 tools/cca_quiz.py --date 2026-05-13 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
   "2026-05-14": {
-    "focus": "Week 1: Foundations + Domain 1 core",
+    "focus": "Week 2: Hooks, workflows, MCP integration",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/overview ; Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Course queue (Academy): Claude 101, AI Capabilities and Limitations, Building with the Claude API (https://anthropic.skilljar.com)",
+    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
     "test_sources": [
-      "practice-tests/test-01-agentic-loops.md",
-      "practice-tests/test-02-multi-agent.md"
+      "practice-tests/test-03-hooks-workflows.md",
+      "practice-tests/test-04-tool-design-mcp.md"
     ],
     "test_command": "python3 tools/cca_quiz.py --date 2026-05-14 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
   "2026-05-15": {
-    "focus": "Week 1: Foundations + Domain 1 core",
+    "focus": "Week 2: Hooks, workflows, MCP integration",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/overview ; Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Course queue (Academy): Claude 101, AI Capabilities and Limitations, Building with the Claude API (https://anthropic.skilljar.com)",
+    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
     "test_sources": [
-      "practice-tests/test-01-agentic-loops.md",
-      "practice-tests/test-02-multi-agent.md"
+      "practice-tests/test-03-hooks-workflows.md",
+      "practice-tests/test-04-tool-design-mcp.md"
     ],
     "test_command": "python3 tools/cca_quiz.py --date 2026-05-15 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
   "2026-05-16": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekend_sat",
-    "reading": "Read: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/implement-tool-use ; Read: https://docs.anthropic.com/en/docs/build-with-claude/mcp ; Read brief: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-16 --count 20 --timed-minutes 90",
-    "review_slot_4pm": [
-      "Target weak questions from hooks/workflows"
-    ]
-  },
-  "2026-05-17": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekend_sun",
-    "reading": "Read: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/implement-tool-use ; Read: https://docs.anthropic.com/en/docs/build-with-claude/mcp ; Read brief: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request",
-    "test_sources": [
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-17 --count 20 --timed-minutes 90",
-    "review_slot_4pm": [
-      "Target weak questions from hooks/workflows"
-    ]
-  },
-  "2026-05-18": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-18 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-19": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-19 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-20": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-20 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-21": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-21 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-22": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-22 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-23": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekend_sat",
     "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Review: /Users/thinh/Developer/Projects/claude-certified-architect/README.md (Week 5-6 sections)",
     "test_sources": [
       "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-23 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-16 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Review wrong answers; convert to CLAUDE.md rule checklist"
     ]
   },
-  "2026-05-24": {
+  "2026-05-17": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekend_sun",
     "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Review: /Users/thinh/Developer/Projects/claude-certified-architect/README.md (Week 5-6 sections)",
     "test_sources": [
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-24 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-17 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Review wrong answers; convert to CLAUDE.md rule checklist"
     ]
   },
-  "2026-05-25": {
+  "2026-05-18": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
@@ -189,10 +110,10 @@
       "practice-tests/test-05-claude-code-config.md",
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-25 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-18 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-05-26": {
+  "2026-05-19": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
@@ -200,10 +121,10 @@
       "practice-tests/test-05-claude-code-config.md",
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-26 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-19 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-05-27": {
+  "2026-05-20": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
@@ -211,10 +132,10 @@
       "practice-tests/test-05-claude-code-config.md",
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-27 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-20 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-05-28": {
+  "2026-05-21": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
@@ -222,10 +143,10 @@
       "practice-tests/test-05-claude-code-config.md",
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-28 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-21 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-05-29": {
+  "2026-05-22": {
     "focus": "Week 3: Claude Code config + workflows",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
@@ -233,34 +154,34 @@
       "practice-tests/test-05-claude-code-config.md",
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-29 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-22 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-05-30": {
+  "2026-05-23": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekend_sat",
     "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Review full scenario notes: /Users/thinh/Developer/Projects/claude-certified-architect/practice-tests/full-exam-01.md",
     "test_sources": [
       "practice-tests/test-07-prompt-engineering.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-30 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-23 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Spot semantic-vs-schema errors; design retry prompts"
     ]
   },
-  "2026-05-31": {
+  "2026-05-24": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekend_sun",
     "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Review full scenario notes: /Users/thinh/Developer/Projects/claude-certified-architect/practice-tests/full-exam-01.md",
     "test_sources": [
       "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-31 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-24 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Spot semantic-vs-schema errors; design retry prompts"
     ]
   },
-  "2026-06-01": {
+  "2026-05-25": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -268,10 +189,10 @@
       "practice-tests/test-07-prompt-engineering.md",
       "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-01 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-25 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-02": {
+  "2026-05-26": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -279,10 +200,10 @@
       "practice-tests/test-07-prompt-engineering.md",
       "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-02 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-26 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-03": {
+  "2026-05-27": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -290,10 +211,10 @@
       "practice-tests/test-07-prompt-engineering.md",
       "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-03 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-27 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-04": {
+  "2026-05-28": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -301,10 +222,10 @@
       "practice-tests/test-07-prompt-engineering.md",
       "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-04 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-28 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-05": {
+  "2026-05-29": {
     "focus": "Week 4: Prompt engineering + structured output",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -312,34 +233,34 @@
       "practice-tests/test-07-prompt-engineering.md",
       "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-05 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-29 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-06": {
+  "2026-05-30": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekend_sat",
     "reading": "Practice exam prep: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Read: What is NOT on exam (from your shared brief)",
     "test_sources": [
       "practice-tests/test-09-context-reliability.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-06 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-30 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Weak-domain matrix and escalation/error-propagation drills"
     ]
   },
-  "2026-06-07": {
+  "2026-05-31": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekend_sun",
     "reading": "Practice exam prep: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Read: What is NOT on exam (from your shared brief)",
     "test_sources": [
       "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-07 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-31 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Weak-domain matrix and escalation/error-propagation drills"
     ]
   },
-  "2026-06-08": {
+  "2026-06-01": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -347,10 +268,10 @@
       "practice-tests/test-09-context-reliability.md",
       "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-08 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-01 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-09": {
+  "2026-06-02": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -358,10 +279,10 @@
       "practice-tests/test-09-context-reliability.md",
       "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-09 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-02 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-10": {
+  "2026-06-03": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -369,10 +290,10 @@
       "practice-tests/test-09-context-reliability.md",
       "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-10 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-03 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-11": {
+  "2026-06-04": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -380,10 +301,10 @@
       "practice-tests/test-09-context-reliability.md",
       "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-11 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-04 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-12": {
+  "2026-06-05": {
     "focus": "Week 5: Context, reliability, and integrated scenarios",
     "kind": "weekday",
     "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
@@ -391,81 +312,169 @@
       "practice-tests/test-09-context-reliability.md",
       "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-12 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-05 --count 12 --timed-minutes 60",
     "review_slot_4pm": []
   },
-  "2026-06-13": {
+  "2026-06-06": {
     "focus": "Week 6: Final readiness + proctored simulation",
     "kind": "weekend_sat",
     "reading": "Simulation protocol: 120-min, no Claude/docs/browser ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success and https://docs.anthropic.com/en/docs/build-with-claude/develop-tests",
     "test_sources": [
       "practice-tests/full-exam-01.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-13 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-06 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Post-mock error clustering by domain"
     ]
   },
-  "2026-06-14": {
+  "2026-06-07": {
     "focus": "Week 6: Final readiness + proctored simulation",
     "kind": "weekend_sun",
     "reading": "Simulation protocol: 120-min, no Claude/docs/browser ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success and https://docs.anthropic.com/en/docs/build-with-claude/develop-tests",
     "test_sources": [
       "practice-tests/full-exam-01.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-14 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-07 --count 20 --timed-minutes 90",
     "review_slot_4pm": [
       "Post-mock error clustering by domain"
     ]
   },
-  "2026-06-15": {
+  "2026-06-08": {
     "focus": "Week 6: Final readiness + proctored simulation",
     "kind": "weekday",
     "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
     "test_sources": [
       "practice-tests/full-exam-01.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-15 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-08 --count 12 --timed-minutes 60",
+    "review_slot_4pm": []
+  },
+  "2026-06-09": {
+    "focus": "Week 6: Final readiness + proctored simulation",
+    "kind": "weekday",
+    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "test_sources": [
+      "practice-tests/full-exam-01.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-09 --count 12 --timed-minutes 60",
+    "review_slot_4pm": []
+  },
+  "2026-06-10": {
+    "focus": "Week 6: Final readiness + proctored simulation",
+    "kind": "weekday",
+    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "test_sources": [
+      "practice-tests/full-exam-01.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-10 --count 12 --timed-minutes 60",
+    "review_slot_4pm": []
+  },
+  "2026-06-11": {
+    "focus": "Week 6: Final readiness + proctored simulation",
+    "kind": "weekday",
+    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "test_sources": [
+      "practice-tests/full-exam-01.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-11 --count 12 --timed-minutes 60",
+    "review_slot_4pm": []
+  },
+  "2026-06-12": {
+    "focus": "Week 6: Final readiness + proctored simulation",
+    "kind": "weekday",
+    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "test_sources": [
+      "practice-tests/full-exam-01.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-12 --count 12 --timed-minutes 60",
+    "review_slot_4pm": []
+  },
+  "2026-06-13": {
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "kind": "weekend_sat",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "test_sources": [
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --full-sim --seed 42",
+    "review_slot_4pm": [
+      "Review top 3 recurring misses and write correction rules"
+    ]
+  },
+  "2026-06-14": {
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "kind": "weekend_sun",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "test_sources": [
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --full-sim --seed 42",
+    "review_slot_4pm": [
+      "Review top 3 recurring misses and write correction rules"
+    ]
+  },
+  "2026-06-15": {
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "kind": "weekday",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "test_sources": [
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
+    ],
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-15 --count 20 --timed-minutes 90",
     "review_slot_4pm": []
   },
   "2026-06-16": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-16 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-16 --count 20 --timed-minutes 90",
     "review_slot_4pm": []
   },
   "2026-06-17": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-17 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-17 --count 20 --timed-minutes 90",
     "review_slot_4pm": []
   },
   "2026-06-18": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-18 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-18 --count 20 --timed-minutes 90",
     "review_slot_4pm": []
   },
   "2026-06-19": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Accelerated Buffer: Retest + Full Simulation",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/full-exam-01.md",
+      "practice-tests/test-07-prompt-engineering.md",
+      "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-19 --count 12 --timed-minutes 60",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-19 --count 20 --timed-minutes 90",
     "review_slot_4pm": []
   }
 }
