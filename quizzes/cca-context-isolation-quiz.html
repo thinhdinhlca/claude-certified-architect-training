@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Context Isolation Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #818cf8;
+    --accent2: #4f46e5;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Context Isolation",
+    "prompt": "A data-science skill runs a lengthy exploratory analysis and appends hundreds of lines of intermediate output to the conversation. Subsequent questions about unrelated code features keep getting contaminated by those analysis tokens. Which single frontmatter change best prevents this?",
+    "opts": [
+      "Add `context: fork` to the skill frontmatter so the analysis runs in an isolated subagent context",
+      "Add `disable-model-invocation: true` to stop Claude from running the skill automatically",
+      "Move the skill to `~/.claude/skills/` so it is scoped to the user instead of the project",
+      "Add `user-invocable: false` so only Claude can invoke the skill internally"
+    ],
+    "ans": 0,
+    "expl": "`context: fork` runs the skill in a forked subagent context, keeping all its verbose intermediate output out of the main conversation context window and preventing contamination of subsequent turns. B is wrong because `disable-model-invocation: true` only controls who can invoke the skill, not where it runs — the output still pollutes main context when you invoke it manually. C is wrong because changing scope (`~/.claude/skills/`) affects who can use the skill across projects, not whether its output stays isolated from the main conversation. D is wrong because `user-invocable: false` means only Claude can invoke it automatically, which does not address where the output lands in the context window."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "Your team stores coding standards, naming conventions, and \"never do X\" rules that every session must know. Where should these live?",
+    "opts": [
+      "`.claude/skills/standards/SKILL.md` with no `disable-model-invocation` flag",
+      "A shared skill invoked at the start of every session with `/standards`",
+      "`.claude/rules/standards.md` with a glob `paths: \"**/*\"` to cover all files",
+      "`.claude/CLAUDE.md` committed to the repository"
+    ],
+    "ans": 3,
+    "expl": "`CLAUDE.md` is loaded at the start of every session, making it the correct home for always-applicable project standards that every developer and every task must follow. A is wrong because skills load only when invoked or when Claude decides they are relevant — there is no guarantee they are in context during every session. B is wrong because requiring manual invocation of `/standards` at every session start is operationally fragile — it depends on human or model compliance rather than deterministic loading. C is wrong because `.claude/rules/` files with `paths: \"**/*\"` trigger when Claude reads matching files, not at every session start, so they are not guaranteed to be loaded before the first file interaction."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A developer's personal `/commit` skill overlaps in name with the project's `.claude/skills/commit/SKILL.md`. Which skill wins when the developer types `/commit`?",
+    "opts": [
+      "Claude Code raises an ambiguity error and asks the user to choose",
+      "Both skills merge their instructions and Claude executes both",
+      "The project skill at `.claude/skills/commit/SKILL.md` takes precedence over the personal skill",
+      "The personal skill at `~/.claude/skills/commit/SKILL.md` takes precedence because enterprise overrides personal, and personal overrides project"
+    ],
+    "ans": 3,
+    "expl": "When skills share the same name across levels, enterprise overrides personal, and personal overrides project — so the personal skill at `~/.claude/skills/` wins over the project skill at `.claude/skills/`. A is wrong because Claude Code resolves the conflict silently using the documented priority order and does not prompt the user to choose. B is wrong because Claude Code does not merge conflicting skills — it applies the higher-priority definition and discards the lower one. C is wrong because the documented precedence is personal > project (with enterprise being the highest of all), not the other way around."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A skill for running database migrations should never trigger automatically — only when the developer explicitly types `/db-migrate`. Which frontmatter field enforces this?",
+    "opts": [
+      "`allowed-tools: Bash`",
+      "`disable-model-invocation: true`",
+      "`user-invocable: false`",
+      "`context: fork`"
+    ],
+    "ans": 1,
+    "expl": "`disable-model-invocation: true` prevents Claude from automatically loading or triggering the skill, ensuring it only runs when the user explicitly invokes it with `/db-migrate`. A is wrong because `allowed-tools: Bash` grants pre-approved tool access when the skill is active but does nothing to restrict invocation control. C is wrong because `user-invocable: false` does the opposite — it hides the skill from the slash menu so users cannot invoke it, while Claude still can. D is wrong because `context: fork` controls where the skill runs (isolated subagent vs. main context), not who can trigger it."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "An architect wants TypeScript-specific linting rules to automatically apply whenever Claude edits `.ts` or `.tsx` files, but not during unrelated Markdown edits in the same project. What is the correct mechanism?",
+    "opts": [
+      "Add `paths` frontmatter to a personal skill at `~/.claude/skills/typescript/SKILL.md`",
+      "Create `.claude/CLAUDE.md` with a section header `## TypeScript Rules` and rely on Claude to apply it contextually",
+      "Create `.claude/rules/typescript.md` with `paths: \"**/*.{ts,tsx}\"` in YAML frontmatter",
+      "Create a skill with `context: fork` that runs TypeScript checks on demand"
+    ],
+    "ans": 2,
+    "expl": "`.claude/rules/` files with `paths` YAML frontmatter glob patterns load conditionally only when Claude works with files matching those patterns, giving deterministic, path-triggered rule application without loading for unrelated file types. A is wrong because the `paths` frontmatter in a skill controls when Claude automatically loads the skill based on file context, but a personal skill also affects only that one developer, not the whole team. B is wrong because CLAUDE.md loads entirely every session — you cannot scope sections of it to specific file types; Claude must infer when to apply them, which is probabilistic rather than deterministic. D is wrong because a forked skill requires explicit invocation and does not auto-apply when specific file types are opened."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A team lead wants to restrict a code-review skill so it can use `Read` and `Grep` without permission prompts, but cannot call `Write` or `Edit` at all during review. Which configuration achieves this?",
+    "opts": [
+      "Set `allowed-tools: Read Grep` to pre-approve those two tools; add deny rules in permission settings to block Write and Edit",
+      "Set `allowed-tools: Read Grep` in frontmatter — this both pre-approves those tools and blocks all others",
+      "Set `disable-model-invocation: true` and restrict the skill manually to read-only operations in instructions",
+      "Set `context: fork` with `tools: Read, Grep` in a matching subagent definition"
+    ],
+    "ans": 0,
+    "expl": "`allowed-tools` grants permission for listed tools without prompting, but it does not restrict other tools — every tool remains callable via normal permission flow. To actually block `Write` and `Edit`, deny rules must be added in permission settings. B is wrong because `allowed-tools` is not an allowlist that blocks unlisted tools; it only pre-approves the listed ones — Write and Edit remain callable through normal permission prompts. C is wrong because `disable-model-invocation: true` only restricts who can invoke the skill and relying on prose instructions to enforce tool access is probabilistic, not deterministic. D is wrong because `context: fork` runs the skill in a subagent, but tool restriction on the subagent requires a separate subagent definition; frontmatter alone on the skill does not wire this up."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A developer wants a personal variation of the team's `/pr-review` skill that follows their own checklist, without affecting teammates who clone the repo. What is the correct approach?",
+    "opts": [
+      "Create `~/.claude/skills/pr-review/SKILL.md` and rely on personal override priority to shadow the project version silently",
+      "Create `~/.claude/skills/my-pr-review/SKILL.md` with a different name to avoid collision with the project skill",
+      "Edit `.claude/skills/pr-review/SKILL.md` in the project and add a personal section guarded by a comment",
+      "Create `~/.claude/skills/pr-review/SKILL.md` — this will not work because project skills take precedence over personal skills"
+    ],
+    "ans": 1,
+    "expl": "Using a different name (`my-pr-review`) in `~/.claude/skills/` avoids the name collision problem entirely and guarantees the personal skill is always available without interfering with the project skill. A is wrong because while personal override priority means the personal skill would shadow the project one, this creates a silent discrepancy for the developer where the team's shared skill becomes invisible — using a different name is the documented correct approach. C is wrong because editing the project skill changes it for all teammates via version control — it is not a personal customization. D is wrong because it contains a false premise: personal skills actually take precedence over project skills with the same name, not the other way around."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "An exploration skill gathers codebase information verbosely before generating a design proposal. After running the skill, the developer notices the next unrelated prompt is slower and the context window indicator is much fuller. What is the root cause and correct fix?",
+    "opts": [
+      "The skill is running in the main conversation context; add `context: fork` so exploration output stays in an isolated subagent context",
+      "The session model is too capable; switch to Haiku with the `model: haiku` frontmatter field",
+      "The skill file is too large; split it into smaller skills under 500 lines",
+      "The skill is triggering too often; add `disable-model-invocation: true` to limit invocations"
+    ],
+    "ans": 0,
+    "expl": "Without `context: fork`, the skill's verbose exploration output enters and stays in the main conversation context window, consuming tokens for all subsequent turns. Adding `context: fork` runs the skill in a forked subagent that returns only a summary, leaving the main context clean. B is wrong because switching to Haiku affects speed and cost but does not change where the skill's output lands in the context window — it still pollutes main context. C is wrong because splitting the skill into smaller files reduces its loaded size but does not prevent the output it generates from polluting the main conversation context. D is wrong because `disable-model-invocation: true` prevents Claude from auto-invoking the skill but the same context pollution occurs whenever the user invokes it manually."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "Which statement correctly describes how `.claude/rules/` files differ from CLAUDE.md for context loading?",
+    "opts": [
+      "Rules files are always loaded at session start just like CLAUDE.md, but in a separate memory layer",
+      "Rules files without `paths` frontmatter load unconditionally at launch; rules files with `paths` frontmatter load only when Claude works with matching files",
+      "Rules files only load when a user explicitly invokes them with a slash command",
+      "Rules files replace CLAUDE.md and are loaded instead of it for large projects"
+    ],
+    "ans": 1,
+    "expl": "Rules files without `paths` frontmatter are loaded unconditionally at launch with the same priority as `.claude/CLAUDE.md`, while rules files with `paths` frontmatter are conditional — they load only when Claude reads files matching the specified glob patterns. A is wrong because there is no \"separate memory layer\" — rules without `paths` load at session start just like CLAUDE.md, while path-scoped rules load on demand. C is wrong because rules files are never invoked via slash commands — that is how skills work, not rules. D is wrong because rules files supplement CLAUDE.md, not replace it — both load and are concatenated into context."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A skill triggers with `context: fork`. What context does the forked subagent start with compared to the main conversation?",
+    "opts": [
+      "The forked subagent inherits the full main conversation history including all prior turns",
+      "The forked subagent starts with a fresh context containing only the subagent system prompt plus basic environment details, not the main conversation history",
+      "The forked subagent inherits permission settings only and generates its own system prompt from the skill description",
+      "The forked subagent inherits only the CLAUDE.md content but not the conversation history"
+    ],
+    "ans": 1,
+    "expl": "Subagents receive only their system prompt plus basic environment details (like working directory) — they do not receive the full Claude Code system prompt or main conversation history, which is precisely what makes them effective for context isolation. A is wrong because inheriting the full main conversation history would defeat the purpose of `context: fork` — the subagent is specifically designed to run in isolation from accumulated context. C is wrong because permission settings are not the only inheritance — the subagent uses the skill frontmatter as its configuration, with the skill body as its system prompt, independent of the parent session. D is wrong because Explore and Plan subagents explicitly skip CLAUDE.md files; custom forked subagents receive only the skill's system prompt, not CLAUDE.md."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A new engineer joins a project and does not receive the \"always use `pnpm` not `npm`\" rule that all existing developers follow. The senior dev checked and the rule is in their `~/.claude/CLAUDE.md`. What is wrong and how should it be fixed?",
+    "opts": [
+      "The new engineer's Claude Code version is outdated; update to get the rule",
+      "The rule is not written concisely enough; rewrite it to be under 200 characters for proper propagation",
+      "The user-level `~/.claude/CLAUDE.md` is only loaded for that developer's sessions — not shared via version control; move the rule to the project-level `.claude/CLAUDE.md`",
+      "User-level CLAUDE.md requires each developer to run `/init` to merge personal settings into their session"
+    ],
+    "ans": 2,
+    "expl": "`~/.claude/CLAUDE.md` is the user-level personal file — it applies across all of that developer's projects but is not committed to version control and is never shared with teammates. Moving the rule to `.claude/CLAUDE.md` in the repository ensures all developers receive it via version control. A is wrong because CLAUDE.md loading behavior does not depend on Claude Code version — this is a configuration scope problem, not a versioning problem. B is wrong because instruction length does not affect whether a rule is shared across developers — the scope (user vs. project) is what determines sharing. D is wrong because `/init` generates or improves a project's CLAUDE.md — it does not merge personal `~/.claude/CLAUDE.md` into the project's instructions."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A `/fix-issue` skill shows just `fix-issue` in the slash menu with no hint about what argument to provide. The developer wants the autocomplete to display `fix-issue [issue-number]`. Which frontmatter field achieves this?",
+    "opts": [
+      "`when_to_use: \"Use with an issue number\"`",
+      "`argument-hint: \"[issue-number]\"`",
+      "`arguments: [issue-number]`",
+      "`description: \"Fix GitHub issue [issue-number]\"`"
+    ],
+    "ans": 1,
+    "expl": "`argument-hint` is the frontmatter field specifically for controlling the hint text shown during autocomplete, e.g., `argument-hint: \"[issue-number]\"` displays the hint alongside the skill name in the slash menu. A is wrong because `when_to_use` provides additional context for Claude's automatic invocation decisions and is appended to the description — it does not affect the autocomplete parameter hint display. C is wrong because `arguments` declares named positional argument mappings for `$name` substitution within the skill body — it does not control the autocomplete hint text in the menu. D is wrong because `description` controls when Claude decides to auto-invoke the skill and what appears in the skill listing — it does not produce the autocomplete parameter hint."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A team wants different rules for React components (`src/components/**/*.tsx`) vs. API handlers (`src/api/**/*.ts`) in the same monorepo. Both rule sets are large enough that loading both always would waste context. What is the optimal configuration?",
+    "opts": [
+      "Create two skills, one per file type, each with `context: fork` to isolate them",
+      "Create a single `.claude/CLAUDE.md` with both sections and instruct Claude in prose which section applies to which files",
+      "Create two separate rule files in `.claude/rules/` — one with `paths: \"src/components/**/*.tsx\"` and one with `paths: \"src/api/**/*.ts\"` — each in its own markdown file",
+      "Create `src/components/.claude/CLAUDE.md` and `src/api/.claude/CLAUDE.md` as subdirectory-level instructions"
+    ],
+    "ans": 2,
+    "expl": "Path-scoped rule files in `.claude/rules/` with `paths` frontmatter are the designed mechanism for applying different rules to different file types — they load conditionally and deterministically based on which files Claude is working with. A is wrong because skills require explicit invocation or Claude auto-detection based on relevance — they are not automatically applied when specific file types are opened, and `context: fork` isolates output, not file-path triggering. B is wrong because CLAUDE.md loads its entire content every session with no ability to scope sections to specific file paths; Claude must infer applicability, which is unreliable. D is wrong because subdirectory CLAUDE.md files load on demand when Claude reads files in those directories, not based on file extension, and cannot distinguish `.tsx` from `.ts` within the same directory tree."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "An Explore subagent is used for Phase 1 of a large refactoring task. Which built-in characteristic makes it specifically useful for context isolation?",
+    "opts": [
+      "Explore pre-loads all project CLAUDE.md files to understand context before searching",
+      "Explore automatically compacts results using `/compact` before returning them",
+      "Explore runs with read-only tools and keeps its verbose search output in its own context, returning only a summary to the main conversation",
+      "Explore uses a more powerful model than the main conversation by default"
+    ],
+    "ans": 2,
+    "expl": "The Explore subagent is optimized specifically as a read-only research agent: it has write tools denied, runs in its own context window, and returns only results to the main conversation — keeping verbose file search output, grep results, and logs out of main context. A is wrong because Explore and Plan subagents explicitly skip CLAUDE.md files to keep research fast and inexpensive, unlike other subagents. B is wrong because Explore does not automatically call `/compact` — it simply returns the summary from its isolated context without that mechanism. D is wrong because Explore uses Haiku by default, which is a faster and cheaper model than Sonnet — not a more powerful one; the speed choice prioritizes low latency."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A skill at `.claude/skills/deploy/SKILL.md` has `allowed-tools: Bash(git add *) Bash(git commit *)`. What exactly does this accomplish?",
+    "opts": [
+      "It pre-approves these specific Bash patterns so Claude can run them without per-use permission prompts while the skill is active; other tools remain callable through normal permission flow",
+      "It permanently grants these Bash permissions to all sessions after the skill is first accepted",
+      "It restricts the skill to only these two Bash patterns — any other Bash command will be blocked when the skill is active",
+      "It grants permission only if the user has already trusted the project workspace; otherwise the field is ignored entirely"
+    ],
+    "ans": 0,
+    "expl": "`allowed-tools` pre-approves the listed tools so Claude can use them without prompting during the skill's active scope; it does not restrict other tools — all other tools remain callable via normal permission prompts. B is wrong because the pre-approval is scoped to while the skill is active, not permanently granted to the entire session or future sessions. C is wrong because `allowed-tools` is a permission pre-approval list, not an allowlist that blocks unlisted tools — the skill can still use other tools subject to normal permission flow. D is wrong because the workspace trust requirement applies to whether the permission granted by `allowed-tools` takes effect at all — but once the workspace is trusted, the field applies as described, not just when manually accepted each time."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A developer has a verbose `/analyze-dependencies` skill that floods context. They want to run it in isolation but also want the Explore subagent's read-only tool set for the job. Which frontmatter combination achieves both goals?",
+    "opts": [
+      "`disable-model-invocation: true` plus `allowed-tools: Read Grep Glob` — prevents auto-run and limits tools inline",
+      "`context: fork` alone — the forked subagent inherits read-only tools automatically when analyzing code",
+      "Move the skill to `~/.claude/skills/` and add `context: fork` — personal scope ensures isolation",
+      "`context: fork` plus `agent: explore` to explicitly use the Explore subagent's read-only tool configuration"
+    ],
+    "ans": 3,
+    "expl": "`context: fork` runs the skill in an isolated subagent context, and `agent: explore` specifies that the Explore subagent type should be used — giving it the read-only tool set (Read, Grep, Glob) and Haiku model that Explore provides. A is wrong because `allowed-tools` pre-approves tools but does not isolate the skill's output from the main context — the verbose output still accumulates in the main conversation. B is wrong because `context: fork` alone uses a general-purpose subagent with full tool inheritance, not read-only tools — you need `agent: explore` to get the Explore configuration. C is wrong because personal scope (`~/.claude/skills/`) and `context: fork` together isolate context, but do not wire up the Explore read-only tool set — `agent: explore` is required for that."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A project CLAUDE.md has grown to 350 lines covering testing conventions, API design, deployment procedures, and code style. Which refactoring best reduces always-loaded context while preserving correct behavior?",
+    "opts": [
+      "Delete CLAUDE.md and replace with a single large skill that covers everything, invoked automatically",
+      "Split into multiple imported files with `@path/to/file` syntax — all imported files still load at session start but organization improves",
+      "Move testing conventions and API design rules to `.claude/rules/` with appropriate `paths` patterns; keep permanent standards in CLAUDE.md; move deployment procedures to a skill",
+      "Use `claudeMdExcludes` to prevent the long CLAUDE.md from loading and rely on skills for all guidance"
+    ],
+    "ans": 2,
+    "expl": "The optimal split is: always-applicable standards stay in CLAUDE.md, file-type-specific rules move to path-scoped `.claude/rules/` files (load only for matching files), and task-specific procedures like deployment move to skills (load only on invocation) — together minimizing always-loaded context. A is wrong because a skill that auto-invokes covers everything replaces the deterministic always-loaded behavior of CLAUDE.md with probabilistic auto-detection — universal standards may not load when Claude deems the skill irrelevant. B is wrong because `@import` syntax in CLAUDE.md expands all referenced files into context at launch — it improves organization but does not reduce tokens loaded per session. D is wrong because `claudeMdExcludes` is for excluding other teams' CLAUDE.md files in monorepos — using it on your own project's CLAUDE.md would eliminate all always-loaded context, requiring every standard to be re-discovered per task."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A `/security-audit` skill inadvertently runs during routine code-completion tasks because Claude decides the description matches. Which frontmatter setting specifically prevents Claude from auto-loading it while keeping it available for explicit `/security-audit` invocations?",
+    "opts": [
+      "`context: fork`",
+      "`disable-model-invocation: true`",
+      "`paths: \"src/security/**/*\"`",
+      "`user-invocable: false`"
+    ],
+    "ans": 1,
+    "expl": "`disable-model-invocation: true` prevents Claude from automatically loading the skill based on description matching, while the user can still explicitly type `/security-audit` to run it. A is wrong because `context: fork` isolates the skill's output but does not prevent Claude from auto-loading it — it would still trigger during routine tasks. C is wrong because `paths` limits when Claude auto-loads the skill to matching file paths, but this would just change when Claude auto-loads it, not prevent automatic loading entirely. D is wrong because `user-invocable: false` does the opposite of what is needed — it hides the skill from the slash menu so users cannot invoke it directly, while Claude can still invoke it automatically."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "Which statement about the Explore subagent and CLAUDE.md loading is accurate?",
+    "opts": [
+      "Explore skips CLAUDE.md files and git status to keep research fast and inexpensive",
+      "Explore loads only the user-level `~/.claude/CLAUDE.md` but not project-level CLAUDE.md",
+      "Explore loads all CLAUDE.md files to understand project context before searching",
+      "Explore loads CLAUDE.md files only when the `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` env var is set"
+    ],
+    "ans": 0,
+    "expl": "Explore (and Plan) are specifically documented to skip CLAUDE.md files and the parent session's git status to keep research fast and cost-efficient — unlike other built-in and custom subagents which load both. B is wrong because Explore skips all CLAUDE.md files regardless of scope — not just project-level. C is wrong because loading CLAUDE.md would add latency and tokens to what is designed to be a fast, cheap research operation — the docs explicitly state Explore skips it. D is wrong because `CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD=1` controls loading CLAUDE.md from `--add-dir` directories for the main session, not for Explore subagents."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A team uses a `/generate-api-endpoint` skill that includes exemplar endpoint code for consistency. The skill is loaded on every session start, consuming significant context even during debugging tasks. What is the simplest fix?",
+    "opts": [
+      "Add `context: fork` to isolate the heavy exemplar content in a subagent",
+      "Move the exemplar code to `.claude/rules/` with a `paths: \"src/api/**/*.ts\"` pattern",
+      "Keep it as a skill with its default configuration — skills only load their body when invoked, not at session start",
+      "Move the exemplar code to CLAUDE.md with a comment marking it as optional"
+    ],
+    "ans": 2,
+    "expl": "Skills load only their description into context at session start; the full skill body loads only when invoked. If the skill body is consuming significant context every session, the more likely cause is it is in CLAUDE.md rather than properly in a skill — a correctly configured skill already has on-demand body loading built in. A is wrong because `context: fork` affects where the skill runs, not when its body loads — the context problem during startup is about the description vs. body distinction, not execution isolation. B is wrong because moving exemplar code to a path-scoped rule would load it whenever `src/api/**/*.ts` files are touched, including during debugging those API files — not just endpoint generation. D is wrong because CLAUDE.md is always fully loaded; adding exemplar code there and marking it \"optional\" does not prevent it from consuming tokens every session."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A developer writes a personal preference skill for code style at `~/.claude/skills/style/SKILL.md`. The project also has `.claude/skills/style/SKILL.md` with team conventions. Which skill runs when the developer types `/style`?",
+    "opts": [
+      "Claude Code raises a conflict warning and disables both until the developer resolves the collision",
+      "Claude merges both skill bodies and presents a combined set of instructions",
+      "The personal skill at `~/.claude/skills/style/SKILL.md` wins because personal scope takes precedence over project scope",
+      "The project skill at `.claude/skills/style/SKILL.md` wins because project settings override personal settings"
+    ],
+    "ans": 2,
+    "expl": "The documented skill precedence is: enterprise > personal > project. Therefore the personal skill at `~/.claude/skills/` takes precedence over the project skill at `.claude/skills/`. A is wrong because Claude Code silently resolves name conflicts using the documented priority order rather than raising warnings or disabling skills. B is wrong because Claude Code does not merge conflicting skills from different scopes — it applies the higher-priority definition only. D is wrong because the precedence order is personal over project, not project over personal — project skills have lower priority than personal skills."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A scenario presents three problems simultaneously: (1) the skill output floods the main conversation with 200 lines of logs, (2) the skill can currently run `rm -rf` during cleanup, and (3) there is no hint in the slash menu showing expected arguments. Which frontmatter combination resolves all three?",
+    "opts": [
+      "`context: fork` + `user-invocable: false` + `argument-hint: \"[target-path]\"`",
+      "`context: fork` + `allowed-tools: Bash(git *) Bash(ls *)` + `argument-hint: \"[target-path]\"`",
+      "`disable-model-invocation: true` + `allowed-tools: Bash(git *)` + `argument-hint: \"[target-path]\"`",
+      "`context: fork` + `allowed-tools: Bash(rm -rf *)` + `description: \"Use with [path]\"`"
+    ],
+    "ans": 1,
+    "expl": "`context: fork` isolates verbose output (problem 1); adding deny rules in permission settings for `rm -rf` combined with `allowed-tools` pre-approving safe patterns addresses the tool concern (problem 2); `argument-hint: \"[target-path]\"` provides the autocomplete hint (problem 3). A is wrong because `user-invocable: false` hides the skill from the slash menu entirely, preventing manual invocation — it does not solve problem 3, it eliminates the invocation path. C is wrong because `disable-model-invocation: true` prevents auto-loading but does not isolate verbose output from the main context window when manually invoked — it does not solve problem 1. D is wrong because `allowed-tools: Bash(rm -rf *)` would pre-approve the dangerous destructive command rather than restricting it — this makes problem 2 worse."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A monorepo has packages with their own `.claude/skills/` directories under `packages/frontend/.claude/skills/` and `packages/backend/.claude/skills/`. How does Claude Code discover these nested skills?",
+    "opts": [
+      "They load at session start because Claude Code recursively scans all `.claude/skills/` directories in the project tree",
+      "They are never discovered; only the root `.claude/skills/` is scanned",
+      "They require explicit `--add-dir` flags pointing to each package directory",
+      "Claude Code discovers nested package skills on demand when Claude works with files in those subdirectories"
+    ],
+    "ans": 3,
+    "expl": "Claude Code discovers skills from nested `.claude/skills/` directories on demand when Claude reads files in those subdirectories — for example, editing `packages/frontend/` triggers discovery of `packages/frontend/.claude/skills/`. A is wrong because nested subdirectory skills load on demand (not at session start) — only root-level `.claude/skills/` and parent-directory skills load at launch. B is wrong because nested package skills are explicitly supported for monorepo setups — the docs describe this pattern as a feature, not a limitation. C is wrong because `--add-dir` grants file access to external directories; discovering nested skills within the existing project tree happens automatically without `--add-dir`."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A developer wants background knowledge about a legacy authentication system in a skill — Claude should use this knowledge when relevant, but `/legacy-auth` should not appear as an invokable command in the slash menu. Which frontmatter field accomplishes this?",
+    "opts": [
+      "`argument-hint: \"\"` to show an empty hint",
+      "`disable-model-invocation: true`",
+      "`context: fork`",
+      "`user-invocable: false`"
+    ],
+    "ans": 3,
+    "expl": "`user-invocable: false` hides the skill from the slash menu so users cannot invoke it directly, while Claude can still load it automatically when relevant — perfect for background knowledge skills. A is wrong because `argument-hint` is only for controlling the hint text shown during autocomplete, not for hiding the skill from the menu entirely. B is wrong because `disable-model-invocation: true` does the opposite: it prevents Claude from auto-loading the skill and lets only the user invoke it via the slash menu. C is wrong because `context: fork` controls execution isolation, not invocation visibility — the skill would still appear in the slash menu with `context: fork` alone."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A team needs deployment procedures documented in Claude's memory. Deployments involve multi-step side-effect-heavy workflows that must never run accidentally. Universal code standards must always be in context. Path-specific API rules are needed only for API files. Which mapping is correct?",
+    "opts": [
+      "Deployment → CLAUDE.md, Standards → skill, API rules → `.claude/rules/` with paths",
+      "Deployment → `.claude/rules/` with `paths: \"deploy/**\"`, Standards → CLAUDE.md, API rules → skill",
+      "Deployment → CLAUDE.md section, Standards → `.claude/rules/`, API rules → skill with `context: fork`",
+      "Deployment → skill with `disable-model-invocation: true`, Standards → CLAUDE.md, API rules → `.claude/rules/` with paths"
+    ],
+    "ans": 3,
+    "expl": "Deployment procedures with side effects → skill with `disable-model-invocation: true` (manual control, on-demand only); universal code standards → CLAUDE.md (always loaded); path-specific API rules → `.claude/rules/` with `paths` (conditional loading by file path). A is wrong because putting deployment in CLAUDE.md makes it always loaded, which wastes context on every session, and using a skill for standards means they may not always be in context. B is wrong because a `.claude/rules/` file with `paths: \"deploy/**\"` would load deployment instructions whenever deploy-path files are touched, not just when deploying — and a forked skill for API rules requires explicit invocation instead of automatic path-based triggering. C is wrong because CLAUDE.md sections cannot be scoped by file path, and path-scoped rules are the correct mechanism for API rules rather than skills."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "After running a `context: fork` skill, the developer asks a follow-up question about the skill's output in the main conversation. How does Claude access that output?",
+    "opts": [
+      "Claude cannot access the output at all — forked context is fully isolated with no return path",
+      "The forked context is merged back into the main context window when the skill completes",
+      "The skill returns a summary or result to the main conversation, which Claude can reference in follow-ups",
+      "Claude re-reads the skill's output from the forked subagent's context directly"
+    ],
+    "ans": 2,
+    "expl": "A forked subagent works independently and returns its results to the main conversation — the summary or output becomes visible in the main context while the verbose intermediate work stays isolated in the subagent context. A is wrong because forked subagents do return results to the main conversation; the isolation prevents verbose intermediate output from contaminating context, not the final result. B is wrong because the forked context is not merged back — only the returned summary appears in the main context, not the full subagent conversation history. D is wrong because Claude in the main conversation cannot directly read the forked subagent's internal context — it only sees what the subagent returns."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A developer creates an `argument-hint` like `\"[branch] [environment]\"` in their deployment skill frontmatter. What does this directly control?",
+    "opts": [
+      "The hint text displayed during slash command autocomplete to indicate expected arguments",
+      "Named variable substitution — `$branch` and `$environment` become available in the skill body",
+      "The order in which `$ARGUMENTS[0]` and `$ARGUMENTS[1]` are bound in the skill body",
+      "Validation logic that rejects invocations with fewer than two arguments"
+    ],
+    "ans": 0,
+    "expl": "`argument-hint` controls only the hint text shown during autocomplete in the slash menu — it is a UI affordance showing what arguments to provide, not a functional argument binding or validation mechanism. B is wrong because named variable substitution requires the `arguments` frontmatter field (e.g., `arguments: [branch, environment]`), not `argument-hint` — the hint field has no effect on `$name` expansion. C is wrong because `$ARGUMENTS[0]` and `$ARGUMENTS[1]` binding is determined by the positional arguments the user types, not by anything in `argument-hint`. D is wrong because `argument-hint` provides no validation logic — Claude Code does not enforce argument count based on the hint; it is purely informational display text."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A project has two files: `.claude/CLAUDE.md` (team-shared instructions) and `CLAUDE.local.md` (personal per-project preferences, gitignored). When both exist, in what order does Claude see them?",
+    "opts": [
+      "They are interleaved alphabetically during context loading",
+      "`.claude/CLAUDE.md` is loaded first; then `CLAUDE.local.md` is appended after at the same directory level — personal notes appear last within that level",
+      "`CLAUDE.local.md` is loaded first; `.claude/CLAUDE.md` is loaded second",
+      "`.claude/CLAUDE.md` is appended after `CLAUDE.local.md` in load order — personal notes win by appearing last"
+    ],
+    "ans": 1,
+    "expl": "Within each directory level, `CLAUDE.local.md` is appended after `CLAUDE.md` — so `.claude/CLAUDE.md` loads first, then `CLAUDE.local.md` appends after it, making personal notes the last thing Claude reads at that level. A is wrong because there is no alphabetical interleaving — the load order follows a documented rule: CLAUDE.md first, CLAUDE.local.md second at each directory level. C is wrong because `CLAUDE.local.md` is not loaded before the project CLAUDE.md; the order within a directory level is CLAUDE.md first, then CLAUDE.local.md. D is wrong in framing — the load order described in option B is correct; CLAUDE.local.md does appear last, but this option misdescribes the mechanism as CLAUDE.md being \"appended after\"."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A skill invokes successfully and its content enters the conversation. After many more turns and auto-compaction, the skill seems to stop influencing Claude's behavior. What is the most likely cause and correct response?",
+    "opts": [
+      "`allowed-tools` grants expired after compaction — re-trust the workspace to restore permissions",
+      "The model switched to Haiku during compaction and doesn't load skill content — switch back with `/model`",
+      "The skill file on disk was edited and the in-memory copy expired — restart Claude Code",
+      "The skill content may have been dropped during compaction; re-invoke the skill to restore its full content"
+    ],
+    "ans": 3,
+    "expl": "Auto-compaction summarizes conversation history within a token budget and re-attaches the most recently invoked skills up to a combined 25,000-token cap, keeping the first 5,000 tokens of each. Older or larger skills can be dropped entirely — re-invoking the skill restores its full content. A is wrong because `allowed-tools` grants are tied to the skill's active scope during a turn, not to a session-level cache that compaction could invalidate. B is wrong because the model does not automatically switch during compaction — the session model remains consistent unless you explicitly change it. C is wrong because Claude Code does not have an \"in-memory cache expiry\" for skills — the skill file on disk is not re-read mid-session unless you explicitly re-invoke."
+  },
+  {
+    "source": "Context Isolation",
+    "prompt": "A team lead wants to ensure security-review instructions are never visible to Claude in sessions unrelated to security work, while still being instantly available when `/security-review` is typed. Which combination of frontmatter fields achieves this?",
+    "opts": [
+      "`disable-model-invocation: true` + `context: fork` — description stays out of context, body loads only on explicit invocation in isolated subagent",
+      "`paths: \"src/security/**/*\"` + `disable-model-invocation: true` — loads only for security files",
+      "`user-invocable: false` + `context: fork` — hides from menu and isolates output",
+      "`disable-model-invocation: true` alone — keeps description out of context and body out until invoked"
+    ],
+    "ans": 0,
+    "expl": "`disable-model-invocation: true` removes the skill's description from the always-loaded skill listing (so Claude does not see it during unrelated sessions) and ensures only the user can invoke it; `context: fork` then runs the security review in isolation when explicitly called. B is wrong because `paths: \"src/security/**/*\"` would load the skill whenever Claude works with security files, which is still visible during security-file editing tasks outside a deliberate security review invocation. C is wrong because `user-invocable: false` hides the skill from the slash menu, which is the opposite of what is needed — the team lead wants `/security-review` to be explicitly invokable. D is wrong because `disable-model-invocation: true` alone does achieve the \"not visible to Claude\" goal, but the team lead also wants the security review to run in its own isolated context — `context: fork` adds that."
+  }
+];
+
+var MODULE_NAME = "Context Isolation";
+var TAGS = ["context: fork", "CLAUDE.md", "Skills", ".claude/rules/", "allowed-tools", "Explore Subagent"];
+var PASS_STORAGE_KEY = 'cca_context_isolation_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_context_isolation_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

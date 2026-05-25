@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA Exam Prep — A Study System Anyone Can Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --cream:#FAF9F6;--ink:#111;--body:#363636;--mute:#6e6e6e;
+  --accent:#705CF6;--accent-dark:#38327C;--accent-light:#C5BDFA;
+  --accent-pale:rgba(112,92,246,0.07);
+  --lime:#C5EF48;--rule:#e2e0db;
+  --ease-expo:cubic-bezier(0.16,1,0.3,1);
+  --ease-quart:cubic-bezier(0.25,1,0.5,1);
+}
+
+html{scroll-behavior:smooth;scroll-padding-top:72px;-webkit-font-smoothing:antialiased}
+body{font-family:'Outfit',system-ui,sans-serif;background:var(--cream);color:var(--ink);line-height:1.7;font-size:17px;font-weight:400}
+
+#progress{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:200;width:0;transition:width .1s linear}
+
+#topbar{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;background:rgba(250,249,246,.9);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;align-items:center}
+#topbar-title{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--body)}
+#topbar-links{display:flex;gap:20px}
+#topbar-links a{font-size:11px;font-weight:500;color:var(--mute);text-decoration:none;transition:color .2s}
+#topbar-links a:hover{color:var(--accent)}
+
+#page{max-width:1100px;margin:0 auto;padding:0 48px}
+
+.hero{padding:120px 0 64px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.hero-left h1{font-size:clamp(40px,6vw,64px);font-weight:800;line-height:1.06;letter-spacing:-.03em;color:var(--ink);margin-bottom:16px}
+.hero-left p{font-size:18px;color:var(--body);line-height:1.6;max-width:48ch}
+.hero-eyebrow{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.hero-eyebrow-line{width:28px;height:1px;background:var(--accent)}
+.hero-eyebrow-text{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.hero-right{display:flex;justify-content:flex-end;align-items:center}
+
+.pipeline-wrap{padding:80px 0}
+
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.section-head-line{width:24px;height:1px;background:var(--accent);flex-shrink:0}
+.section-head-label{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent)}
+
+.pipeline-svg-wrap{background:#fafafa;border:1px solid #d0d0d0;border-radius:10px;padding:28px 16px 24px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+.step-grid{display:flex;flex-direction:column;gap:2px}
+.step{display:grid;grid-template-columns:80px 1fr;gap:24px;background:#fff;border:1px solid #d0d0d0;border-radius:8px;padding:36px;align-items:start;transition:border-color .25s var(--ease-quart),box-shadow .25s var(--ease-quart)}
+.step:hover{border-color:var(--accent);box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.step-num{width:48px;height:48px;background:var(--accent-pale);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--accent);flex-shrink:0}
+.step-content h3{font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px;letter-spacing:-.01em}
+.step-content p{color:var(--body);line-height:1.65;margin-bottom:12px;font-size:16px}
+.step-content p:last-child{margin-bottom:0}
+
+.prompt-box{background:#f7f6fb;border-left:4px solid var(--accent);border-radius:0 6px 6px 0;padding:18px 22px;margin:16px 0 8px;font-size:15px;line-height:1.65;color:var(--body);font-style:italic}
+.prompt-box strong{font-style:normal;color:var(--ink);font-weight:700}
+
+.icon-row{display:flex;gap:16px;flex-wrap:wrap;margin:16px 0}
+.icon-card{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #d0d0d0;border-radius:6px;padding:12px 16px;font-size:14px;font-weight:500;color:var(--body)}
+.icon-card svg{flex-shrink:0}
+
+.feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin:20px 0}
+.feature{background:#fff;border:1px solid var(--rule);padding:24px 28px;transition:border-color .25s var(--ease-quart),background .25s var(--ease-quart)}
+.feature:hover{border-color:var(--accent);background:var(--accent-pale)}
+.feature:first-child{border-radius:8px 0 0 0}
+.feature:nth-child(2){border-radius:0 8px 0 0}
+.feature:nth-child(5){border-radius:0 0 0 8px}
+.feature:nth-child(6){border-radius:0 0 8px 0}
+.feature-top{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.feature-top svg{flex-shrink:0}
+.feature h4{font-size:15px;font-weight:600;color:var(--ink)}
+.feature p{font-size:14px;color:var(--mute);line-height:1.55}
+
+.graph-mock{background:#fcfcfc;border:1px solid #d0d0d0;border-radius:12px;padding:36px;text-align:center;margin:20px 0}
+.graph-mock-label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:24px}
+.graph-caption{font-size:13px;color:var(--mute);margin-top:20px;line-height:1.6;max-width:52ch;margin-left:auto;margin-right:auto}
+
+.statbar{background:var(--accent-dark);border-radius:8px;padding:32px;margin:20px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px}
+.statbar-item{text-align:center}
+.statbar-num{font-size:36px;font-weight:800;color:var(--lime);line-height:1}
+.statbar-label{font-size:12px;color:rgba(255,255,255,.6);margin-top:6px;line-height:1.4;font-weight:500}
+
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:48px;margin:32px 0}
+
+.illustration{background:#fcfcfc;border:1px solid #d0d0d0;border-radius:12px;padding:32px;display:flex;align-items:center;justify-content:center}
+
+h2{font-size:clamp(26px,4vw,34px);font-weight:700;line-height:1.16;letter-spacing:-.02em;color:var(--ink);margin-bottom:16px}
+h3{font-size:20px;font-weight:600;color:var(--ink);margin-bottom:8px}
+
+.cta-dark{background:var(--accent-dark);margin:80px -48px;padding:72px 48px}
+.cta-dark-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.cta-dark h2{color:#fff}
+.cta-dark p{color:rgba(255,255,255,.65);font-size:16px;line-height:1.6}
+.cta-dark-right{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:28px}
+.cta-dark-right p{color:rgba(255,255,255,.7);font-size:14px;margin-bottom:8px}
+.cta-dark-right p:last-child{margin-bottom:0}
+.cta-dark-right strong{color:#fff}
+
+.footer{border-top:1px solid var(--rule);padding:28px 0;display:flex;justify-content:space-between;font-size:12px;color:var(--mute);max-width:1100px;margin:0 auto;padding:28px 48px}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s var(--ease-expo),transform .65s var(--ease-expo)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.d1{transition-delay:60ms}.d2{transition-delay:120ms}.d3{transition-delay:180ms}.d4{transition-delay:240ms}.d5{transition-delay:300ms}
+
+code{font-family:'SF Mono','Fira Code','JetBrains Mono',monospace;font-size:13px;background:var(--accent-pale);padding:2px 6px;border-radius:3px;color:var(--accent-dark)}
+
+@media(max-width:820px){
+  #page{padding:0 24px}
+  #topbar{padding:12px 20px}
+  #topbar-links{display:none}
+  #topbar-title{font-size:10px}
+  .hero{display:block;padding:100px 0 48px}
+  .hero h1{font-size:34px}
+  .hero-right{justify-content:flex-start;margin-top:32px}
+  .hero-right svg{width:100%;height:auto}
+  .step{grid-template-columns:1fr}
+  .step-num{margin-bottom:8px}
+  .feature-grid{grid-template-columns:1fr}
+  .feature{border-radius:0!important}
+  .feature:first-child{border-radius:8px 8px 0 0!important}
+  .feature:last-child{border-radius:0 0 8px 8px!important}
+  .cta-dark{margin:48px -24px;padding:48px 24px}
+  .cta-dark-inner{display:block}
+  .cta-dark-right{margin-top:32px}
+  .statbar{grid-template-columns:1fr;gap:20px}
+  .twocol{display:block}.twocol>div:last-child{margin-top:24px}
+  .pipeline-svg-wrap{padding:24px 12px}
+}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}#progress{display:none}}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="topbar">
+  <span id="topbar-title">CCA Study System</span>
+  <div id="topbar-links">
+    <a href="#step1">Calendar</a>
+    <a href="#step2">Voice</a>
+    <a href="#step3">Obsidian</a>
+    <a href="#step4">Quizzes</a>
+    <a href="#daily-loop">Loop</a>
+  </div>
+</div>
+
+<div id="page">
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-left reveal">
+    <div class="hero-eyebrow"><span class="hero-eyebrow-line"></span><span class="hero-eyebrow-text">Study System</span></div>
+    <h1>How I'm preparing for the CCA exam</h1>
+    <p>A practical guide to building your own study system — from calendar scheduling to voice transcripts to auto-generated quizzes. Everything shown here was built by prompting an agent. You can do the same.</p>
+  </div>
+  <div class="hero-right reveal d2">
+    <svg width="480" height="420" viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg" style="max-width:100%">
+      <rect x="60" y="45" width="110" height="100" rx="16" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <rect x="72" y="58" width="22" height="4" rx="2" fill="var(--accent)"/>
+      <rect x="72" y="68" width="62" height="4" rx="2" fill="#aaa"/>
+      <rect x="72" y="78" width="48" height="4" rx="2" fill="#aaa"/>
+      <rect x="72" y="88" width="70" height="4" rx="2" fill="#aaa"/>
+      <rect x="72" y="98" width="36" height="4" rx="2" fill="#aaa"/>
+      <rect x="72" y="108" width="54" height="4" rx="2" fill="#aaa"/>
+      <rect x="72" y="118" width="42" height="4" rx="2" fill="#aaa"/>
+      <rect x="72" y="128" width="64" height="4" rx="2" fill="#aaa"/>
+      <text x="115" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Daily Notes</text>
+
+      <rect x="260" y="45" width="160" height="55" rx="12" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <rect x="276" y="62" width="32" height="22" rx="5" fill="var(--accent-pale)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="292" y="77" text-anchor="middle" font-size="11" fill="var(--accent)" font-weight="700">M</text>
+      <rect x="340" y="62" width="32" height="22" rx="5" fill="var(--accent)"/>
+      <text x="356" y="77" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">T</text>
+      <rect x="376" y="62" width="32" height="22" rx="5" fill="#fff" stroke="#ccc" stroke-width="1"/>
+      <text x="392" y="77" text-anchor="middle" font-size="11" fill="#888" font-weight="700">W</text>
+      <text x="340" y="34" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Calendar</text>
+
+      <rect x="170" y="150" width="140" height="80" rx="12" fill="#fff" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="240" y="186" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)">Transcript</text>
+      <text x="240" y="210" text-anchor="middle" font-size="12" fill="var(--body)">voice → agent</text>
+      <text x="240" y="138" text-anchor="middle" font-size="12" fill="var(--ink)" font-weight="600">Voice Recording</text>
+
+      <rect x="40" y="280" width="160" height="70" rx="12" fill="#fff" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="120" y="314" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent-dark)">Obsidian</text>
+      <text x="120" y="336" text-anchor="middle" font-size="12" fill="var(--body)">notes & graph</text>
+
+      <rect x="280" y="280" width="160" height="70" rx="12" fill="#fff" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="360" y="314" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent-dark)">HTML Quiz</text>
+      <text x="360" y="336" text-anchor="middle" font-size="12" fill="var(--body)">test & retest</text>
+
+      <!-- Connections: top boxes to Transcript -->
+      <line x1="130" y1="120" x2="200" y2="143" stroke="#555" stroke-width="2.5"/>
+      <polygon points="208,148 200,138 196,148" fill="#555"/>
+      <line x1="350" y1="100" x2="280" y2="143" stroke="#555" stroke-width="2.5"/>
+      <polygon points="272,149 282,143 278,134" fill="#555"/>
+
+      <!-- Connections: Transcript to bottom boxes -->
+      <line x1="200" y1="210" x2="100" y2="274" stroke="#555" stroke-width="2.5"/>
+      <polygon points="94,281 107,276 102,268" fill="#555"/>
+      <line x1="300" y1="220" x2="340" y2="274" stroke="#555" stroke-width="2.5"/>
+      <polygon points="346,281 333,276 338,268" fill="#555"/>
+
+      <!-- Retest loop: wide arc beneath both bottom boxes -->
+      <path d="M40 352 C40 380 440 380 440 352" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <polygon points="233,366 227,373 233,380" fill="var(--accent-dark)"/>
+      <polygon points="247,366 253,373 247,380" fill="var(--accent-dark)"/>
+      <text x="240" y="402" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent-dark)">retest loop</text>
+    </svg>
+  </div>
+</header>
+
+<!-- Pipeline -->
+<div class="pipeline-wrap reveal" id="pipeline">
+  <div class="section-head"><span class="section-head-line"></span><span class="section-head-label">The Pipeline</span></div>
+  <div class="pipeline-svg-wrap">
+    <svg viewBox="0 0 1140 130" xmlns="http://www.w3.org/2000/svg" style="width:1140px;max-width:100%;display:block">
+      <rect x="0" y="30" width="140" height="65" rx="10" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <text x="70" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Calendar</text>
+      <text x="70" y="78" text-anchor="middle" font-size="10" fill="var(--body)">schedule blocks</text>
+      <line x1="140" y1="62" x2="192" y2="62" stroke="#555" stroke-width="2.5"/>
+      <polygon points="198,62 188,58 188,66" fill="#555"/>
+
+      <rect x="202" y="30" width="140" height="65" rx="10" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <text x="272" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Voice Recording</text>
+      <text x="272" y="78" text-anchor="middle" font-size="10" fill="var(--body)">freestyle walkthrough</text>
+      <line x1="342" y1="62" x2="394" y2="62" stroke="#555" stroke-width="2.5"/>
+      <polygon points="400,62 390,58 390,66" fill="#555"/>
+
+      <rect x="404" y="30" width="140" height="65" rx="10" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <text x="474" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Transcript</text>
+      <text x="474" y="78" text-anchor="middle" font-size="10" fill="var(--body)">paste to agent</text>
+      <line x1="544" y1="62" x2="596" y2="62" stroke="#555" stroke-width="2.5"/>
+      <polygon points="602,62 592,58 592,66" fill="#555"/>
+
+      <rect x="606" y="30" width="140" height="65" rx="10" fill="var(--accent-pale)" stroke="var(--accent)" stroke-width="2.5"/>
+      <text x="676" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="var(--accent-dark)">Agent</text>
+      <text x="676" y="78" text-anchor="middle" font-size="10" fill="var(--accent)">processes transcript</text>
+
+      <line x1="746" y1="46" x2="798" y2="28" stroke="#555" stroke-width="2.5"/>
+      <polygon points="804,25 795,31 799,22" fill="#555"/>
+      <rect x="810" y="0" width="110" height="55" rx="10" fill="var(--accent-dark)"/>
+      <text x="865" y="32" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">Obsidian</text>
+      <line x1="920" y1="27" x2="968" y2="27" stroke="#555" stroke-width="2.5"/>
+      <polygon points="974,27 965,23 965,31" fill="#555"/>
+      <rect x="978" y="0" width="62" height="55" rx="10" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <text x="1009" y="32" text-anchor="middle" font-size="10" font-weight="600" fill="var(--ink)">Notes</text>
+
+      <line x1="746" y1="76" x2="798" y2="94" stroke="#555" stroke-width="2.5"/>
+      <polygon points="804,97 795,91 799,102" fill="#555"/>
+      <rect x="810" y="72" width="110" height="55" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+      <text x="865" y="102" text-anchor="middle" font-size="11" font-weight="700" fill="var(--accent-dark)">HTML Quiz</text>
+      <line x1="920" y1="99" x2="968" y2="99" stroke="#555" stroke-width="2.5"/>
+      <polygon points="974,99 965,95 965,103" fill="#555"/>
+      <rect x="978" y="72" width="62" height="55" rx="10" fill="#fff" stroke="#ccc" stroke-width="2"/>
+      <text x="1009" y="104" text-anchor="middle" font-size="10" font-weight="600" fill="var(--ink)">Retest</text>
+
+      <path d="M1046 99 C1120 99 1120 27 1046 27" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-dasharray="6 4"/>
+      <polygon points="1102,56 1095,61 1109,61" fill="var(--accent-dark)"/>
+      <polygon points="1102,70 1095,65 1109,65" fill="var(--accent-dark)"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Steps -->
+<div class="step-grid">
+  <div class="step reveal" id="step1">
+    <div class="step-num">1</div>
+    <div class="step-content">
+      <div class="section-head" style="margin-bottom:12px"><span class="section-head-line"></span><span class="section-head-label">Set the container</span></div>
+      <h3>Schedule study blocks in Google Calendar</h3>
+      <p>Decision fatigue kills consistency. Before touching any study material, block time in your calendar. Weekdays: 1 hour reading + 1 hour testing. Weekends: 2 hours reading + 1 hour review + 2 hours testing. Once it's on the calendar, showing up is automatic.</p>
+      <p>You can do this manually in the Google Calendar UI, or have your agent do it through the CLI. Either way, the important thing is that every day has a <strong>specific module assigned</strong> — not just "study CCA."</p>
+      <div class="prompt-box">
+        <strong>Prompt:</strong> "Create recurring Google Calendar events for my CCA study. Weekdays 8-10 PM, weekends 9-11 AM and 8-10 PM. Map each session to a specific domain from the CCA exam guide. Use gcalcli to create the events."
+      </div>
+      <div class="icon-row">
+        <div class="icon-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><rect x="7" y="14" width="4" height="4" rx="1"/><rect x="13" y="14" width="4" height="4" rx="1"/></svg> Google Calendar</div>
+        <div class="icon-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> gcalcli</div>
+        <div class="icon-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Recurring blocks</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step reveal" id="step2">
+    <div class="step-num">2</div>
+    <div class="step-content">
+      <div class="section-head" style="margin-bottom:12px"><span class="section-head-line"></span><span class="section-head-label">Prime the brain</span></div>
+      <h3>Record a freestyle walkthrough as you read</h3>
+      <p>At the start of each new module, open your voice recorder and talk through what you're reading. This isn't a polished presentation — it's a brain dump. Say what makes sense, what confuses you, what you think the trade-offs are, what seems like it would break in production.</p>
+      <p>The act of verbalizing forces you to <strong>find the gaps</strong>. If you can't explain something out loud, you don't understand it yet. The recording becomes raw material for the next step.</p>
+      <div class="prompt-box">
+        <strong>Prompt:</strong> "I just recorded a 20-minute walkthrough of [topic]. Here's the transcript. Read through it and identify: (1) concepts I clearly understand, (2) concepts I'm fuzzy on, (3) things I got wrong, and (4) questions I raised but didn't answer. For each gap, give me a clear explanation."
+      </div>
+      <div class="icon-row">
+        <div class="icon-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> Voice Memos</div>
+        <div class="icon-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Transcript</div>
+        <div class="icon-card"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Paste to agent</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step reveal" id="step3">
+    <div class="step-num">3</div>
+    <div class="step-content">
+      <div class="section-head" style="margin-bottom:12px"><span class="section-head-line"></span><span class="section-head-label">Build the brain</span></div>
+      <h3>Agent builds your Obsidian vault from the transcript</h3>
+      <p>The agent reads your transcript, fills in your gaps, and creates structured notes in Obsidian. This is where passive reading becomes an <strong>active, linked knowledge base</strong>. Every concept gets a note. Every note links to other notes. Every claim links to a source.</p>
+
+      <div class="feature-grid">
+        <div class="feature">
+          <div class="feature-top"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><h4>Daily Notes</h4></div>
+          <p>One note per session: focus, sources read, quiz score, weak areas, and auto-generated flashcards. One keystroke opens today's note.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-top"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><h4>Templates</h4></div>
+          <p>Define a daily-note skeleton once. Agent inserts it with one command. Consistent structure across every session.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-top"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><h4>Tags</h4></div>
+          <p>Tag every note with <code>#cca/domain1</code> through <code>#cca/domain5</code>. Click a tag to see everything for that domain. Graph View colors by tag.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-top"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polyline points="15 10 20 15 15 20"/><path d="M4 4v7a4 4 0 0 0 4 4h12"/></svg><h4>Backlinks</h4></div>
+          <p>Open any note and see every other note that references it. Write an anti-pattern once, see it linked from every session where you got burned by it.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-top"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg><h4>Dataview</h4></div>
+          <p>Plugin that treats your vault like a database. Query: "show all flashcards tagged <code>#cca/retest</code> sorted by date." No manual tracking.</p>
+        </div>
+        <div class="feature">
+          <div class="feature-top"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="12" y1="22" x2="12" y2="15.5"/><polyline points="22 8.5 12 15.5 2 8.5"/></svg><h4>Graph View</h4></div>
+          <p>The visual network. Every wiki-link becomes a node. Domains cluster naturally. Gap areas show as isolated nodes. The most-linked concepts are visually central.</p>
+        </div>
+      </div>
+
+      <div class="graph-mock">
+        <div class="graph-mock-label">Obsidian Graph View — what your vault looks like</div>
+        <svg viewBox="0 0 640 280" xmlns="http://www.w3.org/2000/svg" style="max-width:640px;width:100%">
+          <defs><radialGradient id="g1"><stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--accent-dark)"/></radialGradient></defs>
+          <line x1="100" y1="170" x2="148" y2="105" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="100" y1="170" x2="170" y2="220" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="100" y1="170" x2="62" y2="135" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="100" y1="170" x2="240" y2="170" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="240" y1="170" x2="195" y2="55" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="240" y1="170" x2="295" y2="135" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="240" y1="170" x2="310" y2="210" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="330" y1="95" x2="310" y2="210" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="330" y1="95" x2="385" y2="145" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="330" y1="95" x2="295" y2="55" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="330" y1="95" x2="480" y2="105" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="480" y1="105" x2="435" y2="170" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="480" y1="105" x2="535" y2="80" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="480" y1="105" x2="460" y2="45" stroke="#c8c8c8" stroke-width="2"/>
+          <line x1="435" y1="170" x2="385" y2="210" stroke="#c8c8c8" stroke-width="2"/>
+          <circle cx="100" cy="170" r="18" fill="url(#g1)"/>
+          <text x="100" y="204" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="700">Agentic</text>
+          <circle cx="240" cy="170" r="16" fill="#fff" stroke="var(--accent)" stroke-width="3"/>
+          <text x="240" y="200" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="700">Hooks</text>
+          <circle cx="330" cy="95" r="16" fill="#fff" stroke="var(--accent)" stroke-width="2.5"/>
+          <text x="330" y="125" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="700">StopReason</text>
+          <circle cx="480" cy="105" r="16" fill="#fff" stroke="var(--accent)" stroke-width="2"/>
+          <text x="480" y="135" text-anchor="middle" font-size="11" fill="var(--ink)" font-weight="700">MCP</text>
+          <circle cx="148" cy="105" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="148" y="88" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">Loop</text>
+          <circle cx="170" cy="220" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="170" y="246" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">TaskTool</text>
+          <circle cx="62" cy="135" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="62" y="116" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">Session</text>
+          <circle cx="195" cy="55" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="195" y="36" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">CLAUDE.md</text>
+          <circle cx="295" cy="135" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="295" y="162" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">PlanMode</text>
+          <circle cx="310" cy="210" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="312" y="238" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">BatchAPI</text>
+          <circle cx="385" cy="145" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="385" y="172" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">CI/CD</text>
+          <circle cx="295" cy="55" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="295" y="36" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">Skills</text>
+          <circle cx="435" cy="170" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="435" y="198" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">Transports</text>
+          <circle cx="535" cy="80" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="535" y="60" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">ToolUse</text>
+          <circle cx="460" cy="45" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="460" y="26" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">Prompts</text>
+          <circle cx="385" cy="210" r="13" fill="#fff" stroke="#c8c8c8" stroke-width="2"/>
+          <text x="385" y="238" text-anchor="middle" font-size="10" fill="var(--body)" font-weight="600">Validate</text>
+          <circle cx="555" cy="210" r="18" fill="var(--accent-pale)" stroke="var(--accent)" stroke-width="3" stroke-dasharray="6 4"/>
+          <text x="555" y="206" text-anchor="middle" font-size="11" fill="var(--accent)" font-weight="700">Context</text>
+          <text x="555" y="220" text-anchor="middle" font-size="10" fill="var(--body)">Mgmt</text>
+          <rect x="515" y="228" width="12" height="12" rx="3" fill="var(--accent)"/>
+          <text x="521" y="238" font-size="10" font-weight="800" fill="#fff">!</text>
+        </svg>
+        <p class="graph-caption">Every node is a note. Every line is a wiki-link. The dense cluster on the left is a well-studied domain — notes naturally interlink. The isolated node on the right with the dashed border and alert badge marks a domain you haven't touched yet. Gaps are impossible to miss.</p>
+      </div>
+
+      <div class="prompt-box">
+        <strong>Prompt:</strong> "Here's the transcript from my walkthrough of [topic]. Create these Obsidian notes: (1) a daily note with focus, sources I mentioned, questions I raised, and 5 flashcards from gaps you identified. (2) a domain note with decision rules and anti-patterns for this topic — every claim linked to an Anthropic docs URL or the transcript itself. Use [[wiki-links]] to connect concepts. Tag everything with #cca/[domain]. Open the notes in Obsidian when done so I can see the graph update."
+      </div>
+    </div>
+  </div>
+
+  <div class="step reveal" id="step4">
+    <div class="step-num">4</div>
+    <div class="step-content">
+      <div class="section-head" style="margin-bottom:12px"><span class="section-head-line"></span><span class="section-head-label">Test the knowledge</span></div>
+      <h3>Generate HTML quizzes that track your progress</h3>
+      <p>Passive review doesn't work. You need to make decisions under time pressure. Have your agent build a self-contained HTML quiz file for each domain. Open in any browser — no internet, no server, no dependencies.</p>
+
+      <div class="statbar">
+        <div class="statbar-item"><div class="statbar-num">30</div><div class="statbar-label">Questions in the bank, randomly sampled per attempt</div></div>
+        <div class="statbar-item"><div class="statbar-num">2</div><div class="statbar-label">Perfect passes required before moving to the next domain</div></div>
+        <div class="statbar-item"><div class="statbar-num">localStorage</div><div class="statbar-label">Pass count and wrong answers persist across browser restarts</div></div>
+      </div>
+
+      <div class="twocol">
+        <div>
+          <h3 style="margin-top:0">What the quiz does</h3>
+          <p>Each attempt draws 20 random questions from a 30-question bank. Options are shuffled so you can't memorize positions. Explanations are <strong>shuffle-proof</strong> — they never reference option letters.</p>
+          <p>A pass requires 1000/1000. Two perfect passes mark the domain complete. Wrong answers accumulate in localStorage and appear as "Weak Areas" grouped by topic on the results screen.</p>
+          <p>Keyboard controls: <code>1-4</code> or <code>A-D</code> to select, <code>Enter</code> to advance, arrow keys to navigate. 15-minute timer with warning at 2 minutes.</p>
+        </div>
+        <div class="illustration">
+          <svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg" style="max-width:280px;width:100%">
+            <rect x="10" y="10" width="260" height="200" rx="12" fill="#fff" stroke="#ccc" stroke-width="2"/>
+            <rect x="28" y="28" width="104" height="16" rx="5" fill="var(--accent-pale)"/>
+            <rect x="140" y="28" width="72" height="16" rx="5" fill="#e8e8e8"/>
+            <rect x="220" y="28" width="32" height="16" rx="5" fill="var(--accent-pale)"/>
+            <text x="80" y="40" text-anchor="middle" font-size="10" font-weight="700" fill="var(--accent)">Domain 2</text>
+            <text x="236" y="40" text-anchor="middle" font-size="10" font-weight="700" fill="var(--accent)">12:34</text>
+            <rect x="28" y="56" width="224" height="52" rx="8" fill="#fafafa" stroke="#d8d8d8" stroke-width="1.5"/>
+            <text x="140" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Q8/20 — Tool Design</text>
+            <text x="140" y="96" text-anchor="middle" font-size="11" fill="var(--body)">Your agent calls the wrong tool...</text>
+            <rect x="28" y="118" width="224" height="22" rx="5" fill="var(--accent-pale)" stroke="var(--accent)" stroke-width="1.5"/>
+            <text x="38" y="134" font-size="11" font-weight="600" fill="var(--accent-dark)">A) Expand tool descriptions</text>
+            <rect x="28" y="144" width="224" height="22" rx="5" fill="#fff" stroke="#d8d8d8" stroke-width="1"/>
+            <text x="38" y="160" font-size="11" fill="var(--body)">B) Add more tools to the agent</text>
+            <rect x="28" y="170" width="224" height="22" rx="5" fill="#fff" stroke="#d8d8d8" stroke-width="1"/>
+            <text x="38" y="186" font-size="11" fill="var(--body)">C) Use a larger model</text>
+            <rect x="28" y="196" width="224" height="22" rx="5" fill="#fff" stroke="#d8d8d8" stroke-width="1"/>
+            <text x="38" y="212" font-size="11" fill="var(--body)">D) Add a routing layer</text>
+          </svg>
+        </div>
+      </div>
+
+      <div class="prompt-box">
+        <strong>Prompt to generate a quiz from scratch:</strong> "Build me a self-contained HTML quiz for CCA Domain [N]. 30 scenario-based questions with 4 plausible options each. Requirements: (1) 20 questions per attempt, randomly drawn and shuffled, (2) localStorage pass tracking — 2 perfect passes needed, (3) localStorage wrong-answer accumulation with per-topic grouping in results, (4) shuffle-proof explanations — never reference option letters, (5) keyboard controls (1-4/A-D/Enter/arrows), (6) 15-minute timer, (7) dark theme with [color] accent, (8) zero dependencies, works from file://. Read the Anthropic docs for this domain before generating questions."
+      </div>
+
+      <div class="prompt-box" style="border-left-color:var(--accent-dark)">
+        <strong>Prompt to iterate on an existing quiz:</strong> "Question [N] has a distractor that's too obviously wrong — rewrite it to be more plausible. Question [M]'s correct answer is consistently the longest — rebalance all 4 options. Question [K]'s explanation references 'option B' which breaks when shuffled — make it shuffle-proof."
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Loop -->
+<div style="margin-top:80px" class="reveal" id="daily-loop">
+  <div class="section-head"><span class="section-head-line"></span><span class="section-head-label">The Daily Loop</span></div>
+  <div class="twocol" style="align-items:center">
+    <div>
+      <h2>How one session flows</h2>
+      <p>Calendar notification arrives. You open the doc, hit record on your voice memos, and talk through what you're reading for 15-20 minutes. You paste the transcript to your agent. It identifies your gaps, answers your questions, creates Obsidian notes, and refreshes the quiz for that domain. You take the quiz. If you miss anything, you retake it immediately — same session. The cycle repeats when the next calendar block fires.</p>
+    </div>
+    <div class="illustration">
+      <svg viewBox="0 0 420 250" xmlns="http://www.w3.org/2000/svg" style="max-width:420px;width:100%">
+        <rect x="120" y="15" width="120" height="55" rx="10" fill="var(--accent-dark)"/>
+        <text x="180" y="40" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Read & Record</text>
+        <text x="180" y="58" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.55)">15-20 min voice dump</text>
+        <line x1="180" y1="70" x2="180" y2="87" stroke="#555" stroke-width="2.5"/>
+        <polygon points="180,95 174,85 186,85" fill="#555"/>
+
+        <rect x="120" y="95" width="120" height="55" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="180" y="120" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent-dark)">Agent Processes</text>
+        <text x="180" y="138" text-anchor="middle" font-size="11" fill="var(--body)">builds notes & quiz</text>
+        <line x1="180" y1="150" x2="180" y2="167" stroke="#555" stroke-width="2.5"/>
+        <polygon points="180,175 174,165 186,165" fill="#555"/>
+
+        <rect x="120" y="175" width="120" height="55" rx="10" fill="#fff" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="180" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="var(--accent-dark)">Take Quiz</text>
+        <text x="180" y="218" text-anchor="middle" font-size="11" fill="var(--body)">20 questions, 15 min</text>
+
+        <path d="M180 230 C360 230 360 150 360 100 C360 55 180 15 180 15" fill="none" stroke="var(--accent-dark)" stroke-width="2.5" stroke-dasharray="6 4"/>
+        <polygon points="360,115 353,120 367,120" fill="var(--accent-dark)"/>
+        <polygon points="360,129 353,124 367,124" fill="var(--accent-dark)"/>
+        <text x="375" y="155" font-size="11" font-weight="700" fill="var(--accent-dark)">retest</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#page -->
+
+<!-- CTA -->
+<div class="cta-dark">
+  <div class="cta-dark-inner reveal">
+    <div>
+      <div class="section-head" style="margin-bottom:16px"><span class="section-head-line" style="background:var(--lime)"></span><span class="section-head-label" style="color:var(--lime)">Start Today</span></div>
+      <h2>The exam tests decisions, not definitions</h2>
+      <p>The best preparation isn't reading documentation — it's repeatedly encountering decision scenarios, getting them wrong, understanding why, and trying again until the right call becomes instinct. An agent can build you the machinery for this. You just need to show up and do the reps.</p>
+    </div>
+    <div class="cta-dark-right">
+      <p><strong>Calendar</strong> removes decision fatigue.</p>
+      <p><strong>Voice recordings</strong> expose what you don't understand.</p>
+      <p><strong>Obsidian</strong> turns your gaps into a linked, searchable knowledge base.</p>
+      <p><strong>HTML quizzes</strong> make testing a frictionless daily habit.</p>
+      <p>All built by prompting an agent. All reproducible.</p>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <span style="font-weight:600;color:var(--body)">Thinh</span>
+  <span>May 2026</span>
+</footer>
+
+<script>
+(function() {
+  var p = document.getElementById('progress');
+  window.addEventListener('scroll', function() {
+    var h = document.documentElement, st = h.scrollTop || document.body.scrollTop, sh = h.scrollHeight - h.clientHeight;
+    if (sh > 0) p.style.width = (st / sh * 100) + '%';
+  }, {passive: true});
+
+  if (window.IntersectionObserver) {
+    var obs = new IntersectionObserver(function(es) {
+      es.forEach(function(e) { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+    document.querySelectorAll('.reveal').forEach(function(el) { obs.observe(el); });
+  } else {
+    document.querySelectorAll('.reveal').forEach(function(el) { el.classList.add('visible'); });
+  }
+})();
+</script>
+
+</body>
+</html>

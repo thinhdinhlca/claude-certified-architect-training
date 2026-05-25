@@ -1,0 +1,60 @@
+{
+  "target_per_module": 30,
+  "generated_from": [
+    "practice-tests/full-exam-01.md",
+    "practice-tests/test-01-agentic-loops.md",
+    "practice-tests/test-02-multi-agent.md",
+    "practice-tests/test-03-hooks-workflows.md",
+    "practice-tests/test-04-tool-design-mcp.md",
+    "practice-tests/test-05-claude-code-config.md",
+    "practice-tests/test-06-plan-mode-cicd.md",
+    "practice-tests/test-07-prompt-engineering.md",
+    "practice-tests/test-08-validation-multipass.md",
+    "practice-tests/test-09-context-reliability.md",
+    "practice-tests/test-10-advanced-context.md"
+  ],
+  "modules": [
+    {
+      "id": "customer-support",
+      "name": "Customer Support Resolution Agent",
+      "path": "practice-tests/module-banks/module-customer-support.md",
+      "question_count": 30,
+      "scenario": "A"
+    },
+    {
+      "id": "code-generation",
+      "name": "Code Generation with Claude Code",
+      "path": "practice-tests/module-banks/module-code-generation.md",
+      "question_count": 30,
+      "scenario": "B"
+    },
+    {
+      "id": "multi-agent-research",
+      "name": "Multi-Agent Research System",
+      "path": "practice-tests/module-banks/module-multi-agent-research.md",
+      "question_count": 30,
+      "scenario": "C"
+    },
+    {
+      "id": "developer-productivity",
+      "name": "Developer Productivity with Claude",
+      "path": "practice-tests/module-banks/module-developer-productivity.md",
+      "question_count": 30,
+      "scenario": "D"
+    },
+    {
+      "id": "ci-cd",
+      "name": "Claude Code for CI/CD",
+      "path": "practice-tests/module-banks/module-ci-cd.md",
+      "question_count": 30,
+      "scenario": "E"
+    },
+    {
+      "id": "structured-extraction",
+      "name": "Structured Data Extraction",
+      "path": "practice-tests/module-banks/module-structured-extraction.md",
+      "question_count": 30,
+      "scenario": "F"
+    }
+  ]
+}

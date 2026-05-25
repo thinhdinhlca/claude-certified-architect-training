@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLAN_JSON = ROOT / "calendar" / "cca_daily_plan.json"
 PRACTICE_DIR = ROOT / "practice-tests"
 LOG_FILE = ROOT / "logs" / "cca_quiz_attempts.jsonl"
+PASS_EVENT_LOG = ROOT / "logs" / "cca_pass_events.jsonl"
 OBSIDIAN_RULES = ROOT / "docs" / "obsidian-rules.md"
 
 
@@ -44,6 +45,12 @@ def run_subprocess(command: list[str], dry_run: bool = False) -> int:
     return subprocess.run(command, cwd=ROOT).returncode
 
 
+def append_jsonl(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps(payload, ensure_ascii=True) + "\n")
+
+
 def cmd_list(_args: argparse.Namespace) -> int:
     print("CCA CLI actions")
     print("  read      Show the study plan and reading checklist for a date")
@@ -51,6 +58,8 @@ def cmd_list(_args: argparse.Namespace) -> int:
     print("  content   List available practice-test content and question counts")
     print("  test      Run interactive test mode (delegates to tools/cca_quiz.py)")
     print("  sim       Run full 60-question, 120-minute simulation")
+    print("  exam-html Generate one prep-style 60Q HTML (4 modules x 15)")
+    print("  record-pass Record a pass event (HTML/manual/CLI) to progress log")
     print("  stats     Show recent attempt metrics from logs")
     print("  obsidian  Show Obsidian rules reference path")
     print("")
@@ -157,6 +166,46 @@ def cmd_sim(args: argparse.Namespace) -> int:
     return run_subprocess(command, dry_run=args.dry_run)
 
 
+def cmd_exam_html(args: argparse.Namespace) -> int:
+    command = [
+        "python3",
+        "tools/cca_generate_exam_html.py",
+        "--output",
+        args.output,
+        "--modules",
+        str(args.modules),
+        "--per-module",
+        str(args.per_module),
+        "--timed-minutes",
+        str(args.timed_minutes),
+    ]
+    if args.seed is not None:
+        command += ["--seed", str(args.seed)]
+    for mid in args.module_id:
+        command += ["--module-id", mid]
+    return run_subprocess(command, dry_run=args.dry_run)
+
+
+def cmd_record_pass(args: argparse.Namespace) -> int:
+    event_date = args.date or str(date.today())
+    payload = {
+        "recorded_at": datetime.now().astimezone().isoformat(),
+        "date": event_date,
+        "event_type": "pass",
+        "method": args.method,
+        "topic": args.topic,
+        "quiz_file": args.quiz_file,
+        "score_1000": args.score,
+        "pass_threshold_1000": args.pass_threshold,
+        "perfect_run_count": args.perfect_run_count,
+        "notes": args.notes,
+    }
+    append_jsonl(PASS_EVENT_LOG, payload)
+    print(f"Recorded pass event to {PASS_EVENT_LOG}")
+    print(json.dumps(payload, ensure_ascii=True))
+    return 0
+
+
 def load_attempts() -> list[dict]:
     if not LOG_FILE.exists():
         return []
@@ -244,6 +293,36 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--reveal", action="store_true", help="Reveal correctness after each question")
     sp.add_argument("--dry-run", action="store_true", help="Print the command instead of running it")
     sp.set_defaults(func=cmd_sim)
+
+    sp = sub.add_parser("exam-html", help="Generate one prep-style HTML exam from module banks")
+    sp.add_argument("--output", default="quizzes/cca-prep-exam.html", help="Output HTML file path")
+    sp.add_argument("--seed", type=int, help="Random seed for module/question sampling")
+    sp.add_argument("--modules", type=int, default=4, help="How many modules to sample")
+    sp.add_argument("--per-module", type=int, default=15, help="Questions to sample per module")
+    sp.add_argument("--timed-minutes", type=int, default=90, help="Exam timer in minutes")
+    sp.add_argument("--module-id", action="append", default=[], help="Optional explicit module id (repeatable)")
+    sp.add_argument("--dry-run", action="store_true", help="Print the command instead of running it")
+    sp.set_defaults(func=cmd_exam_html)
+
+    sp = sub.add_parser("record-pass", help="Record a passed quiz/study checkpoint event")
+    sp.add_argument("--date", help="YYYY-MM-DD (defaults to today)")
+    sp.add_argument(
+        "--method",
+        default="html",
+        choices=["html", "cli", "manual"],
+        help="How the pass was achieved",
+    )
+    sp.add_argument("--topic", required=True, help="Topic/domain label (e.g., hooks, config, mcp)")
+    sp.add_argument("--quiz-file", help="Quiz artifact path (e.g., quizzes/cca-hooks-quiz.html)")
+    sp.add_argument("--score", type=int, default=1000, help="Scaled score out of 1000")
+    sp.add_argument("--pass-threshold", type=int, default=720, help="Pass threshold out of 1000")
+    sp.add_argument(
+        "--perfect-run-count",
+        type=int,
+        help="Optional running perfect-pass count for this quiz/domain",
+    )
+    sp.add_argument("--notes", default="", help="Optional free-text note")
+    sp.set_defaults(func=cmd_record_pass)
 
     sp = sub.add_parser("stats", help="Show score stats from recent attempts")
     sp.add_argument("--last", type=int, default=10, help="Number of most recent attempts to analyze")

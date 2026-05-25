@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Error Propagation Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #f87171;
+    --accent2: #dc2626;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Error Propagation",
+    "prompt": "A web search subagent returns two types of non-success outcomes: an HTTP 504 timeout on one query and a valid API response containing `{\"results\": [], \"total\": 0}` on another. The coordinator receives both and must decide next steps. Which approach correctly handles these distinct outcomes?",
+    "opts": [
+      "Aggregate both into a single \"search failure\" metric and retry the affected queries uniformly",
+      "Treat the 504 as a retryable access failure and treat the empty results as a valid informative finding requiring no retry",
+      "Return a generic \"search unavailable\" error for both to simplify coordinator logic",
+      "Retry both immediately since neither produced usable content for the final report"
+    ],
+    "ans": 1,
+    "expl": "A 504 timeout is an access failure — the data may exist but was unreachable, making a retry appropriate. Zero results is a valid semantic outcome — the search succeeded and found nothing, which is itself informative. Conflating them destroys the semantic distinction. A is wrong because merging both into a single metric causes unnecessary retries on valid empty results and potentially masks persistent access failures. C is wrong because returning a generic error loses both the access failure context (needed for intelligent retry) and the valid empty-result finding (informative data about the research domain). D is wrong because retrying a successful \"0 results\" query wastes resources and misrepresents the outcome as an error when it is a legitimate finding."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A document analysis subagent encounters a corrupted PDF that cannot be parsed. The subagent has already attempted two parsing strategies without success. Which error handling approach is most appropriate?",
+    "opts": [
+      "Silently skip the document and continue processing the remaining files",
+      "Terminate the entire workflow to prevent any partial results from entering the output",
+      "Retry the same parsing strategies with exponential backoff until the document succeeds",
+      "Return a structured error to the coordinator with the document identifier, failure type, and the two attempted strategies"
+    ],
+    "ans": 3,
+    "expl": "A corrupted file is not a transient error — retrying the same strategies will not succeed. The coordinator has broader context to decide whether to skip, attempt alternative parsing, or notify the user; structured error context enables that decision. A is wrong because silent skip hides the failure, leaving the coordinator unaware of the gap and unable to make an informed recovery decision. B is wrong because terminating the workflow kills all progress already made on other documents — a single corrupted file does not justify discarding the entire job. C is wrong because corruption is a persistent failure, not a transient one; exponential backoff on a fundamentally broken file wastes time and produces no new information."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "Your system classifies errors into three categories: tool execution errors (the tool ran but returned an error), model behavior errors (the model generated incorrect tool arguments), and orchestration errors (the coordinator failed to route tasks correctly). A subagent calls `search_academic_db` but receives `{\"error\": \"rate_limit_exceeded\", \"retry_after\": 30}`. Which category does this belong to, and what is the correct recovery owner?",
+    "opts": [
+      "Tool execution error — the subagent should handle this locally by waiting and retrying before escalating",
+      "Orchestration error — the coordinator should pause the entire pipeline until the rate limit resets",
+      "Model behavior error — the coordinator should update its prompt to prevent the subagent from calling rate-limited tools",
+      "Orchestration error — the coordinator should re-route this task to a different subagent with a lower-volume search tool"
+    ],
+    "ans": 0,
+    "expl": "A rate limit error is a tool execution error: the tool ran, received a valid API response, and that response indicates a recoverable transient condition. The subagent is the lowest capable layer for handling it — waiting 30 seconds and retrying is a straightforward local recovery without coordinator involvement. B is wrong because pausing the entire pipeline is disproportionate; only the affected tool call needs to wait, and other parallel work can continue. C is wrong because this is not a model behavior error; the model correctly called a valid tool with valid arguments. The error is in the external API response, not in model reasoning. D is wrong because re-routing to a different subagent escalates unnecessarily — the original subagent can resolve this transiently without architectural changes."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A subagent's tool call fails with a JSON schema validation error: the tool expected `{\"query\": string, \"max_results\": integer}` but received `{\"query\": string, \"max_results\": \"50\"}`. The model passed the count as a string instead of an integer. Which error category is this, and what is the correct fix?",
+    "opts": [
+      "Tool execution error — retry the tool call immediately since schema errors are often transient",
+      "Model behavior error — update the tool description to emphasize that max_results must be an integer type",
+      "Orchestration error — the coordinator should validate all tool arguments before passing them to subagents",
+      "Tool execution error — add input sanitization in the tool handler to coerce string integers to integers"
+    ],
+    "ans": 1,
+    "expl": "When the model passes the wrong type for a parameter, this is a model behavior error — the tool schema was not clear enough to guide correct argument construction. Updating the tool description (or using `strict: true` schema enforcement) addresses the root cause: ambiguous type signaling. A is wrong because schema validation errors are not transient — retrying the same call with the same arguments will produce the same error. C is wrong because pre-validation by the coordinator adds a layer of complexity without addressing why the model generated the wrong type in the first place. D is wrong because adding coercion in the tool handler treats the symptom, not the cause — the model will continue generating wrong types on other calls, and type coercion can mask legitimate errors."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A multi-agent research system has three error types observed in production: (1) a subagent's web search tool returns HTTP 429 (rate limited), (2) a subagent returns results from a source the coordinator did not request, and (3) the coordinator routes a task to the wrong subagent because two tools have similar names. Match each error to its correct category: tool execution, model behavior, orchestration.",
+    "opts": [
+      "1=model behavior, 2=orchestration, 3=tool execution",
+      "1=orchestration, 2=model behavior, 3=tool execution",
+      "1=tool execution, 2=orchestration, 3=model behavior",
+      "1=tool execution, 2=model behavior, 3=orchestration"
+    ],
+    "ans": 3,
+    "expl": "HTTP 429 is a tool execution error — the tool ran and the external API rejected it; retry logic in the subagent is the correct response. Returning results from an unrequested source is a model behavior error — the model made an autonomous decision to query a different source, which is a reasoning or instruction-following issue. Misrouting due to similar tool names is an orchestration error — the coordinator was confused by ambiguous tool descriptions, causing a routing failure. A is wrong because a 429 rate limit is caused by tool execution, not by the coordinator's routing logic. B is wrong because returning wrong-source results is a model behavior issue, not an orchestration routing decision. C is wrong because tool name ambiguity causing misrouting is an orchestration-layer problem, not a raw tool execution failure or model behavior error."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator receives the following error payload from a subagent: `{\"status\": \"error\", \"message\": \"Search failed\"}`. The coordinator cannot determine whether to retry, reroute, or skip. What is the minimum additional structure the subagent should include to enable intelligent recovery?",
+    "opts": [
+      "Include error type (access_failure vs not_found), the attempted query, whether the error is recoverable, and any partial results obtained",
+      "Add an HTTP status code so the coordinator can apply standard HTTP retry semantics",
+      "Add a timestamp and request ID so the coordinator can log the failure for audit purposes",
+      "Return the full stack trace from the tool execution so the coordinator can diagnose the root cause"
+    ],
+    "ans": 0,
+    "expl": "Intelligent recovery requires: error type (determines retry vs skip strategy), the attempted query (enables modified retry), recoverability flag (prevents futile retries on persistent failures), and partial results (preserves value from what succeeded). These four fields give the coordinator everything it needs to make an informed decision. B is wrong because HTTP status codes apply only to HTTP tool calls and collapse the semantic distinction between different failure modes. C is wrong because timestamps and request IDs serve logging and auditing purposes but provide no information the coordinator needs to choose a recovery strategy. D is wrong because stack traces expose implementation internals that the coordinator cannot act on — the coordinator needs semantic error information, not debugging artifacts."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A subagent encounters a transient database connection error on its first attempt. The subagent has a retry policy configured. At what point should the subagent escalate to the coordinator rather than continuing local retries?",
+    "opts": [
+      "Immediately for any error that occurs more than once within a single task execution",
+      "After exhausting local retries or determining the error is persistent, returning the final error state with context about what was attempted",
+      "After the first failure, to give the coordinator maximum time to find an alternative",
+      "Never — the subagent should retry indefinitely until it succeeds or the overall task times out"
+    ],
+    "ans": 1,
+    "expl": "The principle of handling errors at the lowest capable layer means the subagent should resolve transient failures locally. Escalation is correct when retries are exhausted or the error is identified as persistent — at that point, the subagent returns structured context (what was attempted, how many times, what the error was) so the coordinator can make an informed decision. A is wrong because two occurrences is not a reliable threshold for \"persistent\" — some transient errors may occur twice in rapid succession before resolving. C is wrong because escalating after the first failure is premature — it increases coordinator involvement unnecessarily for errors the subagent can resolve in seconds. D is wrong because indefinite retries without escalation can block the pipeline forever on persistent failures and prevent the coordinator from attempting alternative paths."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A web search subagent successfully queries three sources but fails on a fourth due to an access restriction. The subagent has partial results from the three successful sources. Which approach best applies local recovery principles?",
+    "opts": [
+      "Return the three successful results with a structured annotation indicating the fourth source was inaccessible and why",
+      "Return only a success flag since the subagent completed the majority of its work",
+      "Discard all results and return a failure, since incomplete results may mislead the coordinator",
+      "Retry the fourth source five more times before returning any results to the coordinator"
+    ],
+    "ans": 0,
+    "expl": "Local recovery includes maximizing what can be recovered — three valid results are valuable partial output. The structured annotation on the fourth source tells the coordinator exactly what happened, enabling it to decide whether to attempt an alternative source or proceed with the available data. B is wrong because returning only a success flag without the failure annotation hides the gap — the coordinator cannot reason about coverage or decide whether to seek alternative sources. C is wrong because discarding successful results to maintain a \"clean\" all-or-nothing response abandons real value; partial results with transparency are more useful than nothing. D is wrong because an access restriction (not a transient error) will not resolve through retries — continuing to attempt it delays delivery of the three available results."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "Three parallel research subagents are launched simultaneously. After 45 seconds, subagent A returns complete results, subagent B returns partial results with a coverage annotation, and subagent C returns `{\"error\": \"timeout\", \"recoverable\": true, \"query\": \"climate policy EU 2024\"}`. The coordinator must decide next steps. What is the correct approach?",
+    "opts": [
+      "Discard all results and relaunch all three subagents since the pipeline did not complete successfully",
+      "Wait for subagent C to self-recover before aggregating any results to ensure consistency",
+      "Proceed with A's complete results and B's annotated partial results; retry subagent C's query with the preserved query context",
+      "Use subagent A's results only and discard subagents B and C since their results are unreliable"
+    ],
+    "ans": 2,
+    "expl": "Partial success should be handled by preserving all usable results. A's complete results and B's annotated partial results have clear value. C returned a recoverable error with the original query context — the coordinator can issue a targeted retry for that specific query without restarting the full pipeline. A is wrong because discarding all results to restart from scratch wastes the work of both A and B, which completed correctly — total reruns are only justified when results are corrupted or interdependent. B is wrong because \"waiting for C to self-recover\" is not a defined behavior — subagent C returned an error and will not automatically retry; the coordinator must issue the retry explicitly. D is wrong because B's partial results with coverage annotations are explicitly useful — the coordinator knows exactly what B covered and what it missed, enabling informed synthesis."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator orchestrates five subagents in parallel for a market research task. Subagents 1, 2, and 3 succeed. Subagent 4 returns a structured error with `\"recoverable\": false`. Subagent 5 returns a structured error with `\"recoverable\": true`. Which response best describes the correct coordinator behavior?",
+    "opts": [
+      "Halt the entire workflow since not all subagents completed successfully",
+      "Proceed using results from 1, 2, 3; mark subagent 4's domain as a permanent coverage gap; retry subagent 5's query",
+      "Retry both subagents 4 and 5 before proceeding to ensure maximum coverage",
+      "Discard subagent 4's domain from the final report without annotation to keep the output clean"
+    ],
+    "ans": 1,
+    "expl": "The `recoverable` flag is the key discriminator: subagent 4's failure is permanent — retrying would waste resources and the gap should be annotated. Subagent 5's failure is recoverable — the coordinator should retry it with the preserved query context. Results from 1, 2, and 3 should be preserved regardless. A is wrong because halting on any non-complete subagent ignores the recoverable/unrecoverable distinction and discards substantial completed work. C is wrong because retrying a non-recoverable failure (subagent 4) is explicitly wasteful — the `recoverable: false` flag signals the error will persist. D is wrong because silently dropping subagent 4's domain without annotation hides a coverage gap from downstream synthesis, preventing informed confidence assessment."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A subagent should return errors via tool result content rather than by raising exceptions. A developer argues that raising an exception is equivalent since both stop execution. Why is the tool result approach preferred in multi-agent systems?",
+    "opts": [
+      "Tool result content is visible to the model in the conversation history; exceptions break the agentic loop and are not model-visible",
+      "Exceptions require the orchestrator to have access to the subagent's runtime, which is a security concern",
+      "Tool results can be retried automatically while exceptions require manual intervention",
+      "Exceptions are slower to process than structured tool results, so tool results reduce latency"
+    ],
+    "ans": 0,
+    "expl": "The agentic loop depends on the model reasoning about tool outcomes. When a tool result contains error information, the model can read it, understand what happened, and decide the next action. An unhandled exception breaks the loop entirely — the model never sees what went wrong and cannot reason about recovery. B is wrong because exceptions do not require runtime access to the subagent — the concern is not security but model visibility into error state. C is wrong because neither mechanism provides automatic retry; retry logic must be explicitly implemented regardless of how the error is surfaced. D is wrong because the choice between exceptions and tool results is not about latency — both involve a round trip, and structured result serialization is not meaningfully slower than exception propagation."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A subagent's tool raises an unhandled Python exception: `requests.exceptions.ConnectionError: ('Connection aborted.', RemoteDisconnected(...))`. The exception propagates and crashes the subagent process. From the coordinator's perspective, what information is lost compared to a structured error return?",
+    "opts": [
+      "Only the stack trace — the coordinator can infer the connection error and retry automatically",
+      "The error type classification, the recoverability flag, any partial results, and the query context that would have enabled targeted retry",
+      "Nothing — the coordinator receives the exception message as a string and can parse it for recovery context",
+      "Only the subagent's identity — the coordinator can reconstruct all other context from the task definition"
+    ],
+    "ans": 1,
+    "expl": "An unhandled exception delivers a raw error string with no semantic structure. The coordinator loses: the explicit error type classification, the `recoverable` flag needed to decide whether to retry, any partial results the subagent had accumulated, and the preserved query context needed for a targeted retry. A is wrong because the stack trace does not encode recoverability or partial results; the coordinator cannot infer whether a retry is appropriate from exception text alone. C is wrong because parsing a raw exception message string for recovery semantics is fragile and error-prone — the coordinator cannot reliably extract structured intent from a free-form traceback. D is wrong because the query context preserved in a structured error often differs from the original task definition — the subagent may have reformulated the query before the failure."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A subagent tool handler catches an exception and returns the following in the tool result: `{\"isError\": true, \"content\": \"An error occurred. Please try again.\"}`. The coordinator retries and fails again. What is the problem with this error return?",
+    "opts": [
+      "The subagent should not catch exceptions at all — they should propagate to the coordinator for centralized handling",
+      "The `isError` field is not a valid field in the tool result schema — errors should be returned as HTTP 500 responses",
+      "The message lacks error type, failure context, and recoverability signal — the coordinator cannot determine what went wrong or whether retry is appropriate",
+      "The error message is too long and should be shortened to reduce token usage in the coordinator's context"
+    ],
+    "ans": 2,
+    "expl": "\"Please try again\" provides no actionable information: it does not specify what failed (network, auth, rate limit, schema), whether the error is transient or persistent, or what context would help a retry succeed. The coordinator retries blindly and fails again because it has no information to modify its approach. A is wrong because catching exceptions in the tool handler and returning structured errors is the correct pattern — unhandled exceptions break the agentic loop and are not model-visible. B is wrong because `isError` is a recognized field in tool result semantics used to signal errors to the model — the schema is not the problem here. D is wrong because the message is extremely short; the problem is insufficient information, not excessive length."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A financial research subagent is designed to return structured error objects. Which of the following error payloads best enables coordinator recovery for a failed database query?",
+    "opts": [
+      "`{\"error\": true, \"code\": 503}`",
+      "`{\"status\": \"failed\", \"timestamp\": \"2026-05-24T10:30:00Z\", \"agent_id\": \"fin-001\"}`",
+      "`{\"error\": \"db_unavailable\", \"recoverable\": true, \"query\": \"SELECT revenue FROM q1_2026 WHERE company='ACME'\", \"partial_results\": null, \"retry_after_seconds\": 15}`",
+      "`{\"error\": \"DATABASE_ERROR\", \"stacktrace\": \"ConnectionPool.get() line 47: timeout after 30s...\"}`"
+    ],
+    "ans": 2,
+    "expl": "This payload contains every field the coordinator needs: error type (`db_unavailable`) for categorization, `recoverable: true` to confirm retry is worthwhile, the exact query to retry without re-derivation, null partial results to signal nothing was recovered, and a concrete `retry_after_seconds` to schedule the retry appropriately. A is wrong because an HTTP code alone provides no semantic context about what query failed, whether it is recoverable, or when to retry — 503 could mean anything from network partition to planned maintenance. B is wrong because timestamp and agent ID are audit fields, not recovery fields — they tell you when and who, not what failed and whether it can succeed on retry. D is wrong because a stack trace exposes implementation internals that the coordinator cannot act on and clutters the model's context with non-actionable debugging information."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A synthesis subagent receives research from five upstream subagents. Two subagents returned complete results, two returned partial results with coverage annotations, and one returned an unrecoverable error. The synthesis subagent's output should:",
+    "opts": [
+      "Return an error to the coordinator since the input is incomplete and synthesis cannot be trusted",
+      "Synthesize all available results with coverage annotations indicating which topic areas are well-supported, which are partially covered, and which have no coverage",
+      "Ask the coordinator to retry the failed subagent before proceeding with any synthesis",
+      "Only synthesize the two complete results and ignore the partial and failed results to ensure output quality"
+    ],
+    "ans": 1,
+    "expl": "Graceful degradation with transparency: synthesize what is available and annotate coverage gaps explicitly. This preserves the value of the four subagents that succeeded while giving downstream consumers precise confidence information about each topic area. A is wrong because returning an error abandons all completed work for a single unrecoverable failure — partial synthesis with transparent gaps is almost always more valuable than no synthesis. C is wrong because the failed subagent returned an unrecoverable error — requesting a retry on a non-recoverable failure wastes time and blocks output delivery without any realistic chance of success. D is wrong because discarding the partial results (which have explicit coverage annotations) wastes valid data — a partially covered topic is more informative than no coverage."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator receives research results from four parallel subagents. Subagent A covered \"AI in healthcare.\" Subagent B covered \"AI in finance.\" Subagent C covered \"AI in education.\" Subagent D timed out. The synthesis step needs to cover all four domains. How should the coordinator annotate this partial success before passing to synthesis?",
+    "opts": [
+      "Retry D three times synchronously before proceeding, since synthesis cannot run without complete coverage",
+      "Remove D's domain from the synthesis scope and proceed as if it was never assigned",
+      "Pass all four domains to synthesis with a note that D failed, letting synthesis determine the impact",
+      "Pass results from A, B, and C with an explicit coverage annotation indicating D's assigned domain has zero coverage due to timeout, and include D's original query for potential retry"
+    ],
+    "ans": 3,
+    "expl": "The coverage annotation must be explicit and structured: which domain has no coverage, why (timeout), and what was being searched (D's query). This gives the synthesis agent the exact information it needs to annotate its output and lets a human or downstream system decide whether to attempt recovery separately. A is wrong because D timed out, suggesting a persistent or load-based issue; three synchronous retries block the entire pipeline and may all fail the same way. B is wrong because removing D's domain without annotation silently narrows the research scope — any downstream reader would not know the topic was ever intended to be covered. C is wrong because \"a note that D failed\" is vague — the synthesis agent needs the specific domain gap, not just a generic failure notice, to produce properly annotated output."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator receives this from a subagent: `{\"results\": [...25 items...], \"searched\": [\"arxiv\", \"pubmed\"], \"not_searched\": [\"ieee_xplore\"], \"reason_not_searched\": \"rate_limit_exceeded\"}`. What does the `not_searched` annotation enable that a plain results array cannot?",
+    "opts": [
+      "It provides an audit trail for compliance purposes to verify which databases were queried",
+      "It prevents the subagent from being blamed if the final report has gaps in coverage",
+      "It enables the coordinator to reason about coverage gaps, attempt targeted recovery of missed sources, and accurately represent confidence in the synthesis",
+      "It allows the model to verify that the subagent used the correct search tools as specified"
+    ],
+    "ans": 2,
+    "expl": "Coverage annotations transform a partial result into a transparent partial result. The coordinator now knows exactly what was searched (can assess quality) and what was not (can attempt targeted retry of `ieee_xplore` or annotate the gap). A plain results array only tells you what was found, not whether the search was complete. A is wrong because compliance audit trails are a side benefit, not the primary function — the annotation is for recovery reasoning, not logging. B is wrong because responsibility attribution is not a system concern; coverage annotations exist to enable recovery and transparent output, not to manage blame. D is wrong because verifying tool usage is an audit concern, not a recovery-enabling capability — the coordinator needs to know what gaps exist, not just which tools ran."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A research pipeline has three stages: collection subagents → synthesis subagent → validation subagent. The synthesis subagent completes successfully but the validation subagent detects that 40% of the citations are inaccessible. Which coverage annotation approach correctly handles this mid-pipeline partial failure?",
+    "opts": [
+      "Validation should retry all inaccessible citations synchronously before returning any results",
+      "Validation should silently drop the inaccessible citations and return a clean validated result",
+      "Validation should return an error causing the coordinator to rerun synthesis from scratch",
+      "Validation should return results with annotations distinguishing verified citations from unverified ones, including which citations could not be accessed and why"
+    ],
+    "ans": 3,
+    "expl": "Coverage annotations at the validation layer mirror the same principle as at the collection layer: annotate what is known versus unknown with enough context to enable informed decisions. A 60% verified / 40% unverified split with explicit identification of the unverifiable citations is far more useful than a binary pass/fail. A is wrong because synchronously retrying all inaccessible citations blocks the pipeline; if the citations are unavailable due to paywalls, link rot, or server issues, retries will not resolve them. B is wrong because silently dropping 40% of citations produces a clean-looking but incomplete output — the coordinator and end user cannot assess the confidence level of the result. C is wrong because rerunning synthesis from scratch does not fix the validation problem — the same citations will be inaccessible after a second synthesis pass, and the work is wasted."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "Five subagents run in parallel. Each subagent should search a different geographic region. After all complete, the coordinator notes that subagents 2 and 4 both searched \"North America\" despite being assigned distinct regions. Which coordination failure does this represent and how should it be prevented?",
+    "opts": [
+      "Tool execution error — add deduplication logic after all subagents return to merge duplicate results",
+      "Model behavior error in both subagents — add prompt examples showing the correct region assignment",
+      "Orchestration error in the coordinator's task decomposition — coordinator should explicitly assign non-overlapping region boundaries before delegation",
+      "Orchestration error — add a shared state ledger so subagents can check which regions have been claimed before starting"
+    ],
+    "ans": 2,
+    "expl": "This is a coordinator decomposition failure: the coordinator did not specify clear, non-overlapping boundaries before delegation. Both subagents defaulted to \"North America\" because the instructions were ambiguous. The fix happens before work begins, not after. A is wrong because deduplication after the fact wastes the tokens and time spent on duplicate searches — it treats the symptom while the root cause (ambiguous task boundaries) remains. B is wrong because this is not a subagent reasoning failure — each subagent individually made a plausible interpretation of its instructions; the instructions themselves were the problem. D is wrong because a shared state ledger introduces complex coordination overhead and race conditions — pre-partitioning before delegation eliminates the need for runtime coordination entirely."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator dispatches four subagents in parallel. Subagents 1 and 3 return results within 10 seconds. Subagents 2 and 4 are still running at 30 seconds. The coordinator's `max_tokens` budget is 80% consumed by the results from 1 and 3 plus the pending state. What should the coordinator do?",
+    "opts": [
+      "Increase max_tokens to accommodate the expected additional results from subagents 2 and 4",
+      "Kill subagents 2 and 4 immediately to preserve the context budget and proceed with available results",
+      "Wait indefinitely for subagents 2 and 4 since partial results may produce incorrect synthesis",
+      "Continue waiting but set a timeout threshold; if 2 and 4 exceed it, record them as timed out with coverage annotations and proceed with results from 1 and 3"
+    ],
+    "ans": 3,
+    "expl": "The correct behavior is a defined timeout with graceful degradation: allow subagents 2 and 4 a reasonable window to complete, but do not wait indefinitely. If they exceed the threshold, treat their non-response as a timeout error, apply coverage annotations to record the gap, and proceed with what is available. A is wrong because `max_tokens` is a system-level constraint that should not be increased dynamically based on subagent behavior — the architecture must function within the defined budget. B is wrong because \"killing immediately\" is premature — 30 seconds may be within normal bounds for complex queries, and abrupt termination loses the work already done inside those subagents. C is wrong because waiting indefinitely risks the orchestrator itself exceeding its `max_tokens` limit or stalling the pipeline without any useful output."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator orchestrates subagents that run in the same process with full trust. A second deployment routes the same subagents over a network API with no shared memory. Which trust-related difference affects error handling and permission design?",
+    "opts": [
+      "Trust level has no impact on error handling — structured error returns are required in both cases",
+      "Network subagents require more verbose error messages since the coordinator cannot inspect their logs",
+      "Same-process subagents can raise exceptions that propagate to the coordinator; network subagents cannot",
+      "Same-process subagents can be granted elevated permissions since the trust boundary is internal; network subagents should receive minimal scoped permissions since the channel is external and may be intercepted"
+    ],
+    "ans": 3,
+    "expl": "Trust level directly affects permission scoping. Same-process subagents operate within the same trust boundary as the coordinator — elevated permissions are containable. Network subagents operate across a boundary that may be intercepted, spoofed, or compromised; least-privilege scoping limits blast radius if the channel or endpoint is exploited. A is wrong because trust level is directly relevant to permission design; same-process and cross-network deployments have meaningfully different attack surfaces. B is wrong because verbosity of error messages is a design choice unrelated to trust level — the coordinator should receive the same structured error schema whether the subagent is local or remote. C is wrong because the preferred pattern is to avoid exception propagation in both cases — structured error returns via tool result content is the correct approach regardless of process boundary."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A subagent is given the tools: `web_search`, `read_file`, `write_file`, `execute_bash`, and `send_email`. During a research task, the subagent uses `send_email` to notify stakeholders of its preliminary findings without being asked. Which principle does this violate, and what is the correct design?",
+    "opts": [
+      "This is an orchestration error — the coordinator should have pre-approved the email before the subagent sent it",
+      "This violates least privilege — give the subagent only `web_search` and `read_file` for a read-only research task",
+      "This violates separation of concerns — the subagent should have `send_email` but include a confirmation step before sending",
+      "This is acceptable behavior — subagents should proactively communicate findings to relevant parties"
+    ],
+    "ans": 1,
+    "expl": "Least privilege means giving each agent only the tools required for its specific task. A research subagent needs `web_search` and `read_file` — it has no business need for `write_file`, `execute_bash`, or `send_email`. Removing these tools makes unintended side effects impossible by design, not merely discouraged by prompts. A is wrong because the issue is not coordinator approval of the action but the fact that the tool should not have been available to the subagent at all. C is wrong because adding a confirmation step still leaves `send_email` accessible when the task doesn't need it — the correct fix is removing the tool, not adding a gate. D is wrong because a subagent taking unsolicited external communication actions is precisely the kind of autonomous side-effect that least-privilege tool scoping prevents — \"proactive\" behavior that the coordinator did not authorize is a reliability failure."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "Two subagents are deployed: one runs in the same Claude Code session as the coordinator (same-process), and one runs as a separate API-called service (cross-network). An attacker compromises the network channel to the second subagent and injects a malicious tool result. Which trust boundary design most limits the impact?",
+    "opts": [
+      "Require the network subagent to sign all responses with a shared secret",
+      "Add a coordinator-side result validator that checks all incoming tool results for malicious patterns",
+      "Encrypt all tool results so injected content cannot be read by the coordinator",
+      "Scope network subagent permissions to read-only tools so injected results cannot trigger write actions"
+    ],
+    "ans": 3,
+    "expl": "Least-privilege permission scoping is the most direct mitigation: if the network subagent can only use read-only tools, an injected tool result cannot cause write, delete, or communication actions even if the coordinator acts on it. The blast radius is bounded by the permission scope. A is wrong because signature verification prevents tampering but does not limit what a successfully verified (or bypassed) malicious result can cause downstream. B is wrong because pattern-based validators are fragile against novel injection techniques and add complexity without addressing the root permission surface. C is wrong because encryption protects the channel but does not limit what the coordinator does with results after decryption — once decrypted, a malicious result can still trigger harmful actions."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator receives mixed results from six parallel subagents: three returned complete results, two returned partial results with coverage annotations, and one returned an unrecoverable error. `max_tokens` is at 70% of budget. When should the coordinator halt the orchestration rather than proceed with partial synthesis?",
+    "opts": [
+      "When the missing coverage would make the output fundamentally unusable for its stated purpose, or when proceeding would exceed resource constraints with unacceptable confidence",
+      "Whenever any subagent returns an unrecoverable error, since partial synthesis may produce misleading output",
+      "When more than 33% of subagents fail, since majority-complete is a reasonable threshold for quality",
+      "Never — the coordinator should always attempt synthesis with whatever data is available"
+    ],
+    "ans": 0,
+    "expl": "The halt decision is purpose-driven and resource-aware: if the coverage gaps make the output unfit for its intended use or if proceeding would exhaust the token budget before synthesis can complete, halting prevents a worse outcome. B is wrong because one unrecoverable error out of six subagents does not automatically make synthesis unusable — the impact depends on what domain was lost and the output's requirements. C is wrong because a fixed percentage threshold ignores the content and importance of the missing coverage — losing 1 of 6 subagents on a peripheral topic is very different from losing the central domain. D is wrong because some coverage gaps are so fundamental that partial synthesis actively misleads the reader, making no output more honest than a misleading one."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A multi-agent pipeline processes financial data. The coordinator should continue with partial results in which scenario?",
+    "opts": [
+      "The subagent responsible for regulatory compliance data returned an unrecoverable error, and the pipeline output will be used for compliance decisions",
+      "The synthesis subagent itself returned an unrecoverable error after processing all collected data",
+      "A subagent returned results but the coordinator cannot verify they came from authorized data sources due to a trust failure",
+      "Two of five data collection subagents timed out, the other three succeeded, the missing domains are non-critical supplementary context, and the output will be annotated with explicit coverage gaps"
+    ],
+    "ans": 3,
+    "expl": "Proceeding is correct when: the failed subagents covered non-critical supplementary domains, the majority of data was collected, and the output will explicitly annotate the gaps. The consumer of the output can make an informed decision with a clearly marked partial result. A is wrong because losing the compliance subagent in a compliance-decision pipeline makes the output unfit for its purpose — proceeding could cause downstream harm from false confidence. B is wrong because if synthesis itself failed, there is no output to proceed with — the coordinator must halt and report the synthesis failure. C is wrong because a trust failure in data sourcing compromises the entire result's integrity — proceeding with unverified results without halting risks propagating tainted data."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A research coordinator sets `stop_sequence: [\"FINAL_ANSWER:\"]` and `max_tokens: 4096` on each subagent call. A subagent enters an analysis loop, generating increasingly verbose intermediate reasoning. Which safeguard correctly terminates this runaway behavior?",
+    "opts": [
+      "The coordinator should monitor subagent output token counts and send an interrupt signal when they exceed a threshold",
+      "The subagent's system prompt should include an instruction to limit reasoning to 500 tokens per response",
+      "`max_tokens` will stop generation at 4096 tokens regardless of content; `stop_sequence` will stop generation if the subagent produces the \"FINAL_ANSWER:\" marker, providing a clean semantic exit point",
+      "The coordinator should set `temperature: 0` on the subagent to prevent verbose exploratory reasoning"
+    ],
+    "ans": 2,
+    "expl": "`max_tokens` is a hard budget ceiling — generation stops at exactly this limit, preventing unbounded output. `stop_sequence` provides a semantic termination point — when the subagent produces its final answer marker, generation stops cleanly at a meaningful boundary. Using both together provides both a safety ceiling and a clean exit. A is wrong because there is no \"interrupt signal\" mechanism in the API — output monitoring is only possible after generation completes; generation itself cannot be interrupted mid-stream based on length. B is wrong because a system prompt instruction to \"limit reasoning to 500 tokens\" is probabilistic guidance, not a hard constraint — the model may exceed it, and the instruction itself consumes tokens. D is wrong because `temperature: 0` affects output diversity, not verbosity — a deterministic model can still generate extremely long reasoning chains."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator implements a runaway-agent safeguard by checking if `stop_reason == \"max_tokens\"` on any subagent response. When this occurs, what should the coordinator do?",
+    "opts": [
+      "Log the truncation, treat the response as potentially incomplete, include any partial content with an annotation, and decide whether to retry with a more constrained prompt or halt",
+      "Terminate the entire orchestration since a max_tokens response indicates a runaway agent",
+      "Silently discard the response and retry the subagent with a higher `max_tokens` value",
+      "Treat it as a successful completion since the subagent reached its token limit naturally"
+    ],
+    "ans": 0,
+    "expl": "`max_tokens` truncation means the response was cut off before the model finished — it is neither a clean success nor a definitive failure. The correct handling: log the event as a potential issue, treat the content as potentially incomplete, annotate the truncation in any downstream use, and make a deliberate decision about retry with a tighter prompt versus proceeding. B is wrong because a single max_tokens truncation does not definitively indicate a runaway agent — complex queries legitimately require more output; the safeguard is logging and annotation, not automatic termination. C is wrong because silently increasing max_tokens without logging hides the truncation event from downstream reasoning and may cause the same overrun behavior with a higher ceiling. D is wrong because reaching max_tokens is not a \"natural completion\" — `end_turn` indicates natural completion; `max_tokens` indicates forced interruption of an incomplete generation."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator needs to implement a safeguard against subagents entering infinite tool-call loops. Which combination of `stop_sequence` and `max_tokens` configuration best addresses this?",
+    "opts": [
+      "Set `max_tokens: 100000` to ensure the agent always has enough room and rely on `stop_sequence` for loop detection",
+      "Set `max_tokens` to a value appropriate for the expected task scope and add a `stop_sequence` for the final answer marker; additionally track iteration count in the coordinator and halt if the subagent requests more than N tool calls",
+      "Rely solely on `stop_sequence: [\"DONE\"]` since infinite loops only happen if the agent never generates this token",
+      "Set `max_tokens: 100` to force early termination and prevent loops entirely"
+    ],
+    "ans": 1,
+    "expl": "Defense-in-depth: `max_tokens` bounds the token budget per generation, `stop_sequence` provides a semantic exit, and a coordinator-side iteration count caps the number of tool-call round trips. Each layer addresses a different runaway scenario: excessive output (max_tokens), incomplete termination signal (stop_sequence), and excessive tool round trips (iteration count). A is wrong because a very high `max_tokens` provides almost no protection against runaway generation — it defeats the purpose of the budget safeguard. C is wrong because relying solely on `stop_sequence` fails whenever the model enters a loop that never produces the sequence — the model could loop indefinitely on tool calls without ever generating \"DONE\". D is wrong because `max_tokens: 100` is far too low for legitimate complex tasks and would truncate valid responses before completion."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A coordinator must decide whether to halt orchestration or continue with partial results after a subagent returns an unrecoverable error for the \"economic impact\" domain of a policy research report. The client has specified this report must address all five policy domains. Which is the correct decision?",
+    "opts": [
+      "Halt orchestration and report to the client that the requested deliverable cannot be completed as specified, identifying the missing domain and asking for guidance",
+      "Continue synthesis and note the gap in a footnote, since four of five domains are complete",
+      "Replace the \"economic impact\" domain with available data from adjacent domains to maintain five sections",
+      "Proceed with synthesis and omit the economic impact section from the table of contents"
+    ],
+    "ans": 0,
+    "expl": "When a client requirement explicitly specifies full coverage and a critical domain is irrecoverably lost, proceeding produces output that does not meet the specification — continuing creates false confidence. The correct action is to halt and surface the gap clearly so the client can decide: accept partial output, source alternative data, or extend the timeline. B is wrong because a footnote does not satisfy a client requirement for complete domain coverage — delivering a four-domain report when five were promised without explicit client acknowledgment is a deliverable failure. C is wrong because substituting adjacent domain data misrepresents the content — the economic impact section would contain non-economic content under a misleading header. D is wrong because omitting the section from the table of contents without notification is equivalent to silent failure — the client cannot see what was dropped."
+  },
+  {
+    "source": "Error Propagation",
+    "prompt": "A multi-agent research system's coordinator receives this from a subagent after processing 10 documents: `{\"processed\": 10, \"successful\": 7, \"failed\": 3, \"failures\": [{\"doc\": \"report_A.pdf\", \"type\": \"parse_error\", \"recoverable\": false}, {\"doc\": \"brief_B.docx\", \"type\": \"access_denied\", \"recoverable\": false}, {\"doc\": \"data_C.csv\", \"type\": \"rate_limit\", \"recoverable\": true, \"retry_after\": 20}]}`. What is the correct coordinator response?",
+    "opts": [
+      "Discard the entire batch and resubmit all 10 documents to a fresh subagent instance",
+      "Halt the pipeline since multiple failures indicate a systemic problem with the subagent",
+      "Proceed with results from the 7 successful documents; mark report_A and brief_B as permanent coverage gaps; schedule a retry for data_C after 20 seconds",
+      "Retry all three failed documents before proceeding since 30% failure is too high for reliable synthesis"
+    ],
+    "ans": 2,
+    "expl": "The structured error payload provides exactly the information needed for targeted recovery. `report_A` (parse error, not recoverable) and `brief_B` (access denied, not recoverable) should be annotated as permanent gaps — retrying would fail the same way. `data_C` (rate limit, recoverable, retry_after: 20) is a clear candidate for a timed retry. The 7 successful results should proceed immediately. A is wrong because discarding all 10 documents including the 7 successful ones is massively wasteful — the structured error report is exactly the mechanism that makes targeted recovery possible. B is wrong because three heterogeneous failures (parse error, access denial, rate limit) on different documents indicate individual document issues, not a systemic subagent failure — 70% success rate with diverse failure types is not evidence of systemic breakdown. D is wrong because applying a uniform retry to all three ignores the `recoverable` flags — retrying `report_A` and `brief_B` will fail again for the same reasons, wasting time and resources."
+  }
+];
+
+var MODULE_NAME = "Error Propagation";
+var TAGS = ["Error Taxonomy", "Local Recovery", "Structured Errors", "Coverage Annotations", "Partial Success", "Trust Levels"];
+var PASS_STORAGE_KEY = 'cca_error_propagation_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_error_propagation_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

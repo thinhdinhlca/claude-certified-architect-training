@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Tool Use & Extended Thinking Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #fbbf24;
+    --accent2: #b45309;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "A junior engineer defines a tool with name: 'get-stock-price!' and input_schema with required: []. The description says 'Gets stock price.' On first API call, the model calls the tool with no arguments. What is the most likely root cause?",
+    "opts": [
+      "The model doesn't understand the tool name because of the exclamation mark, so it ignores the schema requirements",
+      "The description is too brief - the model doesn't know a ticker parameter is needed, so it omits it despite the schema",
+      "The API rejected the tool definition because the name contains special characters, but the error was silently ignored",
+      "The input_schema is invalid because it has no required array, and the API auto-corrected it to allow empty calls"
+    ],
+    "ans": 1,
+    "expl": "The description is too brief — the model has no way to know a ticker parameter is needed, so it calls the tool with empty input even though the schema could accept it. Descriptions are the single most important factor in tool performance, and the missing ticker context causes the omission. A is wrong because the name pattern `^[a-zA-Z0-9_-]{1,64}$` rejects '!' and the API would return a 400 error — the call would never reach the model at all. C is wrong because the API does not silently ignore tool name validation failures; a 400 error is returned immediately and the call fails. D is wrong because an empty `required` array is valid JSON Schema meaning all properties are optional, so the API does not auto-correct it and the schema is technically sound."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You define a tool with input_schema.required = ['location', 'unit'] and unit has enum: ['celsius', 'fahrenheit']. Claude calls the tool with {'location': 'Tokyo', 'unit': 'kelvin'}. What happens?",
+    "opts": [
+      "The API accepts the call and passes it to your tool implementation - schema validation only happens for input_examples, not actual tool calls",
+      "The API rejects the tool call with a 400 error because 'kelvin' is not in the enum",
+      "Claude receives the tool result and retries with a corrected unit value automatically",
+      "The model is penalized in its next response but the tool call still executes"
+    ],
+    "ans": 1,
+    "expl": "The API validates every tool call input against the `input_schema` before execution, and 'kelvin' violates the `enum: ['celsius', 'fahrenheit']` constraint, so the request is rejected with a 400 error. A is wrong because schema validation applies to all actual tool calls, not only to `input_examples` — the API enforces the schema on every invocation. C is wrong because Claude does not receive a tool result to reason from; the API rejects the call before execution and your code must handle the error explicitly. D is wrong because there is no penalty mechanism in the API — the call simply fails with a 400 error and no tool result is produced."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You have two tools: search_logs ('Search application logs') and query_metrics ('Query system metrics'). In testing, Claude sometimes calls query_metrics when the user asks about error rates in logs. Which fix is most effective?",
+    "opts": [
+      "Add input_examples to both tools showing the correct queries for each",
+      "Update descriptions to clarify data sources: search_logs for text logs, query_metrics for time-series monitoring data",
+      "Rename the tools to logs_search and metrics_query to follow naming conventions",
+      "Consolidate both tools into a single query_data tool with a 'data_type' parameter"
+    ],
+    "ans": 1,
+    "expl": "Updating descriptions to name the distinct data sources — text application logs versus time-series monitoring data — directly resolves the ambiguity that causes the wrong tool to be selected, since tool descriptions are the primary signal Claude uses for selection. A is wrong because `input_examples` illustrate parameter shapes for complex inputs but do not disambiguate which tool handles which domain — they cannot fix a selection ambiguity caused by overlapping descriptions. C is wrong because renaming without updating descriptions leaves the same semantic overlap; the model selects based on description content, not name formatting conventions. D is wrong because consolidating two fundamentally different data sources into one tool violates single-responsibility and hides the data-source distinction rather than clarifying it."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your agent has separate tools: create_pr, add_reviewer, merge_pr. In testing, Claude frequently creates a PR but forgets to add reviewers before merging. What's the most effective redesign?",
+    "opts": [
+      "Add a system prompt instruction: 'Always add reviewers after creating a PR'",
+      "Consolidate into a single manage_pr tool with a 'create' action that accepts reviewers",
+      "Keep the tools separate but add input_examples showing the full create-review-merge workflow",
+      "Add a validation layer that rejects merge_pr calls if no reviewer was added"
+    ],
+    "ans": 1,
+    "expl": "Consolidating into a single `manage_pr` tool where the 'create' action accepts an optional `reviewers` field makes the reviewer step structurally part of creation, so the model cannot skip it by choosing the wrong next tool. A is wrong because system prompt instructions are probabilistic — the model may still omit the reviewer step when context is long or distracted, and instructions do not enforce sequencing the way tool design does. C is wrong because `input_examples` show parameter shapes but do not constrain which tools the model chooses to call or in what order between three separate tools. D is wrong because a validation layer is a runtime safety net that surfaces errors after the fact rather than eliminating the root cause of the tool-sequencing gap."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your MCP server exposes 12 tools for GitHub operations and 8 for Jira operations. Claude sometimes calls search_issues when the user asks about Jira tickets. Both services have an 'issues' concept. What's the best fix?",
+    "opts": [
+      "Add a routing classifier before the MCP server that pre-selects the correct service based on keywords",
+      "Namespace all tools by service: github_search_issues, jira_search_issues with explicit descriptions",
+      "Remove the Jira tools from this agent and create a separate Jira-specific agent",
+      "Add a 'service' parameter to search_issues and let Claude specify which service to query"
+    ],
+    "ans": 1,
+    "expl": "Namespacing tools by service prefix (`github_search_issues`, `jira_search_issues`) combined with explicit per-service descriptions makes selection unambiguous — Anthropic recommends prefix-based namespacing for tools spanning multiple services. A is wrong because an external classifier adds an extra failure surface and can misroute on ambiguous queries, whereas the correct service is already inferable from the tool name and description if namespaced properly. C is wrong because splitting into separate agents removes the ability to coordinate across services in a single workflow, which the user may need. D is wrong because a shared `search_issues` tool with a `service` parameter conflates two distinct services into one tool, violating single-responsibility and requiring Claude to know to pass the right service value every time."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You add input_examples to a user-defined tool. Which statement is true about how the API handles them?",
+    "opts": [
+      "Input examples are validated against the input_schema, and invalid examples cause a 400 error on the API request",
+      "Input examples are optional hints that Claude may or may not use, with no validation performed",
+      "Input examples are only supported for Anthropic-schema tools like web search, not user-defined tools",
+      "Input examples override the input_schema, allowing Claude to pass values not defined in the schema"
+    ],
+    "ans": 0,
+    "expl": "The API strictly validates `input_examples` against the `input_schema` before processing the request — extra parameters, wrong types, or enum violations all return a 400 error immediately. B is wrong because `input_examples` are not optional hints; they are validated and their valid values are injected into the prompt to guide model behavior. C is wrong because `input_examples` are supported for user-defined tools and Anthropic-schema client tools — they are not available only for server-side tools like web search. D is wrong because examples must conform to the `input_schema` and cannot introduce parameters outside it; the schema always takes precedence."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You are building a customer support agent that handles simple, well-defined tasks: looking up orders, checking shipping status, processing returns. Queries are unambiguous and inputs are always provided. What's the optimal model choice?",
+    "opts": [
+      "Claude Opus 4.7 - it handles all tool use scenarios best, so it's always the safest choice",
+      "Claude Sonnet 4.6 - it provides a good balance, and since the tool use is straightforward, there's no downside to using it",
+      "Claude Haiku - it's fast and cost-effective for straightforward tools, though server-side validation is needed",
+      "Claude Opus 4.6 - it supports manual budget_tokens control for extended thinking, which is useful even for simple tasks"
+    ],
+    "ans": 2,
+    "expl": "Claude Haiku is optimal for straightforward, unambiguous tool-use tasks — it delivers fast responses at the lowest cost, and since inputs are always provided, its tendency to infer missing parameters is mitigated by server-side validation. A is wrong because Opus 4.7 is designed for complex, ambiguous multi-tool workflows and its additional reasoning capability provides no benefit for simple lookups while adding unnecessary cost and latency. B is wrong because Sonnet 4.6 is more expensive than Haiku for tasks where Haiku performs adequately, making it the wrong cost-performance trade-off. D is wrong because manual `budget_tokens` extended thinking on Opus 4.6 adds latency and cost with zero benefit for simple, deterministic tool calls that require no deep reasoning."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your agent needs to reason about ambiguous user queries (e.g., 'check my account' could mean balance, recent transactions, or settings) and often needs to ask clarifying questions before calling tools. Which model handles this best?",
+    "opts": [
+      "Claude Haiku - it is optimized for fast responses and will quickly pick the most likely tool",
+      "Claude Sonnet 4.6 - it balances speed and reasoning, and supports both adaptive and manual thinking modes",
+      "Claude Opus 4.7 - it seeks clarification when needed rather than guessing, and handles ambiguous queries best",
+      "Claude Opus 4.6 - its manual budget_tokens control allows precise tuning of reasoning depth for each query"
+    ],
+    "ans": 2,
+    "expl": "Claude Opus 4.7 is explicitly designed to seek clarification on ambiguous queries rather than guessing, and it achieves the highest accuracy on complex multi-tool scenarios requiring nuanced judgment. A is wrong because Haiku is optimized for speed and may infer missing parameters or pick the most likely tool without asking, which causes incorrect actions on genuinely ambiguous queries. B is wrong because while Sonnet 4.6 supports adaptive thinking, it does not match Opus 4.7's documented strength in recognizing ambiguity and requesting clarification before acting. D is wrong because manual `budget_tokens` mode on Opus 4.6 is deprecated, and tuning a fixed thinking budget does not solve the clarification-seeking behavior gap."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You want to force Claude to use the get_weather tool when answering a weather query, AND you need Claude to explain its reasoning in natural language first (e.g., 'Let me check the weather for you'). Extended thinking is enabled. Which approach is optimal?",
+    "opts": [
+      "Use tool_choice: {type: 'tool', name: 'get_weather'} - this forces the specific tool while preserving extended thinking",
+      "Use tool_choice: 'any' - this guarantees a tool is called, and the model can still explain before the tool call",
+      "Use tool_choice: 'auto' and add instructions in the user message to use the get_weather tool",
+      "Disable extended thinking temporarily, use tool_choice: 'tool', then re-enable extended thinking in the next turn"
+    ],
+    "ans": 2,
+    "expl": "Using `tool_choice: 'auto'` with explicit user-message instructions is the only valid approach because extended thinking is incompatible with `tool_choice: 'any'` and `tool_choice: {type: 'tool'}` — both return a 400 error when thinking is enabled. A is wrong because `tool_choice: {type: 'tool', name: 'get_weather'}` returns a 400 error when extended thinking is active, making this configuration structurally invalid. B is wrong because `tool_choice: 'any'` also returns a 400 error when extended thinking is enabled, and additionally the API prefills the assistant turn to start a tool call, preventing any natural language explanation before it. D is wrong because you cannot toggle thinking mid-turn, and changing `tool_choice` between turns breaks prompt caching continuity without solving the fundamental incompatibility."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "In your agentic loop, you check stop_reason to decide whether to execute a tool or return the final response. The API returns stop_reason: 'max_tokens'. What does this indicate and how should you handle it?",
+    "opts": [
+      "The model finished its response normally - treat it as end_turn and return the response to the user",
+      "The model's response was truncated - you should continue the conversation or increase max_tokens",
+      "The model wants to call a tool but ran out of space to specify which one - terminate and report an error",
+      "The model encountered an internal error - retry the same request with identical parameters"
+    ],
+    "ans": 1,
+    "expl": "`stop_reason: 'max_tokens'` means the response was cut off at the token limit and is incomplete — the correct action is to continue the conversation by sending the truncated response as context, or increase `max_tokens` to allow a complete response. A is wrong because `max_tokens` is explicitly distinct from `end_turn`, which signals a voluntary stop; treating a truncated response as complete will return an incomplete or corrupt reply to the user. C is wrong because while a truncated tool call is possible, the correct action is continuation or budget increase, not termination — treating this as an unrecoverable error discards a recoverable situation. D is wrong because retrying with identical parameters will produce the same truncated result at the same token boundary without resolving the underlying capacity issue."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "On Claude Opus 4.7, your code sets thinking: {type: 'enabled', budget_tokens: 12000}. What happens?",
+    "opts": [
+      "The API accepts it and Claude uses extended thinking with a 12,000 token budget",
+      "The API returns a 400 error - Opus 4.7 only supports adaptive thinking",
+      "The API silently converts the request to adaptive thinking with effort: 'high'",
+      "The API ignores the thinking config and runs without extended thinking"
+    ],
+    "ans": 1,
+    "expl": "Opus 4.7 only supports adaptive thinking (`type: 'adaptive'`) and explicitly rejects `type: 'enabled'` with a 400 error, because manual `budget_tokens` mode is not available on this model. A is wrong because Opus 4.7 does not support the `'enabled'` thinking type at all — the API rejects the request before any thinking is performed. C is wrong because the API does not silently convert invalid configurations; it returns a hard 400 error requiring the caller to fix the request. D is wrong because the API does not silently ignore an invalid thinking config — it returns a 400 error, not a fallback to no-thinking mode."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You are building a multi-step agentic workflow where Claude must call tool A, reason about the result, then decide whether to call tool B or C. Which thinking mode is required for Claude to reason between tool calls?",
+    "opts": [
+      "Standard extended thinking with budget_tokens - Claude reasons once before all tool calls",
+      "Interleaved thinking - Claude can reason between tool calls, re-evaluating strategy after each result",
+      "Disabled thinking - Claude uses its base reasoning capabilities which are sufficient for most workflows",
+      "Adaptive thinking with effort: 'low' - this minimizes thinking overhead while still allowing tool use"
+    ],
+    "ans": 1,
+    "expl": "Interleaved thinking enables Claude to insert a reasoning step after each tool result, allowing it to re-evaluate strategy and choose the correct next tool based on what was returned — this is the only mode that supports reasoning between individual tool calls. A is wrong because standard extended thinking with `budget_tokens` produces a single thinking block before the first tool call; Claude cannot reason again after seeing a tool result without interleaved mode. C is wrong because base reasoning without any thinking mode does not provide the structured between-call deliberation needed to correctly branch on tool results in complex workflows. D is wrong because `effort: 'low'` in adaptive mode minimizes thinking depth and is designed for simple queries — the opposite of what a branching multi-step workflow requires."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You switch from manual extended thinking (budget_tokens: 8000) to adaptive thinking on Sonnet 4.6. Which change should you expect in your agentic tool-use workflow?",
+    "opts": [
+      "The model will always use exactly 8,000 tokens for thinking, maintaining predictable costs",
+      "The model will dynamically decide when and how much to think, enabling interleaved reasoning between tool calls",
+      "The model will skip thinking entirely for simple queries, but complex queries will fail because no budget is specified",
+      "The model will use the same amount of thinking tokens but bill them at a lower rate"
+    ],
+    "ans": 1,
+    "expl": "Switching to adaptive thinking means the model dynamically decides when to think and how deeply, and interleaved thinking is automatically enabled, allowing reasoning between individual tool calls without any additional configuration. A is wrong because adaptive thinking replaces the fixed `budget_tokens` ceiling with dynamic allocation — there is no guaranteed 8,000-token usage, and costs will vary per request. C is wrong because adaptive thinking never fails on complex queries for lack of a budget; the model allocates thinking tokens as needed up to its internal ceiling. D is wrong because thinking tokens are billed as output tokens regardless of thinking mode — there is no discounted billing rate for adaptive versus manual mode."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You need interleaved thinking (thinking between tool calls) on Claude Opus 4.6. Which configuration enables this?",
+    "opts": [
+      "Manual extended thinking: thinking: {type: 'enabled', budget_tokens: 10000}",
+      "Adaptive thinking: thinking: {type: 'adaptive'} - interleaved thinking is auto-enabled",
+      "Disabled thinking - Opus 4.6 always performs interleaved reasoning by default",
+      "Manual thinking with the interleaved-thinking-2025-05-14 beta header"
+    ],
+    "ans": 1,
+    "expl": "On Claude Opus 4.6, setting `thinking: {type: 'adaptive'}` automatically enables interleaved thinking, which inserts reasoning blocks between each tool call without requiring any additional headers or parameters. A is wrong because manual mode (`type: 'enabled'` with `budget_tokens`) on Opus 4.6 does not support interleaved thinking — reasoning happens once upfront only, and the API does not inject reasoning blocks between tool calls in this mode. C is wrong because Opus 4.6 does not perform interleaved reasoning by default with thinking disabled; base-model reasoning lacks the structured between-call thinking blocks that interleaved mode provides. D is wrong because the `interleaved-thinking-2025-05-14` beta header applies specifically to Sonnet 4.6 manual mode, not to Opus 4.6, and is not the documented path for interleaved thinking on Opus 4.6."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You set thinking: {type: 'adaptive', display: 'omitted'} to reduce latency. A colleague claims this also reduces costs because thinking tokens are not returned. Is this correct?",
+    "opts": [
+      "Yes - omitted display means no thinking tokens are generated or billed",
+      "No - thinking tokens are still billed internally; omitted display only skips streaming to reduce latency",
+      "Partially - omitted display reduces costs by about 50% because only half the thinking tokens are billed",
+      "It depends - costs are reduced only when the model skips thinking entirely for simple queries"
+    ],
+    "ans": 1,
+    "expl": "`display: 'omitted'` only skips streaming the thinking content to the client — the model still generates full thinking tokens internally and you are billed for all of them; the `signature` field in the response still carries the encrypted full thinking. A is wrong because omitting display does not prevent thinking token generation; the model always generates thinking first and the full token count is billed regardless of whether the content is returned. C is wrong because billing is based on all thinking tokens generated, not on a fraction of them — there is no partial billing reduction tied to the display setting. D is wrong because while adaptive thinking may skip thinking for simple queries, that behavior is independent of the `display` field and depends on the model's internal assessment of query complexity, not the display configuration."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "On Claude Opus 4.7, you want to see Claude's summarized thinking process in the API response. What must you do?",
+    "opts": [
+      "Nothing - Opus 4.7 defaults to summarized display, so thinking content is automatically included",
+      "Explicitly set display: 'summarized' because Opus 4.7 defaults to 'omitted'",
+      "Set display: 'full' to receive the complete unedited thinking text",
+      "Use manual thinking mode instead of adaptive, because adaptive mode never returns thinking content"
+    ],
+    "ans": 1,
+    "expl": "Opus 4.7 (and Mythos Preview) defaults to `display: 'omitted'`, so you must explicitly set `display: 'summarized'` to receive a summarized thinking block in the API response. A is wrong because `display: 'summarized'` is the default only on Opus 4.6 and Sonnet 4.6 — Opus 4.7's default is 'omitted', so no thinking content is returned without an explicit override. C is wrong because `'full'` is not a valid value for the `display` field — the only supported values are `'summarized'` and `'omitted'`. D is wrong because adaptive mode can return thinking content when `display: 'summarized'` is set; it is manual mode that is unavailable on Opus 4.7, not adaptive mode."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your adaptive thinking queries frequently hit stop_reason: 'max_tokens', cutting off responses. You have already increased max_tokens to the maximum your budget allows. What should you adjust?",
+    "opts": [
+      "Switch to manual thinking mode with a smaller budget_tokens value for more predictable token usage",
+      "Lower the effort level (e.g., from 'high' to 'medium') to reduce thinking depth without changing max_tokens",
+      "Disable thinking entirely - the base model reasoning is sufficient for your use case",
+      "Add a system prompt instruction telling Claude to use fewer thinking tokens"
+    ],
+    "ans": 1,
+    "expl": "Lowering the `effort` level (e.g., from `'high'` to `'medium'`) reduces the depth of thinking the model performs, which decreases thinking token consumption and leaves more of the `max_tokens` budget for the visible response — this is the documented mechanism for controlling thinking depth in adaptive mode. A is wrong because manual thinking mode is deprecated on 4.6 and rejected on 4.7, and switching to a fixed `budget_tokens` value does not solve a hard `max_tokens` ceiling that has already been maximized. C is wrong because disabling thinking sacrifices reasoning quality across all queries unnecessarily when the problem can be solved by tuning effort level. D is wrong because prompt instructions about token budgets are unreliable guidance that the model may not follow; the `effort` parameter is the intended API-level control for this purpose."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Which effort level is available on all adaptive thinking models (Opus 4.7, Opus 4.6, Sonnet 4.6, Mythos Preview)?",
+    "opts": [
+      "xhigh - it provides the deepest reasoning on all models",
+      "max, high (default), medium, and low",
+      "Only high and low - other levels are model-specific",
+      "max and xhigh - these are the universal high-reasoning levels"
+    ],
+    "ans": 1,
+    "expl": "The four effort levels `max`, `high` (default), `medium`, and `low` are available on every adaptive thinking model — Opus 4.7, Opus 4.6, Sonnet 4.6, and Mythos Preview. A is wrong because `xhigh` is exclusive to Opus 4.7 and is not supported on Opus 4.6, Sonnet 4.6, or Mythos Preview. C is wrong because `max` and `medium` are also universally available, not just `high` and `low` — the full four-level range applies to all adaptive models. D is wrong because `xhigh` is not universal — only `max` is, and combining `max` and `xhigh` as a pair overstates what is broadly supported."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You provide a custom system prompt and define three tools in your API request. How does the API combine these?",
+    "opts": [
+      "Your system prompt replaces the tool-related instructions entirely - you must manually include tool definitions in your prompt",
+      "The API auto-constructs a system prompt combining tool definitions, your prompt, and tool config",
+      "Tool definitions are sent as a separate parameter and do not appear in the system prompt at all",
+      "Your system prompt is appended after the tool definitions, but tool descriptions are truncated to fit within the context window"
+    ],
+    "ans": 1,
+    "expl": "The API automatically constructs a combined system prompt that includes formatting instructions, the full JSON Schema tool definitions, your custom system prompt text, and any tool configuration — this is why well-written tool descriptions directly affect model performance. A is wrong because your custom system prompt does not replace the tool-related instructions; the API merges both, so you never need to manually embed tool definitions in your prompt text. C is wrong because tool definitions do appear in the constructed system prompt in JSON Schema format — they are not kept in a separate, isolated parameter that the model cannot see. D is wrong because tool descriptions are not truncated to fit the context window; they appear in full as part of the auto-constructed prompt."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your tool returns {'uuid': 'a1b2c3...', '256px_image_url': '...', 'mime_type': 'application/pdf'}. You notice Claude sometimes struggles to use these results for follow-up tool calls. What's the most effective improvement?",
+    "opts": [
+      "Add more fields to give Claude maximum information and flexibility",
+      "Replace cryptic identifiers with semantic, human-readable ones: name, image_url, file_type",
+      "Return raw binary data instead of JSON for better performance",
+      "The current format is fine - Claude can parse UUIDs and technical identifiers easily"
+    ],
+    "ans": 1,
+    "expl": "Replacing opaque identifiers like `uuid` and `256px_image_url` with semantic names like `name`, `image_url`, and `file_type` directly improves the model's ability to reference and chain these values in follow-up tool calls — Anthropic recommends semantic identifiers over cryptic ones for agentic accuracy. A is wrong because adding more fields increases context token consumption and introduces noise without improving the signal quality that causes the chaining failures. C is wrong because raw binary data is not supported in tool result content — tool responses must be text or structured data. D is wrong because while Claude can technically parse UUIDs, cryptic field names like `256px_image_url` and `mime_type` reduce precision in follow-up calls compared to natural language equivalents."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You want to let Claude control whether tool responses are detailed (with all IDs for chaining) or concise (minimal fields). Which pattern does Anthropic recommend?",
+    "opts": [
+      "Add a 'verbose' boolean parameter to the tool that toggles between full and minimal output",
+      "Implement a response_format enum (e.g., 'concise' vs 'detailed') similar to GraphQL field selection",
+      "Create two separate tools: one that returns detailed output and one that returns concise output",
+      "Add a 'fields' array parameter where Claude can specify exactly which fields to return"
+    ],
+    "ans": 1,
+    "expl": "A `response_format` enum parameter with values like `'concise'` and `'detailed'` is Anthropic's documented pattern for letting agents control output verbosity — it is explicit, type-safe, and easy for the model to reason about, similar to GraphQL field selection. A is wrong because a boolean `verbose` flag is less expressive than an enum and cannot cleanly support more than two output modes if requirements expand. C is wrong because creating two separate tools for the same operation purely to control verbosity inflates tool count, violates consolidation principles, and degrades selection accuracy. D is wrong because a `fields` array introduces schema complexity and is prone to validation errors when the model specifies field names that don't exactly match the tool's output schema."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "An agent with access to 18 tools (customer lookup, order management, billing, shipping, returns, reviews) shows degraded tool selection accuracy. According to Anthropic's research, what's the primary issue and fix?",
+    "opts": [
+      "The model needs more training data on tool selection - fine-tune it on your specific tool set",
+      "Agents with too many tools degrade in accuracy; restrict each agent to 4-5 tools per role",
+      "Add more detailed descriptions to all 18 tools to improve selection accuracy",
+      "Implement a keyword-based pre-filter that selects 5 candidate tools before each model call"
+    ],
+    "ans": 1,
+    "expl": "Anthropic's research shows tool selection accuracy degrades significantly beyond 4-5 tools per agent — the fix is to split the 18 tools across role-specific agents, each carrying only the tools relevant to its domain. A is wrong because fine-tuning is not the recommended approach for tool selection degradation; restructuring tool count and assignment is the documented solution. C is wrong because better descriptions help with ambiguous descriptions but do not overcome the fundamental decision-complexity problem that arises when the model must choose from 18 candidates. D is wrong because a keyword pre-filter bypasses the model's semantic understanding, can exclude the correct tool on ambiguous queries, and adds architectural complexity that role-based agent splitting avoids."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your team implements list_contacts, list_events, and create_event as three separate tools. The agent frequently calls list_contacts and list_events before every create_event, wasting tokens. What's the recommended fix?",
+    "opts": [
+      "Add prompt instructions telling the agent to skip unnecessary listing steps",
+      "Implement a single schedule_event tool that finds availability and schedules in one call",
+      "Add caching to the list tools to reduce repeated token costs",
+      "Remove the list tools - the agent should infer availability from context"
+    ],
+    "ans": 1,
+    "expl": "Implementing a single `schedule_event` tool that internally resolves contacts and checks availability before scheduling consolidates the multi-step workflow into one call, eliminating the unnecessary listing steps by removing the agent's ability to call them independently. A is wrong because prompt instructions cannot reliably prevent the agent from calling tools it deems necessary — the model will continue listing when it believes availability data is stale or missing. C is wrong because caching reduces the token cost of repeated list calls but does not eliminate the unnecessary calls themselves; the workflow inefficiency remains. D is wrong because removing the list tools without replacement forces the agent to guess at availability and contact data, which introduces incorrect event creation rather than solving the problem."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You configure tool_choice: 'any' with strict: true on all tool definitions. What guarantees does this combination provide?",
+    "opts": [
+      "Claude will call at least one tool, and all tool inputs will strictly follow their input_schema",
+      "Claude will call ALL available tools in a single response",
+      "Claude will call exactly one tool, chosen randomly from the available set",
+      "Claude will call the first tool in the tools array, ensuring deterministic behavior"
+    ],
+    "ans": 0,
+    "expl": "`tool_choice: 'any'` guarantees Claude must call at least one tool from the available set, and `strict: true` on each tool definition guarantees that all generated tool inputs will conform exactly to their `input_schema` without additional or missing fields. B is wrong because `tool_choice: 'any'` means at least one tool must be called — it does not force all tools in the array to be called in a single response. C is wrong because Claude selects the tool(s) based on query semantics and tool descriptions, not through random selection — and `any` allows multiple tool calls, not exactly one. D is wrong because there is no documented behavior where Claude prefers the first tool in the array; tool position in the array does not determine selection order."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You are passing conversation history during a multi-turn tool-use workflow with extended thinking. What must you preserve from the assistant's previous turn?",
+    "opts": [
+      "Only the text content blocks - thinking blocks contain internal state that should not be exposed",
+      "Only the tool_use blocks - thinking blocks are regenerated on each turn",
+      "The complete assistant message including thinking blocks (with signatures) must be preserved",
+      "Nothing special - extended thinking has no additional requirements for conversation history"
+    ],
+    "ans": 2,
+    "expl": "The complete assistant message — including all thinking blocks with their `signature` fields — must be passed back unchanged in conversation history; the API uses the encrypted signatures to verify reasoning continuity and will reject or mishandle requests where thinking blocks are stripped. A is wrong because thinking blocks are not merely internal state to hide — they are required by the API for multi-turn tool-use continuity, and omitting them breaks the conversation flow. B is wrong because thinking blocks are not regenerated on each turn; they carry forward the reasoning trace from the previous step, and the API expects them verbatim. D is wrong because extended thinking imposes an explicit additional requirement: thinking blocks with signatures must be preserved in the last assistant message when continuing a tool-use conversation."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "What is the key difference between standard extended thinking and interleaved thinking in agentic workflows?",
+    "opts": [
+      "Standard thinking uses fewer tokens; interleaved thinking uses more tokens for deeper reasoning",
+      "Standard thinking reasons once before all tool calls; interleaved thinking allows reasoning between each tool call",
+      "Standard thinking is only available on Opus; interleaved thinking is available on all models",
+      "Standard thinking returns visible reasoning; interleaved thinking hides reasoning from the API response"
+    ],
+    "ans": 1,
+    "expl": "Standard extended thinking produces a single reasoning block before the first tool call, while interleaved thinking inserts a fresh reasoning block after each tool result, allowing the model to re-evaluate strategy based on what each tool returned — this is the defining functional difference for multi-step agentic workflows. A is wrong because token usage is determined by query complexity and effort level, not by whether thinking is standard or interleaved — interleaved thinking can use fewer total tokens if the task resolves quickly after the first tool. C is wrong because standard extended thinking (manual mode) is available on Sonnet 4.6 and Opus 4.6, not exclusively on Opus models, and interleaved availability is model-dependent, not universal. D is wrong because reasoning visibility is controlled by the `display` setting (`'summarized'` or `'omitted'`), which applies equally to both standard and interleaved thinking modes."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You migrate from manual thinking (budget_tokens: 10000) to adaptive thinking on Opus 4.7. How does this affect your ability to predict token costs per request?",
+    "opts": [
+      "Costs become more predictable because adaptive thinking uses a fixed default budget",
+      "Costs become less predictable because Claude dynamically decides thinking depth per request",
+      "Costs stay the same because adaptive thinking still respects the previous budget_tokens value as a soft limit",
+      "Costs decrease by exactly 50% because adaptive thinking is more efficient than manual mode"
+    ],
+    "ans": 1,
+    "expl": "Adaptive thinking replaces the fixed `budget_tokens` ceiling with dynamic per-request allocation based on query complexity — costs vary by request and cannot be pre-calculated with certainty, reducing cost predictability compared to manual mode. A is wrong because adaptive thinking has no fixed default budget; it allocates thinking tokens dynamically and the amount varies across requests. C is wrong because adaptive thinking completely ignores any previously used `budget_tokens` value — the parameter does not carry over as a soft limit or reference point. D is wrong because there is no guaranteed 50% cost reduction from switching to adaptive thinking; costs depend entirely on how much thinking each individual query demands."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "In your agentic loop, after processing a tool result, you append both the assistant's tool_use message and the tool result to the conversation history. You then send the next API request. Claude responds with text content but no tool_use block, even though more tools are needed. What might be wrong?",
+    "opts": [
+      "The model has reached its max_tokens limit and cannot generate the tool_use block",
+      "You forgot to set tool_choice: 'any', so Claude decided not to call another tool",
+      "The tool result wasn't formatted as a tool_result block - the model sees it as user text",
+      "Claude has reached the end of the task and correctly decided to stop"
+    ],
+    "ans": 2,
+    "expl": "If the tool result is appended as plain user text rather than a properly structured `tool_result` content block with the matching `tool_use_id`, the model treats it as a conversational user message and responds naturally in text rather than continuing the tool-use loop. A is wrong because hitting `max_tokens` produces `stop_reason: 'max_tokens'` with a truncated response — it does not cause Claude to generate fluent text content while silently omitting the tool call. B is wrong because `tool_choice: 'auto'` (the default) should still select additional tools when the conversation history correctly signals an incomplete task; the absence of tool calls despite outstanding work points to a formatting error, not a missing `tool_choice` override. D is wrong because the scenario states more tools are needed — if Claude correctly decided to stop, the task would actually be complete, which contradicts the observed behavior."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "A developer creates input_examples for a tool but receives a 400 error on the API request. The examples include parameters not defined in the input_schema. Which statement explains this?",
+    "opts": [
+      "Input examples are validated against the input_schema, and extra parameters cause a validation error",
+      "The API rejects examples with extra parameters because they might confuse the model",
+      "Input examples must be a subset of the input_schema; any deviation returns 400",
+      "The 400 error is unrelated to examples - it's caused by a malformed JSON payload"
+    ],
+    "ans": 0,
+    "expl": "The API strictly validates `input_examples` against the `input_schema` before processing the request — parameters not defined in the schema are treated as `additionalProperties` violations, causing a 400 error immediately. B is wrong because the rejection is a schema validation failure, not a model-confusion heuristic — the API enforces JSON Schema rules structurally before any model interaction occurs. C is wrong because examples do not need to be a strict subset of parameters; they need to be *valid according to* the schema, meaning they must use defined properties with correct types and enum values. D is wrong because the error is directly caused by the extra parameters in the examples violating schema validation; a malformed JSON payload would produce a different, syntactic parse error."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "Your agent must coordinate multiple tools in a single workflow: search for documents, extract relevant passages, summarize findings, and email the summary. Queries are often ambiguous. Which model is optimal?",
+    "opts": [
+      "Claude Haiku - it's fast enough to handle the multiple tool calls efficiently",
+      "Claude Sonnet 4.6 - it balances performance and can handle moderate complexity",
+      "Claude Opus 4.7 - it handles multiple tools best and seeks clarification on ambiguous queries",
+      "Claude Opus 4.6 - manual budget_tokens control lets you precisely tune reasoning for each step"
+    ],
+    "ans": 2,
+    "expl": "Claude Opus 4.7 is optimal because the workflow requires three capabilities it uniquely provides: coordination across multiple sequential tools, clarification-seeking on ambiguous queries, and auto-enabled interleaved thinking for complex multi-step reasoning between tool calls. A is wrong because Haiku is not designed for complex multi-tool coordination with ambiguous inputs — it may infer missing parameters and make incorrect tool choices rather than asking for clarification. B is wrong because while Sonnet 4.6 handles moderate complexity, it does not match Opus 4.7's documented strength in ambiguity resolution and multi-tool coordination for workflows of this complexity. D is wrong because manual `budget_tokens` mode on Opus 4.6 is deprecated, and the ability to tune a fixed thinking budget does not compensate for Opus 4.6's weaker performance on ambiguous multi-tool workflows compared to Opus 4.7."
+  },
+  {
+    "source": "Tool Use & Extended Thinking",
+    "prompt": "You set display: 'summarized' and notice the thinking block contains a summary rather than the full reasoning. Which statement about billing is correct?",
+    "opts": [
+      "You are billed only for the summarized tokens visible in the response",
+      "You are billed for the original thinking tokens generated internally, not the summarized output",
+      "Summarized thinking is free because the summary is generated by a separate process",
+      "Billing is reduced by 50% because the summary contains half the tokens of the original thinking"
+    ],
+    "ans": 1,
+    "expl": "You are billed for the full original thinking tokens the model generated internally — the summarization is performed by a separate model pass and its token count is not charged, but the underlying thinking tokens always are, regardless of the `display` setting. A is wrong because billing is not based on the summarized output token count visible in the response; the billed count reflects the larger original thinking token generation, which means your invoice will not match the visible token count. C is wrong because while the summarization step itself is not charged, the original thinking tokens that were generated before summarization are always billed as output tokens. D is wrong because there is no guaranteed 50% reduction tied to summarization — billing is based on the actual original thinking token count, which varies by query complexity and bears no fixed ratio to summary length."
+  }
+];
+
+var MODULE_NAME = "Tool Use & Extended Thinking";
+var TAGS = ["Tool Definitions", "Extended Thinking", "Adaptive Thinking", "tool_choice", "Multi-turn", "Computer Use"];
+var PASS_STORAGE_KEY = 'cca_tool_use_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_tool_use_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

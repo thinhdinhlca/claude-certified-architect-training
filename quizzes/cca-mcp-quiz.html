@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - MCP & Tool Design Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #2dd4bf;
+    --accent2: #0d9488;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "MCP is often described as \"the USB-C for AI integrations.\" What does this metaphor capture about the protocol?",
+    "opts": [
+      "MCP is a hardware standard that devices must physically connect through, similar to how USB-C works in electronics",
+      "MCP provides a universal, standardized interface that replaces custom one-off integrations, allowing an AI application to connect with any MCP-compatible tool or data source through the same protocol",
+      "MCP was designed by the same standards organization that created the USB-C specification, ensuring hardware-level compatibility between AI devices",
+      "MCP is the fastest protocol for AI data transfer, just as USB-C offers the highest data throughput among physical connectors"
+    ],
+    "ans": 1,
+    "expl": "MCP is a software protocol layer that replaces the N×M combinatorial problem of custom point-to-point integrations — just as USB-C replaced a drawer full of proprietary cables with a single universal connector. A is wrong because MCP is a software protocol, not a hardware standard, and there is no physical connector or device requirement in the spec. C is wrong because MCP is an Anthropic-led open protocol, not a product of any USB standards body. D is wrong because throughput is not MCP's differentiator — standardized discovery, lifecycle management, and capability negotiation are."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "What is the primary problem that the Model Context Protocol (MCP) solves in the AI ecosystem?",
+    "opts": [
+      "Reducing the cost of LLM API calls by compressing prompt data before transmission over the network",
+      "Providing a standard protocol for AI models to securely access external tools, data sources, and context without requiring custom integration code for each connection",
+      "Standardizing model weight formats so that different LLM vendors can share parameter data across training pipelines",
+      "Replacing the need for fine-tuning by allowing models to dynamically load capabilities through protocol extensions"
+    ],
+    "ans": 1,
+    "expl": "MCP eliminates the N×M integration problem by providing a single standard protocol for tool discovery, capability negotiation, and execution — any MCP host connects to any MCP server without bespoke glue code. A is wrong because MCP does not compress or optimize prompt data; it is a connection and capability protocol, not a compression layer. C is wrong because MCP has nothing to do with model weight formats or cross-vendor training pipelines. D is wrong because MCP does not replace fine-tuning; it expands runtime access to external context and tools without changing model weights."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "In MCP architecture, there are three key roles: Host, Client, and Server. Which statement correctly describes their relationships?",
+    "opts": [
+      "The Host application creates one Client per MCP server, and each Client maintains a 1:1 connection with exactly one Server",
+      "The Host acts as a central load balancer, distributing requests across a pool of Clients which then fan out to any available Server in the cluster",
+      "The Client is embedded within the Server process, and the Host connects directly to the Server through the Client's local API",
+      "Multiple Hosts share a single Client instance which multiplexes connections to all configured Servers simultaneously"
+    ],
+    "ans": 0,
+    "expl": "In the MCP architecture the Host (e.g., Claude Desktop) owns and creates one Client per configured Server, with each Client maintaining a strict 1:1 transport connection to exactly one Server — this isolation prevents one server's failures or behavior from affecting another's connection. B is wrong because MCP has no load-balancer or fan-out concept; each Client connects to exactly one Server, not a pool. C is wrong because Clients live inside the Host process, not inside the Server process — the Server is a separate entity that the Client connects to. D is wrong because Clients are not shared across Hosts; each Host owns its own set of dedicated Clients."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer is integrating MCP into a custom chat application. Their app needs to connect to three different MCP servers: a filesystem server, a database server, and a weather API server. How many MCP clients should the host application create?",
+    "opts": [
+      "One client that connects to all three servers through a single multiplexed transport connection",
+      "Three clients — one for each server — because every MCP client maintains a 1:1 connection with exactly one server",
+      "One client per active user session, with the client dynamically routing requests to the appropriate server based on the tool being called",
+      "The number depends on the transport type — stdio servers can share one client, but HTTP servers each require their own dedicated client"
+    ],
+    "ans": 1,
+    "expl": "The MCP spec mandates a 1:1 Client-to-Server relationship regardless of transport type — three servers means three clients, each with its own dedicated transport connection and initialization handshake. A is wrong because MCP has no multiplexing concept at the client layer; each client manages exactly one server connection, not a shared channel to multiple servers. C is wrong because clients are created per server at configuration time, not per user session, and routing is the Host's responsibility, not a client-level concern. D is wrong because the 1:1 rule applies equally to stdio and Streamable HTTP — the transport type does not change client cardinality."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "An MCP server exposes an `execute_sql_query` capability. The model decides when to call it, provides SQL parameters, and the server runs the query and returns results. Which MCP primitive does this represent?",
+    "opts": [
+      "A Resource — because the capability provides access to database data that the model reads at application-controlled times",
+      "A Prompt — because the server is injecting the query results as templated context into the model's conversation",
+      "A Tool — because it represents a model-controlled, executable function that the model invokes with parameters and receives dynamic, computed results",
+      "A Notification — because the server pushes query results to the model whenever database changes occur"
+    ],
+    "ans": 2,
+    "expl": "Tools are the MCP primitive for model-controlled, executable functions — the model decides when to invoke them, supplies parameters, and receives dynamic computed results, which matches exactly how `execute_sql_query` behaves. A is wrong because Resources are application-controlled and read-only; the application (not the model) decides which resource to expose, and the data is not computed on demand with model-supplied parameters. B is wrong because Prompts are server-defined, user-selectable templates that are chosen before the model runs, not dynamically invoked functions that the model calls mid-conversation. D is wrong because Notifications are one-way signals from server to client about state changes; they do not carry query results and are not a primitive the model invokes."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "Your application lets users browse a file tree. When a user clicks a file, you want the AI model to be able to read its contents. Which MCP primitive should you expose for this?",
+    "opts": [
+      "A Tool named `read_file` — because reading a file is an action that the model must actively execute by calling a function",
+      "A Resource — because the file's contents are application-controlled, read-only data that the application decides to expose, and the model accesses them without choosing which specific file to read",
+      "A Prompt template with a `{fileContent}` placeholder — so the file content is always injected as conversation context before the model responds",
+      "A Capability declaration — because file reading is an implicit server capability that the client must negotiate during initialization"
+    ],
+    "ans": 1,
+    "expl": "Resources represent application-controlled, read-only data — the user click (not the model) triggers the selection, the application decides which file to expose, and the model accesses its content as provided context, matching the Resource primitive exactly. A is wrong because a Tool would make the model responsible for deciding which file to read and when — that control belongs to the user and application here, not the model. C is wrong because a Prompt template is a server-defined template the user selects before the conversation; it is not the right primitive for exposing dynamic file content selected at runtime by a user action. D is wrong because Capability declarations are part of the initialization handshake between client and server and do not represent data or actions accessible during a session."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer defines conversation starters like \"Summarize this meeting\" and \"Draft an email response\" that include dynamic information from the current context. Which MCP primitive best fits this use case?",
+    "opts": [
+      "Tools — because each conversation starter triggers a specific server-side function to generate a response",
+      "Resources — because conversation starters are static text blocks served as read-only data from the server",
+      "Prompts — because they are server-defined, user-selectable templates that include dynamic context and are explicitly chosen by the user before being sent to the model",
+      "Sampling requests — because the server needs to generate completions from the model based on the conversation starter text"
+    ],
+    "ans": 2,
+    "expl": "Prompts are the MCP primitive for server-defined, user-selectable templates that can include dynamic context injected at selection time — exactly what \"Summarize this meeting\" and \"Draft an email response\" are. A is wrong because Tools are model-invoked functions for executing actions; conversation starters are user-selected templates, not functions the model decides to call. B is wrong because Resources are application-controlled data blobs accessed as read-only context; they are not templates that structure how the user starts a conversation. D is wrong because Sampling requests are how MCP servers ask the host/model to generate a completion on the server's behalf — the opposite direction of what a conversation starter needs."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "What is the Host application's primary responsibility regarding MCP clients?",
+    "opts": [
+      "The Host directly encodes and decodes JSON-RPC messages for all server communication, bypassing the client layer entirely",
+      "The Host manages the lifecycle of multiple clients, creates one client per configured server, and orchestrates which client receives which user intent based on the current conversation",
+      "The Host serves as a reverse proxy, forwarding MCP messages from the AI model to remote servers and caching responses for subsequent requests",
+      "The Host introspects each server's source code to generate appropriate tool definitions, eliminating the need for servers to self-describe"
+    ],
+    "ans": 1,
+    "expl": "The Host owns the user experience and is responsible for reading server configurations, creating and destroying Clients (one per configured Server), and deciding which Client should handle a given user request — Clients handle the actual transport and protocol mechanics. A is wrong because JSON-RPC encoding is the Client's responsibility; the Host operates at a higher orchestration level and does not bypass the Client layer. C is wrong because the Host is not a reverse proxy or caching layer — it creates discrete Clients that each own their own direct connection to a single Server. D is wrong because Servers self-describe their tools via `tools/list` during the session; the Host never reads server source code."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "An MCP host application crashes while clients are mid-conversation with their respective servers. When the host process restarts, what happens to the client-server connections?",
+    "opts": [
+      "All connections automatically resume — MCP servers maintain persistent state independently of the host process lifecycle",
+      "All previous client-server connections are terminated, and the host must create new clients and re-initialize each server connection from scratch",
+      "Only Streamable HTTP connections survive the crash; stdio-based connections are permanently lost and cannot be recovered",
+      "Each server caches its session state and restores the conversation context when the host reconnects, preserving tool call history"
+    ],
+    "ans": 1,
+    "expl": "MCP Clients live inside the Host process — when the Host crashes, every Client and its associated transport connection is destroyed simultaneously, and the Host must re-create every Client, re-establish every transport, and complete the full initialization handshake for each Server from scratch on restart. A is wrong because MCP servers do not maintain independent persistent state tied to a disconnected client; session state is tied to the active transport connection, which is gone when the Host crashes. C is wrong because both stdio and Streamable HTTP connections are managed by Client objects inside the Host process — both are lost when the Host crashes; there is no transport-specific survival rule. D is wrong because MCP specifies no server-side session caching or reconnection protocol; servers do not restore conversation context for a new connection."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer is building a local-first MCP server for static code analysis. The server runs as a subprocess and should communicate without any network stack. Which transport should they use?",
+    "opts": [
+      "Streamable HTTP on localhost — because it still avoids remote network configuration while providing the same API surface",
+      "stdio — because it communicates over standard input/output streams of a subprocess, requires zero network configuration, and involves no ports or TLS",
+      "WebSocket transport — because it enables persistent bidirectional communication between the host process and the server process",
+      "Unix domain sockets — because they are the standard inter-process communication mechanism defined by the MCP specification"
+    ],
+    "ans": 1,
+    "expl": "stdio transport communicates exclusively over the stdin/stdout streams of a locally spawned subprocess — it requires no ports, no TLS certificates, and no network stack at all, making it the perfect fit for a local-first subprocess server. A is wrong because even localhost HTTP still requires binding a TCP port and initializing a network stack, violating the \"without any network stack\" requirement. C is wrong because WebSockets require an HTTP upgrade handshake and a TCP port, which is a network stack dependency; additionally, WebSockets are not a standard MCP transport defined in the spec. D is wrong because Unix domain sockets are not a transport type defined by the MCP specification — only stdio and Streamable HTTP are standard MCP transports."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A team wants to deploy their MCP server as a cloud service so remote users can access it. The server also needs to authenticate incoming connections. Which transport should they use?",
+    "opts": [
+      "stdio transport with SSH tunneling — because the SSH layer provides both remote access and authentication without changing the MCP transport",
+      "Streamable HTTP transport — because it operates over standard HTTP(S), supports bearer token and other HTTP authentication mechanisms, and is designed for remote MCP server access",
+      "Both stdio and Streamable HTTP simultaneously — stdio for local sessions and HTTP for remote sessions, with automatic transport failover",
+      "gRPC transport — because MCP's protocol buffer layer enables authentication middleware that stdio and HTTP lack"
+    ],
+    "ans": 1,
+    "expl": "Streamable HTTP is the MCP transport designed for remote deployment — it operates over standard HTTPS, supports bearer tokens and other HTTP authentication headers natively, and can be hosted as a standard cloud service behind a load balancer or API gateway. A is wrong because stdio is inherently a local subprocess transport that communicates via stdin/stdout; SSH tunneling is an external wrapper, not a change to the MCP transport, and the underlying stdio transport still cannot accept independent remote connections. C is wrong because an MCP server exposes one transport per connection endpoint, not simultaneous dual-transport with failover; that is not a concept in the MCP specification. D is wrong because gRPC is not a transport defined by the MCP specification — only stdio and Streamable HTTP are standard MCP transports."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer deploys a local MCP server using stdio transport and tests it successfully. They then try to access that same server from a different machine on the same network and it fails. What is the reason?",
+    "opts": [
+      "stdio transport communicates through stdin/stdout of a local subprocess — it has no network interface, no listening port, and cannot accept connections from any remote machine",
+      "The MCP protocol mandates TLS encryption for all cross-machine communication, and stdio does not support TLS certificate configuration",
+      "stdio transport only works on Linux because Windows and macOS handle subprocess standard streams differently at the operating system level",
+      "Remote access over stdio is disabled by default and requires explicitly setting the `\"allowRemote\": true` flag in the MCP server configuration"
+    ],
+    "ans": 0,
+    "expl": "stdio transport is architected around subprocess stdin/stdout streams — there is no socket, no listening port, and no network interface involved, so the server is physically incapable of receiving a connection from any machine other than the one that spawned the subprocess. B is wrong because the failure is not about TLS — stdio never reaches the network layer at all; TLS configuration is irrelevant when there is no network socket to encrypt. C is wrong because stdio transport works on Linux, macOS, and Windows; all modern operating systems provide subprocess standard streams, and the MCP spec makes no OS-specific exclusions. D is wrong because there is no `allowRemote` configuration flag in the MCP specification; stdio transport has no remote access mode at all, regardless of configuration."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "What is the correct sequence when an MCP client first establishes a connection with a server?",
+    "opts": [
+      "The client sends `tools/list` immediately, the server responds with available tools, and the connection is implicitly established with that first exchange",
+      "The client sends an `initialize` request carrying its capabilities and protocol version, the server responds with its own capabilities, then the client sends `notifications/initialized` — only after this handshake can the client list and call tools",
+      "The server sends a `greeting` notification upon connection, the client acknowledges it with a `ready` message, then the server pushes its complete tool and resource definitions to the client",
+      "The client opens the transport, the server immediately begins streaming available tools and resources through server-initiated messages, and no explicit initialization step is required"
+    ],
+    "ans": 1,
+    "expl": "The MCP initialization lifecycle is strictly sequenced: client sends `initialize` with its protocol version and capabilities, server responds with its own capabilities, client confirms with `notifications/initialized`, and only then can either side exchange `tools/list`, `resources/list`, or tool calls — requests sent before this handshake completes are rejected by spec. A is wrong because sending `tools/list` before `initialize` violates the MCP lifecycle; the server must reject requests from an uninitialized connection. C is wrong because there is no `greeting` notification or `ready` message in the MCP specification; the server does not push capabilities — the client must request them. D is wrong because MCP requires an explicit initialization handshake before any capability exchange; servers do not spontaneously stream tool definitions on connection."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "During MCP initialization, a client declares support for the \"roots\" capability. The server does not support this capability. What is the outcome?",
+    "opts": [
+      "The server rejects the connection — capability mismatches are fatal initialization errors in the MCP handshake",
+      "The server ignores the unsupported capability and establishes the connection normally — only capabilities that both sides support are active for the session",
+      "The server attempts to implement roots support dynamically by loading a plugin that matches the capability declaration",
+      "The client automatically downgrades its protocol version to match the server's narrower capability set before retrying"
+    ],
+    "ans": 1,
+    "expl": "MCP capability negotiation is additive and non-destructive — the effective capability set for a session is the intersection of what both sides declared, and any capability declared by only one party is simply inactive; the connection proceeds normally. A is wrong because the MCP spec explicitly does not treat capability mismatches as fatal errors; unrecognized capabilities are silently ignored by the party that does not support them. C is wrong because MCP has no dynamic plugin loading mechanism for capability fulfillment; server capabilities are fixed at startup, not dynamically acquired during handshake. D is wrong because the client does not retry with a downgraded protocol version due to capability mismatches; protocol version negotiation and capability negotiation are separate concerns, and capability differences do not trigger a version downgrade."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "After the initialization handshake completes successfully, an MCP client needs to discover what tools the server provides. Which request should it send?",
+    "opts": [
+      "`tools/discover` — a standard MCP method that returns all available tool metadata including names, descriptions, and parameter schemas",
+      "`tools/list` — which returns an array of tool definitions, each with a name, description, and JSON Schema input schema describing expected parameters",
+      "`server/describe` — a unified method that returns the complete server manifest including tools, resources, and prompts in a single response",
+      "`capabilities/query` — because tool discovery is part of the capability negotiation phase and must be completed before tools can be called"
+    ],
+    "ans": 1,
+    "expl": "`tools/list` is the MCP-specified method for tool discovery post-initialization — it returns an array of tool objects each containing a name, description, and JSON Schema `inputSchema` that the client and model use to understand how to call the tool. A is wrong because `tools/discover` does not exist in the MCP specification; the correct method name is `tools/list`. C is wrong because `server/describe` does not exist in the MCP specification; tools, resources, and prompts are discovered through separate `tools/list`, `resources/list`, and `prompts/list` requests, not a unified manifest call. D is wrong because `capabilities/query` does not exist in the MCP specification; capability negotiation happens during `initialize`, not as a separate discovery request after initialization."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "What format does MCP use for encoding all messages — requests, responses, and errors — exchanged between clients and servers?",
+    "opts": [
+      "Protocol Buffers (protobuf) — because MCP needs efficient binary encoding with strict schema validation for large tool call results",
+      "JSON-RPC 2.0 — a lightweight remote procedure call protocol that uses JSON for structured request/response messaging with standardized error codes",
+      "GraphQL — because MCP needs flexible queries that let clients request only the specific tool fields they need without over-fetching data",
+      "MessagePack — a compact binary serialization format that MCP uses to minimize transport overhead for high-throughput tool calls"
+    ],
+    "ans": 1,
+    "expl": "MCP builds on JSON-RPC 2.0 for all message encoding — requests carry `method`, `params`, and `id`; responses carry `result`; errors carry a standardized `code`, `message`, and optional `data` — the same protocol foundation used by the Language Server Protocol. A is wrong because MCP uses human-readable JSON, not binary Protocol Buffers; the spec makes no use of protobuf schemas or binary wire encoding. C is wrong because GraphQL is a query language for APIs with its own schema and resolver model; MCP uses simple JSON-RPC method calls, not GraphQL queries or mutations. D is wrong because MessagePack is a binary serialization format not used by MCP; all MCP messages are valid JSON text, not compact binary."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "An MCP client specifies protocol version \"2024-11-05\" during initialization. The server supports version \"2025-03-26\" but not \"2024-11-05\" directly. What happens?",
+    "opts": [
+      "The connection succeeds — the server responds with its own version and operates in a mode compatible with the client's declared version",
+      "The server forces the client to upgrade by responding with an error that includes the minimum supported protocol version",
+      "The connection is rejected because the protocol version must match exactly — MCP does not support version negotiation across different dates",
+      "The client automatically probes for compatibility by retrying the initialize request with progressively newer version strings until the server accepts one"
+    ],
+    "ans": 0,
+    "expl": "MCP protocol versioning is designed for forward compatibility — servers respond with their own supported version and adapt their behavior to remain compatible with older clients; the connection succeeds as long as the server can interoperate with the declared client version. B is wrong because the MCP spec does not define an error-based upgrade flow; servers do not respond with an error demanding a version upgrade during normal version negotiation. C is wrong because MCP explicitly does not require exact version matching — the protocol is designed to be forward-evolvable with older clients able to connect to newer servers. D is wrong because the MCP spec defines no automatic retry-with-probe behavior; the client sends its version once in `initialize` and the server handles compatibility."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer's MCP stdio server writes debug log messages to stdout between JSON-RPC responses. Why does this break communication with the client?",
+    "opts": [
+      "stdout is the transport channel for JSON-RPC messages in stdio mode — any non-JSON output intermixed with protocol messages corrupts the message stream, and the client cannot parse the combined output as valid JSON-RPC",
+      "stdout output is subject to operating system rate limits, and excessive log messages exhaust the I/O quota needed for actual MCP protocol responses",
+      "The MCP client interprets every line written to stdout as a tool call result, causing phantom tool executions that produce incorrect conversation state",
+      "stdout is reserved for MCP protocol-level heartbeat pings, and debugging output interferes with the keep-alive timing mechanism"
+    ],
+    "ans": 0,
+    "expl": "In stdio transport, stdout is the exclusive channel for JSON-RPC messages — the client reads stdout and attempts to parse every byte as JSON-RPC; any non-JSON debug text interleaved between protocol messages produces unparseable output and breaks the framing, causing the client to fail. All server-side logging must go to stderr, which is separate from the MCP transport channel. B is wrong because operating systems do not impose I/O rate limits on stdout in a way that would affect MCP; the problem is parsing corruption, not bandwidth exhaustion. C is wrong because the client does not interpret arbitrary stdout lines as tool call results — it expects valid JSON-RPC message structure; malformed bytes produce parse errors, not phantom tool executions. D is wrong because MCP stdio transport has no heartbeat or keep-alive mechanism; stdout carries JSON-RPC request/response messages only, not protocol-level pings."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer needs to inspect the JSON-RPC messages being exchanged between their MCP client and a Streamable HTTP server during development. Which tool should they use?",
+    "opts": [
+      "The MCP Inspector — a dedicated debugging proxy that sits between client and server, displaying every JSON-RPC request and response with formatted views and allowing interactive testing of individual messages",
+      "Chrome DevTools Network tab — because Streamable HTTP operates over standard HTTP, all MCP traffic appears as regular HTTP requests in browser developer tools",
+      "Wireshark — because MCP uses a custom binary framing layer on top of HTTP that requires packet-level protocol analysis",
+      "The `mcp debug --trace` CLI command built into every MCP SDK that automatically captures and pretty-prints all protocol traffic"
+    ],
+    "ans": 0,
+    "expl": "The MCP Inspector is a purpose-built debugging proxy that understands MCP message semantics — it displays the initialization handshake, capability negotiation, tool definitions, and individual tool call request/response pairs with formatted views and supports interactive testing of messages directly. B is wrong because while Chrome DevTools can show raw HTTP requests, it has no understanding of MCP message semantics, cannot display capability negotiation, and does not provide MCP-aware formatting or interactive tool testing. C is wrong because MCP does not use a custom binary framing layer; all messages are JSON-RPC text over standard HTTP, and Wireshark packet analysis provides far more low-level detail than necessary for MCP debugging. D is wrong because there is no `mcp debug --trace` command built into MCP SDKs; the MCP Inspector is the official debugging tool."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer configures an MCP server with a relative path: `./servers/my-mcp-server`. What is this path resolved relative to?",
+    "opts": [
+      "The current working directory of the Host application process at the moment the server subprocess is spawned",
+      "The directory containing the MCP configuration file (such as `claude_desktop_config.json`), regardless of where the Host process was started from",
+      "The user's home directory — MCP always resolves relative paths starting from `~/` for portability across different system configurations",
+      "The system's `/usr/local/bin` directory, which is the standard installation location for all MCP server executables"
+    ],
+    "ans": 0,
+    "expl": "Relative paths in MCP configuration are resolved against the Host application's current working directory at the time it spawns the server subprocess — which is why absolute paths are recommended in production to avoid resolution differences between launch environments. B is wrong because the MCP spec does not resolve relative paths relative to the config file's directory; resolution is based on the Host process's working directory, which may differ from where the config file lives. C is wrong because MCP does not canonicalize relative paths against the user's home directory; `~/` expansion is a shell convention, not an MCP path resolution rule. D is wrong because `/usr/local/bin` is a Unix system binary directory with no special significance in MCP path resolution; MCP servers can live anywhere and are found relative to the Host's working directory."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer's MCP server requires an API key to call a third-party weather service. What is the recommended approach for providing this key to the server at runtime?",
+    "opts": [
+      "Hard-code the API key directly in the server's source code so it is always available regardless of how the server is launched",
+      "Pass the API key through environment variables configured in the `env` field of the MCP server's configuration entry — the Host sets these variables before spawning the server process",
+      "Embed the API key as a query parameter in the server's connection URL string within the configuration file",
+      "Send the API key in the `initialize` request as a custom capability so the server can authenticate before serving any tool calls"
+    ],
+    "ans": 1,
+    "expl": "The MCP `env` configuration field lets the Host inject environment variables into the server subprocess before it starts — the actual secret value lives in a `.env` file outside version control, keeping secrets out of both source code and committed configuration. A is wrong because hard-coding secrets in source code violates basic secret hygiene; the key would be exposed in version control and any deployment artifact, and rotation requires a code change. C is wrong because embedding the API key in a connection URL string exposes it in the configuration file, which may be committed to version control, visible in process listings, and logged by the Host. D is wrong because the MCP `initialize` request is for protocol version and capability negotiation, not credential exchange; there is no custom capability mechanism for injecting credentials during handshake."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "How do MCP Apps fundamentally differ from traditional web applications in their architecture and data flow?",
+    "opts": [
+      "MCP Apps run entirely on the server with no client-side rendering, whereas web apps use progressive enhancement for client-side interactivity",
+      "MCP Apps support bi-directional data flow — both host and server can initiate communication — and they preserve conversation context across interactions, unlike traditional web apps which follow a stateless request-response model",
+      "MCP Apps compile to WebAssembly for sandboxed client-side execution, while web apps are built with JavaScript and HTML",
+      "MCP Apps bypass HTTP entirely, using a proprietary WebTransport protocol that reduces latency compared to traditional REST endpoints"
+    ],
+    "ans": 1,
+    "expl": "MCP Apps maintain a stateful, bidirectional connection where servers can push notifications to the host and conversation context persists across tool calls — fundamentally different from the stateless request-response cycle of traditional web apps where each HTTP request is independent. A is wrong because MCP Apps are not about server-side rendering versus client-side rendering; MCP is a protocol layer for AI tool integration, not a web rendering architecture. C is wrong because MCP Apps do not compile to WebAssembly; MCP servers are regular processes communicating over stdio or HTTP, and WebAssembly sandboxing is not part of the MCP specification. D is wrong because MCP uses standard HTTP for Streamable HTTP transport, not a proprietary WebTransport protocol; Streamable HTTP operates over plain HTTPS."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "How should an MCP App isolate third-party MCP server code for security?",
+    "opts": [
+      "Third-party MCP servers run as separate operating system processes, each with restricted permissions — similar to how mobile platforms sandbox individual apps — providing process-level isolation that prevents a compromised server from accessing the host's or other servers' data",
+      "All MCP server code runs in the same Node.js event loop with namespace-based isolation, where each server's functions are registered under a unique prefix to prevent collisions",
+      "Third-party MCP servers execute within sandboxed iframes in the browser, leveraging web platform origin-based security boundaries for isolation",
+      "The JSON-RPC protocol layer provides built-in sandboxing — each server's methods are automatically scoped to its connection ID without additional process isolation"
+    ],
+    "ans": 0,
+    "expl": "Each MCP server runs as a separate OS process with restricted filesystem access and limited network permissions — process-level boundaries mean a compromised server cannot read the Host's memory, access other servers' data, or escalate privileges beyond its own process space. B is wrong because running all server code in a shared Node.js event loop provides only namespace separation, not security isolation; a malicious server could access shared memory, override globals, or interfere with other servers in the same process. C is wrong because MCP servers are not browser-based and do not execute in iframes; they are standalone processes communicating over stdio or HTTP, and web origin isolation does not apply. D is wrong because JSON-RPC is a message encoding format with no sandboxing capability; connection ID scoping of methods is a routing concern, not a security isolation mechanism — it does nothing to prevent a server from making OS-level calls."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A Python developer sees instructions to run an MCP server using `uv run main.py`. What is `uv` in this context?",
+    "opts": [
+      "A testing framework specifically designed for validating MCP server implementations against the protocol specification compliance suite",
+      "A fast Python package and project manager written in Rust that replaces pip, pip-tools, and virtualenv — `uv run` auto-resolves and installs dependencies before executing the script, similar to how `npx` works for Node.js",
+      "A virtual environment wrapper that provides isolated Python runtimes but relies on pip for actual package management and resolution",
+      "A MCP-specific SDK that translates Python type annotations into MCP tool definitions automatically, generating protocol-compliant server scaffolding"
+    ],
+    "ans": 1,
+    "expl": "`uv` is a Rust-based Python package and project manager that replaces pip, pip-tools, virtualenv, and poetry — `uv run` automatically resolves and installs dependencies declared in `pyproject.toml` before executing the script, providing zero-setup execution similar to `npx` for Node.js. A is wrong because `uv` is a general-purpose Python toolchain, not an MCP-specific testing or compliance framework; it has no knowledge of the MCP protocol specification. C is wrong because `uv` does not rely on pip for package resolution; it has its own high-performance dependency resolver written in Rust that is designed to replace pip entirely. D is wrong because `uv` is not an MCP SDK and has no awareness of MCP tool definitions or protocol scaffolding; the MCP Python SDK is a separate library that `uv` can install like any other package."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer is building an MCP client using the Python SDK. They need to manage async resources — server connections, transport setup, and session cleanup — ensuring everything is properly closed even if an exception occurs during setup. Which pattern is recommended?",
+    "opts": [
+      "Using nested try/finally blocks to explicitly close each resource individually in reverse order of acquisition",
+      "Using `AsyncExitStack` — a context manager that collects async cleanup callbacks as resources are acquired and ensures every resource is properly closed even when exceptions occur, commonly paired with `connect_to_server` and related context managers",
+      "Using `atexit.register()` to schedule cleanup callbacks that execute when the Python interpreter process terminates",
+      "Letting Python's garbage collector handle resource cleanup automatically, since MCP connection objects implement `__del__` finalizers for safe teardown"
+    ],
+    "ans": 1,
+    "expl": "`AsyncExitStack` is the MCP Python SDK's recommended pattern for managing multiple async resources — it dynamically collects cleanup callbacks as each context manager (transport, session, connection) is entered, and guarantees correct reverse-order teardown even when an exception occurs mid-setup. A is wrong because nested try/finally blocks for multiple async resources are error-prone; each additional resource requires another nesting level, and a bug in one finally block can suppress exceptions from others — `AsyncExitStack` handles this correctly by design. C is wrong because `atexit.register()` runs callbacks only when the Python interpreter exits normally; it does not handle exceptions during setup, does not work with async cleanup coroutines, and fires far too late to properly close active network connections. D is wrong because `__del__` finalizers are not guaranteed to run promptly or at all in CPython due to reference cycles, and they cannot await async cleanup coroutines — relying on GC for MCP connection teardown leads to resource leaks."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "An MCP server's available tools change at runtime — a new tool is added while clients are connected. How does the server inform connected clients of this change?",
+    "opts": [
+      "The server sends a `notifications/tools/list_changed` notification, signaling clients to re-fetch the tool list by sending a new `tools/list` request to get the updated definitions",
+      "The server pushes the complete updated tool definitions directly in the notification payload, and the client processes the new list without needing a separate re-fetch request",
+      "The server disconnects all clients and forces a full re-initialization, which causes each client to send a fresh `tools/list` during the new handshake cycle",
+      "The server embeds the updated tool list as metadata in the response to whichever tool call the client sends next, piggybacking on existing traffic"
+    ],
+    "ans": 0,
+    "expl": "MCP notifications are one-way fire-and-forget signals that carry no data payload — `notifications/tools/list_changed` tells connected clients that the tool list has changed, and each client must then issue a fresh `tools/list` request to retrieve the updated definitions. B is wrong because MCP notifications carry no response expectation and typically contain minimal or no payload; the spec does not define a notification that pushes complete tool definitions — the client must re-fetch via `tools/list`. C is wrong because MCP has no mechanism for a server to force client disconnection and re-initialization in response to tool changes; doing so would disrupt ongoing conversations and is not part of the notification contract. D is wrong because MCP responses carry only the result of the method that was called; there is no piggyback metadata mechanism for injecting updated tool definitions into unrelated tool call responses."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A client receives a `notifications/resources/list_changed` message from an MCP server. Which statement about handling this notification is correct?",
+    "opts": [
+      "The client must send an acknowledgment response within five seconds, or the server retransmits the notification assuming it was lost in transit",
+      "The notification is fire-and-forget with no response expected from the client, but it is only valid if the server declared the corresponding notification capability during initialization",
+      "The notification payload always includes a complete diff of which resources were added, modified, and removed, so the client can update its cache without a re-fetch",
+      "The client's MCP SDK automatically re-fetches resources upon receiving this notification — no additional client-side code is required"
+    ],
+    "ans": 1,
+    "expl": "MCP notifications are unidirectional fire-and-forget messages — no acknowledgment is defined in the spec and no retransmission occurs; additionally, a server may only send notification types it declared during the `initialize` handshake, so receiving this notification confirms the server declared that capability. A is wrong because the JSON-RPC 2.0 notification type (no `id` field) explicitly does not expect a response; the MCP spec defines no acknowledgment requirement and no retransmit-on-silence behavior for notifications. C is wrong because `notifications/resources/list_changed` carries no diff payload in the MCP specification; it is a minimal signal that the list changed, and the client must issue a fresh `resources/list` request to learn what changed. D is wrong because the MCP SDK does not automatically re-fetch resources on this notification; the application code must register a handler and explicitly call `resources/list` to retrieve the updated state."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "An MCP client calls `tools/call` with parameter `{\"file\": \"report.pdf\"}`, but the tool's input schema requires `\"filePath\"` not `\"file\"`. The server returns an error with code `-32602`. What does this error code indicate?",
+    "opts": [
+      "The server encountered an internal error while executing the tool function — this is a server-side bug in the tool implementation",
+      "Invalid params — the request parameters do not match the tool's declared input schema, and the error indicates the client sent malformed or incorrectly named parameters",
+      "The requested tool was not found on the server — the tool may have been removed or renamed since the client last called `tools/list`",
+      "The request exceeded the server's configured execution timeout — the tool took too long to begin processing the malformed parameters"
+    ],
+    "ans": 1,
+    "expl": "JSON-RPC 2.0 error code `-32602` means \"Invalid params\" — the server received the request but the parameters `{\"file\": \"report.pdf\"}` do not conform to the tool's declared input schema, which requires `filePath`; this is a client-side parameter error indicating the call was structurally malformed. A is wrong because a server-side internal error is signaled by code `-32603` (\"Internal error\"), not `-32602`; the error here is in the client's parameter structure, not in the tool's execution logic. C is wrong because a missing or unknown method is signaled by code `-32601` (\"Method not found\"); `-32602` specifically indicates that the method was found but the supplied parameters are invalid. D is wrong because execution timeouts are implementation-specific errors typically reported with application-level error codes above `-32000`, not the standard `-32602` parameter validation code."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "A developer is building an MCP client that logs server responses for debugging purposes. Which security practice is most important when implementing this logging?",
+    "opts": [
+      "Log every server response at DEBUG level so that developers can always trace the complete data flow for troubleshooting production issues",
+      "Sanitize or redact sensitive data from server responses before writing to logs — server responses may contain user data, API keys in transit, or proprietary information that should never appear in log files or monitoring systems",
+      "Disable all logging in production environments entirely — debugging information should only be collected and retained during local development",
+      "Encrypt each log entry with the originating server's public key so that only the server operator can decrypt and read the debug output"
+    ],
+    "ans": 1,
+    "expl": "MCP tool call results may contain user PII, credentials, or proprietary business data — sanitizing or redacting this before writing to any logging sink prevents sensitive data from appearing in log files, error tracking platforms, and monitoring dashboards where it would be broadly accessible. A is wrong because logging every raw server response at DEBUG level in production creates a data exposure risk; tool results frequently contain user-specific data that should never be stored verbatim in log infrastructure accessible to operations teams. C is wrong because disabling all production logging eliminates the observability needed to detect incidents, diagnose production failures, and audit security events — the solution is selective redaction, not complete logging removal. D is wrong because encrypting logs with the server's public key makes the logs unreadable to the client operator who needs to debug their own system; log encryption, if used, should protect data at rest for the logging system's owner, not make logs inaccessible to the developer."
+  },
+  {
+    "source": "MCP & Tool Design",
+    "prompt": "An MCP client receives a tool call result from a server that does not match the tool's declared output schema — extra fields are present and required fields are missing. What is the safest client-side behavior?",
+    "opts": [
+      "Trust the server's output as-is and forward it to the model — the model is designed to handle unstructured and unexpected data gracefully",
+      "Validate server responses against the declared output schema, and if validation fails, reject the result with a clear error rather than passing potentially malformed or unexpected data to the AI model",
+      "Silently transform the output to fit the schema by stripping extra fields and inserting default values for any missing required fields",
+      "Immediately disconnect from the server and permanently blacklist it — any schema mismatch indicates a compromised or malicious server"
+    ],
+    "ans": 1,
+    "expl": "Validating server responses against declared output schemas and surfacing clear errors on mismatch is the correct practice — passing structurally unexpected data to the AI model can cause hallucination, incorrect reasoning, or data leakage that is hard to trace back to the malformed tool result. A is wrong because models are not reliably resilient to structurally malformed inputs; unexpected data shapes can cause the model to misinterpret fields, make incorrect decisions, or produce responses that appear plausible but are based on garbage data. C is wrong because silently transforming output masks real bugs in the server implementation and inserts fabricated values for missing required fields, potentially causing the model to reason on data that was never actually returned by the server. D is wrong because a schema mismatch is more likely a server bug or version skew than a security compromise; immediately disconnecting and blacklisting is a disproportionate response that would cause unnecessary service disruption for what is typically a development-time integration error."
+  }
+];
+
+var MODULE_NAME = "MCP & Tool Design";
+var TAGS = ["MCP Protocol", "Host/Client/Server", "Transport", "Initialization", "Tool Exposure", "Security"];
+var PASS_STORAGE_KEY = 'cca_mcp_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_mcp_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

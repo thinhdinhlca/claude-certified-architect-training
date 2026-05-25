@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Hooks & Workflow Control Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #c084fc;
+    --accent2: #9333ea;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You need to ensure formatting always runs after file edits, regardless of model behavior. Best hook pattern?",
+    "opts": [
+      "`UserPromptSubmit` with prompt reminder",
+      "`PostToolUse` matcher `Edit|Write` + formatter command",
+      "`Stop` hook with manual checklist",
+      "`Notification` hook"
+    ],
+    "ans": 1,
+    "expl": "PostToolUse with a matcher targeting Edit and Write fires a deterministic command hook every time either tool completes, guaranteeing the formatter runs regardless of what the model decides to do next. A is wrong because UserPromptSubmit fires before Claude sees the user message, not after a file edit, so it cannot guarantee post-edit formatting and relies on the model complying with a prompt reminder. C is wrong because Stop fires at turn end, not after each individual file edit, so multiple edits in one turn would only trigger one formatter run at the end. D is wrong because Notification fires when Claude sends a notification (idle prompts, permission prompts), which is unrelated to file edit events."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "A teammate asks what stream command hooks read input from. Correct answer?",
+    "opts": [
+      "`stdout`",
+      "`stderr`",
+      "`stdin`",
+      "HTTP response body"
+    ],
+    "ans": 2,
+    "expl": "Command hooks receive their input payload (the hook context JSON) on stdin, allowing the shell script or binary to read tool name, arguments, and other event data from standard input. A is wrong because stdout is how a command hook sends its response back to Claude Code, not how it receives input. B is wrong because stderr is used for error output from the hook process and is not the input channel. D is wrong because HTTP response body is the response mechanism for http-type hooks, not for command-type hooks."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You want to deny destructive Bash commands before execution. Best event?",
+    "opts": [
+      "`PostToolUse`",
+      "`PreToolUse`",
+      "`Stop`",
+      "`SessionEnd`"
+    ],
+    "ans": 1,
+    "expl": "PreToolUse fires before the tool executes, giving the hook a chance to return a permissionDecision of deny to block the command entirely before any harm is done. A is wrong because PostToolUse fires after the tool has already executed, so by the time the hook runs the destructive command has already completed and cannot be undone. C is wrong because Stop fires at the end of a turn after all tool calls have already run, making it too late to block any specific tool execution. D is wrong because SessionEnd fires when the session is ending, which is far too late to intercept individual tool calls during the session."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Why use `matcher: \"Bash\"` and `if: \"Bash(rm *)\"` together?",
+    "opts": [
+      "Required by JSON parser",
+      "`matcher` is regex only, `if` is exact only",
+      "Coarse filter first, precise argument-level filter second",
+      "`if` replaces `matcher`"
+    ],
+    "ans": 2,
+    "expl": "The matcher field performs a fast, coarse filter on the tool name so the hook only loads for Bash events at all, while the if field performs a precise argument-level check that can inspect the full command string including parameters like \"rm *\". This two-stage approach reduces unnecessary hook invocations while providing fine-grained control. A is wrong because there is no JSON parser requirement driving this pattern — both fields are optional and independent. B is wrong because both fields support pattern matching; the distinction is not regex-vs-exact but rather tool-name scope vs. full-command expression scope. D is wrong because if does not replace matcher; matcher scopes which events load the hook at all, while if acts as an additional condition within those events."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You need to auto-approve only `ExitPlanMode` permission prompts. Which event?",
+    "opts": [
+      "`PermissionRequest`",
+      "`PermissionDenied`",
+      "`UserPromptExpansion`",
+      "`StopFailure`"
+    ],
+    "ans": 0,
+    "expl": "PermissionRequest fires when Claude Code is about to display a permission prompt, and a hook can return a permissionDecision of allow with a matcher filtering for ExitPlanMode to auto-approve only that specific prompt type. B is wrong because PermissionDenied fires after a permission has already been denied and can signal retry, but cannot intercept and pre-approve a pending permission request. C is wrong because UserPromptExpansion fires when a user slash command is expanded into a prompt before Claude sees it, which is unrelated to permission prompt interception. D is wrong because StopFailure fires when a turn ends due to an API or execution error, not when a permission prompt is raised."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You changed `.envrc` and want Claude environment refreshed automatically. Best hook setup?",
+    "opts": [
+      "`SessionEnd` only",
+      "`CwdChanged` only",
+      "`SessionStart` + `CwdChanged` (+ optional `FileChanged` watch)",
+      "`PostCompact`"
+    ],
+    "ans": 2,
+    "expl": "SessionStart ensures the environment is loaded fresh at the beginning of every session, CwdChanged reloads it whenever the working directory changes (which may load a different .envrc), and an optional FileChanged watcher on .envrc can reload the environment immediately when that specific file is modified. A is wrong because SessionEnd fires when the session is terminating, which is too late to refresh the environment for the current session's remaining work. B is wrong because CwdChanged alone misses the initial load at session start, meaning the environment may not be set correctly for the first directory Claude works in. D is wrong because PostCompact fires after conversation history is compacted, which is unrelated to environment file changes."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "What does `UserPromptExpansion` fire on?",
+    "opts": [
+      "Any stop token",
+      "Tool failure only",
+      "User command expansion into a prompt before Claude sees it",
+      "MCP tool completion"
+    ],
+    "ans": 2,
+    "expl": "UserPromptExpansion fires when a user's slash command or shorthand is being expanded into the full prompt text, giving the hook an opportunity to inspect or modify the expanded content before it is passed to Claude. A is wrong because stop tokens trigger the Stop or StopFailure events, not UserPromptExpansion. B is wrong because tool failures trigger PostToolUse or related events, not UserPromptExpansion. D is wrong because MCP tool completion would fire PostToolUse events, not UserPromptExpansion."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You need a long-running background test after every edit without blocking the turn. Use:",
+    "opts": [
+      "`type: prompt` + `async: true`",
+      "`type: command` + `async: true`",
+      "`type: mcp_tool` + `async: true`",
+      "`type: http` + `decision: defer`"
+    ],
+    "ans": 1,
+    "expl": "The async: true flag is a feature of command-type hooks; setting it causes Claude Code to launch the command process and immediately continue the turn without waiting for the process to exit, making it ideal for long-running test suites that should not block the model. A is wrong because async: true is not a supported field for prompt-type hooks, which inject text into the conversation context and have different execution semantics. C is wrong because async: true is not a supported field for mcp_tool-type hooks; MCP tool hooks invoke a server-side tool and wait for a response. D is wrong because http-type hooks do not have a \"decision: defer\" field; the async pattern for non-blocking execution is specific to command hooks."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Can async hooks block a tool call with `permissionDecision: deny`?",
+    "opts": [
+      "Yes, always",
+      "Only on weekends",
+      "No, async cannot control already-proceeded action",
+      "Only for Bash"
+    ],
+    "ans": 2,
+    "expl": "When a hook runs asynchronously, Claude Code does not wait for its output before proceeding with the tool call. By the time an async hook finishes and returns a permissionDecision, the action has already been taken, so deny has no effect. A is wrong because an async hook's output is not read before the tool executes, so a deny decision arrives too late to block anything. B is wrong because hook behavior does not vary by day of the week; this is not a real constraint. D is wrong because the limitation applies to all tool types, not just Bash; async hooks cannot block any tool call regardless of the tool involved."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You need to trigger a webhook for compliance checks and include auth token from env. Best type?",
+    "opts": [
+      "`prompt`",
+      "`agent`",
+      "`http` with `headers` and `allowedEnvVars`",
+      "`mcp_tool` only"
+    ],
+    "ans": 2,
+    "expl": "The http hook type sends an HTTP POST to a specified URL and supports a headers field for setting authorization headers, as well as allowedEnvVars to safely interpolate environment variables (such as an auth token) into those headers without hardcoding secrets in the config file. A is wrong because prompt hooks inject text into the Claude conversation context and cannot make outbound HTTP calls to external webhooks. B is wrong because agent hooks invoke a sub-agent and are designed for judgment-heavy tasks, not for straightforward webhook delivery with auth headers. D is wrong because mcp_tool hooks call a tool on a connected MCP server, not an arbitrary external webhook endpoint."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "What happens if an HTTP hook returns non-2xx?",
+    "opts": [
+      "Session hard-stops",
+      "Tool call always denied",
+      "Non-blocking error; execution continues",
+      "Claude retries forever"
+    ],
+    "ans": 2,
+    "expl": "A non-2xx HTTP response from a hook is treated as a non-blocking error; Claude Code logs the failure and continues execution as if the hook had not fired, unless a valid 2xx response was returned with a blocking permissionDecision payload. A is wrong because a hook HTTP error does not terminate the session; only a permissionDecision of deny in a 2xx response can block execution. B is wrong because a non-2xx response carries no decision payload at all — the tool call is not denied, it proceeds normally. D is wrong because Claude Code does not retry failed HTTP hooks; it logs the error and moves on without retry logic."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You want to call an existing MCP server tool after `Write`. Best type?",
+    "opts": [
+      "`command`",
+      "`http`",
+      "`mcp_tool`",
+      "`prompt`"
+    ],
+    "ans": 2,
+    "expl": "The mcp_tool hook type is specifically designed to invoke a tool on a connected MCP server, allowing hooks to leverage the same server tools already available to Claude without spawning shell processes or making separate HTTP calls. A is wrong because a command hook runs a local shell command or binary, not an MCP server tool; you would need to reimplement MCP client logic in a shell script. B is wrong because an http hook makes a plain HTTP request to a URL, not an MCP protocol call to a connected server tool. D is wrong because a prompt hook injects text into the conversation context and cannot directly invoke an MCP server tool."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "An MCP tool hook is configured on `SessionStart` and fails with \"server not connected.\" Why?",
+    "opts": [
+      "MCP tools are disabled for hooks",
+      "`SessionStart` can fire before MCP connections finish",
+      "Wrong event name only",
+      "Must use `prompt` first"
+    ],
+    "ans": 1,
+    "expl": "SessionStart fires very early in the session lifecycle, and MCP server connections are established asynchronously after session initialization begins. If the hook fires before the MCP server has finished connecting, any mcp_tool invocation will fail because the server is not yet available. A is wrong because MCP tools are supported for hooks; the issue is timing, not a blanket prohibition. C is wrong because the event name SessionStart is valid and correct; the failure is due to connection timing, not a typo. D is wrong because using a prompt hook first would not solve the MCP connection timing issue; it would just inject text before the server is ready."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "For `FileChanged` watch list, matcher behavior is:",
+    "opts": [
+      "Always regex",
+      "Literal filename list split by `|`",
+      "Ignored",
+      "Derived from `if`"
+    ],
+    "ans": 1,
+    "expl": "For FileChanged events, the matcher field is interpreted as a literal list of filenames or paths separated by the pipe character, not as a regex pattern, so the hook fires only when one of the explicitly listed files changes. A is wrong because unlike the tool-name matcher for events like PreToolUse and PostToolUse, the FileChanged matcher does not use regex — it uses literal filename matching. C is wrong because the matcher is not ignored for FileChanged; it is the primary mechanism for specifying which files to watch. D is wrong because the if field is a separate conditional expression evaluated after the matcher; the matcher is not derived from the if field."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Which event has no matcher support and fires every occurrence?",
+    "opts": [
+      "`PostToolUse`",
+      "`PermissionRequest`",
+      "`TaskCreated`",
+      "`ConfigChange`"
+    ],
+    "ans": 2,
+    "expl": "TaskCreated does not support a matcher field and fires on every task creation event without filtering, making it unsuitable for selective triggering — any hook on TaskCreated will run for every new task. A is wrong because PostToolUse supports a matcher field that can filter by tool name using a regex pattern, allowing selective firing. B is wrong because PermissionRequest supports filtering by the type of permission being requested, so hooks can be scoped to specific permission types. D is wrong because ConfigChange fires when settings are modified and does support filtering by which setting changed, so it is not an always-fire event."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Best event to capture all parallel tool calls completion before next model step:",
+    "opts": [
+      "`PostToolBatch`",
+      "`PostToolUseFailure`",
+      "`Stop`",
+      "`Setup`"
+    ],
+    "ans": 0,
+    "expl": "PostToolBatch fires once after all tools in a parallel tool call batch have completed, providing a single checkpoint where the hook can inspect all results together before the model processes them, rather than firing once per individual tool completion. B is wrong because PostToolUseFailure (or the failure variant of PostToolUse) fires per individual failed tool, not after the entire batch has finished, so it does not provide a batch-level checkpoint. C is wrong because Stop fires at the end of the entire turn, not between parallel tool batches and the next model reasoning step within the same turn. D is wrong because Setup is not a standard hook event in the Claude Code hooks system; there is no event by that name."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "In `PreToolUse`, multiple hooks return conflicting decisions. Which precedence is most restrictive?",
+    "opts": [
+      "`allow` wins",
+      "`ask` wins over deny",
+      "`deny` wins",
+      "Last hook wins"
+    ],
+    "ans": 2,
+    "expl": "When multiple PreToolUse hooks return conflicting permissionDecision values, the most restrictive decision wins: deny takes precedence over ask, and ask takes precedence over allow, ensuring that no single hook can silently override a security restriction set by another hook. A is wrong because allow is the least restrictive decision and loses to both ask and deny when there is a conflict. B is wrong because ask prompts the user for a decision but is less restrictive than an outright deny; deny still wins over ask. D is wrong because last-hook-wins would allow any single hook to override security restrictions set by earlier hooks, which would undermine the safety model."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You want to enrich context after compaction with project conventions. Useful pattern:",
+    "opts": [
+      "`SessionStart` matcher `compact` that prints context to stdout",
+      "`StopFailure` deny",
+      "`PermissionDenied` retry",
+      "`TaskCompleted` only"
+    ],
+    "ans": 0,
+    "expl": "The PostCompact event (or a SessionStart hook scoped to post-compaction) fires after conversation history is compacted, and a hook can print project conventions or context to stdout so Claude Code injects that text back into the conversation, restoring critical context that was compressed away. B is wrong because StopFailure fires when a turn ends due to an API or execution error, not after compaction, and returning deny from StopFailure cannot inject context into a new conversation window. C is wrong because PermissionDenied fires when a specific permission is denied and its retry signal is for retrying that tool call, not for injecting project context after compaction. D is wrong because TaskCompleted fires when an agent task finishes, not after conversation compaction, so it would not trigger at the right lifecycle point."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "What is `TeammateIdle` mainly useful for?",
+    "opts": [
+      "Blocking shell commands",
+      "Tracking/automating around agent-team inactivity transitions",
+      "Forcing compaction",
+      "Changing model temperature"
+    ],
+    "ans": 1,
+    "expl": "TeammateIdle fires when an agent in a multi-agent team transitions to an idle state, making it useful for orchestration patterns like reassigning work, sending notifications, or triggering cleanup tasks when a teammate stops being active. A is wrong because blocking shell commands is the domain of PreToolUse hooks with a Bash matcher and permissionDecision deny, not TeammateIdle. C is wrong because compaction is triggered by conversation length thresholds and the PostCompact event handles post-compaction logic; TeammateIdle has no mechanism to force compaction. D is wrong because model temperature and other inference parameters are set at request time in the API call, not through hook events during a session."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "`PermissionDenied` event can signal model to try again with:",
+    "opts": [
+      "`{continue: true}`",
+      "`{retry: true}`",
+      "`{decision: \"allow\"}`",
+      "`{tool_retry: 1}`"
+    ],
+    "ans": 1,
+    "expl": "A PermissionDenied hook can return a JSON payload containing retry: true, which signals Claude Code to present the model with the denial context and allow it to attempt the operation again with a modified approach. A is wrong because continue: true is not a recognized field in the PermissionDenied hook response schema; the correct field name is retry. C is wrong because returning decision: \"allow\" in a PermissionDenied hook does not retroactively change the permission outcome; the denial has already occurred and the allow decision field is used in PermissionRequest hooks, not PermissionDenied. D is wrong because tool_retry: 1 is not a valid field in the hooks response schema; there is no such counter-based retry mechanism."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You need policy decisions that require judgment (not deterministic shell checks). Prefer:",
+    "opts": [
+      "`prompt` or `agent` hooks",
+      "`CwdChanged` only",
+      "`WorktreeRemove`",
+      "`Notification` with bell"
+    ],
+    "ans": 0,
+    "expl": "Prompt hooks inject instructions into Claude's context so the model can apply nuanced reasoning to a policy decision, and agent hooks spawn a sub-agent that can reason about complex conditions — both are appropriate when deterministic shell logic is insufficient for the judgment required. B is wrong because CwdChanged is a lifecycle event that fires when the working directory changes; it is not a hook type suited for policy judgment and does not have a mechanism to make approval decisions. C is wrong because WorktreeRemove fires when a git worktree is being removed; it is a lifecycle event for that specific operation, not a general-purpose hook type for policy evaluation. D is wrong because Notification hooks fire when Claude sends a notification and cannot themselves perform policy judgment or block tool execution based on complex reasoning."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Best reason to keep hook matchers narrow:",
+    "opts": [
+      "Prevent JSON parse cost only",
+      "Avoid accidental broad approvals/actions and reduce blast radius",
+      "Required by MCP protocol",
+      "To enable async mode"
+    ],
+    "ans": 1,
+    "expl": "Narrow matchers ensure a hook fires only for the specific tool events it was designed for, preventing it from accidentally approving, denying, or running side effects on unrelated tool calls and reducing the scope of potential misconfigurations or security oversights. A is wrong because JSON parsing cost is negligible compared to the safety and correctness benefits; the primary reason for narrow matchers is not performance but blast radius control. C is wrong because the MCP protocol has no requirement about hook matcher specificity; matcher scope is a Claude Code configuration concern, not a protocol mandate. D is wrong because async mode is enabled by the async: true field on a command hook and has no dependency on whether the matcher is narrow or broad."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "`StopFailure` semantics:",
+    "opts": [
+      "Can be blocked with exit code 2",
+      "Output and exit code are ignored; turn ended by API error",
+      "Same as `Stop`",
+      "Runs only in plan mode"
+    ],
+    "ans": 1,
+    "expl": "StopFailure fires after a turn has already ended due to an API or execution error, so Claude Code does not read the hook's output or exit code to make any decisions — the turn is already over and the failure has already occurred, making the hook useful only for side effects like logging or alerting. A is wrong because exit code 2 (the deny signal) is meaningful in PreToolUse hooks to block tool execution, but StopFailure has no pending action to block; the turn has already ended. C is wrong because Stop fires after a successful turn completion and its output can influence context injection for the next turn, whereas StopFailure fires after an error and its output is ignored. D is wrong because StopFailure is not scoped to plan mode; it fires whenever any turn ends due to failure, regardless of the current mode."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "To distribute vetted hooks org-wide while blocking user/project hooks, admins rely on:",
+    "opts": [
+      "`allowManagedHooksOnly` and managed settings",
+      "`disableAllHooks` in local settings",
+      "Session aliases",
+      "FileChanged watch"
+    ],
+    "ans": 0,
+    "expl": "The allowManagedHooksOnly flag in managed (enterprise) settings restricts hook execution to only those hooks defined in the managed settings layer, preventing users from adding project-level or user-level hooks that could bypass org policy while still allowing centrally vetted hooks to run. B is wrong because disableAllHooks would block the org-vetted hooks as well as user hooks, defeating the purpose of distributing managed hooks — it is a total kill switch, not a selective trust mechanism. C is wrong because session aliases are a CLI convenience feature for reusing session configurations and have no role in hook trust scope enforcement. D is wrong because FileChanged watch is a hook event for responding to file system changes, not a mechanism for controlling hook authorization scope across an organization."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Where should a shareable project hook live?",
+    "opts": [
+      "`~/.claude/settings.json`",
+      "`.claude/settings.local.json`",
+      "`.claude/settings.json`",
+      "temporary `/tmp/hook.json`"
+    ],
+    "ans": 2,
+    "expl": "`.claude/settings.json` is the project-level settings file that is committed to version control alongside the codebase, making any hooks defined there automatically available to all team members who clone the repository. A is wrong because `~/.claude/settings.json` is the user-level global settings file on the individual developer's machine and is not shared with other team members. B is wrong because `.claude/settings.local.json` is explicitly intended for local overrides that should not be committed to version control (it is typically gitignored), making it the wrong place for shared project hooks. D is wrong because a temporary file in /tmp is not part of the project, is not version-controlled, and will not persist across sessions or machines."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "When should you use `WorktreeCreate` hook?",
+    "opts": [
+      "Only to run prettier",
+      "To replace/customize default git worktree behavior (especially non-git VCS)",
+      "To disable MCP",
+      "To force teammate mode"
+    ],
+    "ans": 1,
+    "expl": "WorktreeCreate fires when Claude Code is about to create a new worktree, and a hook can override or customize that behavior — which is especially valuable for non-git version control systems or repositories with non-standard worktree setups that Claude Code's default git worktree command would handle incorrectly. A is wrong because running a formatter like prettier is a PostToolUse concern triggered by file edit events, not a worktree lifecycle concern; using WorktreeCreate for formatting would be both incorrect and fragile. C is wrong because MCP server connections are managed through the MCP configuration section of settings, not through worktree lifecycle hooks. D is wrong because teammate mode is an agent orchestration configuration, not something triggered or enabled through the WorktreeCreate hook event."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "What does `Notification` hook event represent?",
+    "opts": [
+      "All Bash command output",
+      "Claude sending a notification (permission prompt, idle prompt, etc.)",
+      "MCP server startup",
+      "CWD mutation"
+    ],
+    "ans": 1,
+    "expl": "The Notification event fires whenever Claude Code sends a notification to the user, including permission prompts, idle state alerts, and other informational messages, allowing hooks to intercept, log, or react to these notification moments. A is wrong because Bash command output is not surfaced as a Notification event; Bash tool execution produces PostToolUse events, and the command's stdout/stderr is part of the tool result, not a notification. C is wrong because MCP server startup is a session initialization concern and does not fire a Notification event; SessionStart is the closest lifecycle event for early-session activities. D is wrong because CWD changes fire the CwdChanged event, not the Notification event; these are distinct lifecycle signals for different system state changes."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "Why is \"prompt instructions only\" weaker than programmatic hooks for critical constraints?",
+    "opts": [
+      "Prompt is invalid JSON",
+      "Prompt-based behavior is probabilistic; hooks are deterministic execution points",
+      "Hooks are cheaper tokens",
+      "Prompts cannot mention tools"
+    ],
+    "ans": 1,
+    "expl": "A language model follows prompt instructions with high but not perfect probability — under unusual inputs, edge cases, or adversarial prompts, it may fail to comply even with explicit instructions. Hooks, by contrast, are deterministic execution points in the Claude Code runtime: a PreToolUse hook that returns deny will always block the tool call, regardless of what the model was prompted to do. A is wrong because prompts are plain text, not JSON, so JSON validity is irrelevant; the limitation is probabilistic compliance, not a syntax issue. C is wrong because while hooks do not consume prompt tokens, the reason to prefer hooks for critical constraints is reliability and determinism, not token economics. D is wrong because prompts can and do mention tools by name; the limitation is not what prompts can reference but whether the model reliably acts on those references."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "You want to watch settings edits for audit trail during active sessions. Use:",
+    "opts": [
+      "`ConfigChange`",
+      "`UserPromptSubmit`",
+      "`SessionEnd`",
+      "`PreCompact`"
+    ],
+    "ans": 0,
+    "expl": "ConfigChange fires whenever Claude Code detects a change to its settings files during an active session, making it the correct event to hook into for building an audit trail of configuration modifications as they happen. B is wrong because UserPromptSubmit fires when the user submits a message, which has nothing to do with settings file modifications; it cannot detect when settings are changed. C is wrong because SessionEnd fires when the session terminates, which would only capture that a session ended, not which settings were changed or when during the session they were modified. D is wrong because PreCompact is not a standard Claude Code hook event; the compaction-related event is PostCompact, and neither is related to settings file auditing."
+  },
+  {
+    "source": "Hooks & Workflow Control",
+    "prompt": "`stdin`/`stdout` vs HTTP body in hooks:",
+    "opts": [
+      "Command hooks: stdin/stdout; HTTP hooks: POST body/response body",
+      "Command hooks use only stderr",
+      "HTTP hooks read stdin directly",
+      "Both ignore JSON"
+    ],
+    "ans": 0,
+    "expl": "Command hooks receive their event context JSON on stdin and write their response JSON to stdout, while HTTP hooks receive their event context as the HTTP POST request body and return their response in the HTTP response body — each transport model is consistent with its underlying mechanism. B is wrong because command hooks use stdin for input and stdout for output; stderr is available for error logging but is not the primary transport channel for hook data. C is wrong because HTTP hooks operate over the network using HTTP request/response semantics; they do not read from the process's stdin stream because they are not shell processes. D is wrong because both command hooks and HTTP hooks communicate exclusively through JSON — the hook event payload is JSON, and the expected response format is also JSON."
+  }
+];
+
+var MODULE_NAME = "Hooks & Workflow Control";
+var TAGS = ["PreToolUse", "PostToolUse", "HTTP Hooks", "Async Hooks", "Permission Events", "Lifecycle Events"];
+var PASS_STORAGE_KEY = 'cca_hooks_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_hooks_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

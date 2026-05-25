@@ -5,6 +5,7 @@
 - `./cca read --date YYYY-MM-DD` - show what to read today.
 - `./cca test --date YYYY-MM-DD` - start interactive quiz mode.
 - `./cca sim --seed 42` - run full 60Q/120m mock exam.
+- `./cca record-pass --topic <name> --quiz-file <path>` - persist a pass checkpoint event.
 
 <details>
 <summary>Level 2 - Daily Study Flow</summary>
@@ -17,6 +18,8 @@
    - `./cca test --date 2026-05-10 --count 20 --timed-minutes 90 --seed 99`
 4. Check score trend:
    - `./cca stats --last 10`
+5. If pass happened in HTML/manual flow, persist checkpoint:
+   - `./cca record-pass --date 2026-05-10 --method html --topic hooks --quiz-file quizzes/cca-hooks-quiz.html --score 1000 --perfect-run-count 2`
 
 </details>
 
@@ -68,6 +71,18 @@
 - Flags:
   - `--last N` (default: 10)
 
+### `record-pass`
+- Purpose: append a pass checkpoint to `logs/cca_pass_events.jsonl` (for HTML quizzes/manual passes not captured by CLI quiz logs).
+- Flags:
+  - `--date YYYY-MM-DD`
+  - `--method html|cli|manual` (default: `html`)
+  - `--topic <label>` (required)
+  - `--quiz-file <path>`
+  - `--score N` (default: 1000)
+  - `--pass-threshold N` (default: 720)
+  - `--perfect-run-count N`
+  - `--notes "text"`
+
 ### `obsidian`
 - Purpose: show Obsidian rules file path and status.
 - Example:
@@ -84,6 +99,8 @@
   - Confirm key exists in `calendar/cca_daily_plan.json`.
 - `stats` looks odd:
   - Check raw logs: `tail -n 20 logs/cca_quiz_attempts.jsonl`.
+- Need to inspect pass checkpoints:
+  - `tail -n 20 logs/cca_pass_events.jsonl`.
 - Need to inspect what `test` will run without starting quiz:
   - Use `--dry-run`.
 

@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Few-Shot & Prompt Patterns Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #fb923c;
+    --accent2: #c2410c;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A customer support agent produces responses with inconsistent structure — sometimes leading with the resolution, sometimes with an apology, sometimes with a policy reference. The behavior varies even on identical issue types. The team wants uniform response structure across all cases. What is the most direct fix?",
+    "opts": [
+      "Add a self-critique step asking the model to verify its response meets format requirements before sending.",
+      "Add a preprocessing layer that classifies the issue type and routes to specialized sub-prompts.",
+      "Provide 3–5 few-shot examples in the system prompt that demonstrate the target input→output structure for common case types.",
+      "Enable extended thinking so the model deliberates on format before generating a response."
+    ],
+    "ans": 2,
+    "expl": "Inconsistent format on predictable case types is exactly the use case for few-shot examples — they directly show the model what input→output structure looks like. A is wrong because self-critique catches accuracy or completeness gaps, not format inconsistency. B is wrong because routing adds architectural complexity when the issue is purely format guidance. D is wrong because extended thinking addresses reasoning depth, not output structure."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A code review agent sometimes omits security considerations from its output, sometimes skips edge-case coverage, and sometimes fails to mention performance tradeoffs. The pattern is unpredictable — each omission is different. What technique is best suited to catch these variable gaps?",
+    "opts": [
+      "A self-critique pass instructing the model to review its draft against a checklist: security, edge cases, performance, correctness.",
+      "Few-shot examples covering the five most common review types.",
+      "Preprocessing to extract function signatures before sending to the review prompt.",
+      "XML-structured output schema with required fields for each review category."
+    ],
+    "ans": 0,
+    "expl": "Variable, case-specific omissions are the signal for self-critique — a checklist review pass catches gaps regardless of which category was missed in the first pass. B is wrong because few-shot examples only help with predictable patterns and can't cover the variability described. C is wrong because preprocessing improves input quality but does not address what the model omits in its output. D is wrong because required schema fields force structure but do not diagnose which content is actually missing."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A legal document summarizer is tasked with summarizing contracts. The input documents sometimes include scanned OCR text with artifacts, garbled clause numbering, and inconsistent section headers. The model's summaries are unreliable. What is the highest-leverage first step?",
+    "opts": [
+      "Few-shot examples showing correct summaries for well-formed contracts.",
+      "A self-critique step asking the model to flag uncertain content in its summary.",
+      "A preprocessing layer that normalizes OCR artifacts, fixes clause numbering, and standardizes section headers before the document reaches the summarization prompt.",
+      "Extended thinking to allow the model more reasoning tokens when encountering malformed input."
+    ],
+    "ans": 2,
+    "expl": "The root problem is input quality — the model cannot reliably summarize documents when the input is noisy. Preprocessing fixes the input before it reaches the model, addressing the actual failure point. A is wrong because few-shot examples don't help when the problem is malformed input the model cannot parse reliably. B is wrong because self-critique addresses output accuracy, not the upstream input quality issue. D is wrong because extended thinking does not compensate for structurally broken input."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A content moderation system routes posts to one of five category labels. Reviewers report that the label distribution is correct but the written justification format varies widely — sometimes bullet points, sometimes prose, sometimes numbered lists. A junior engineer suggests adding a second LLM call to review the output format. What is the better approach?",
+    "opts": [
+      "Add a self-critique step where the model evaluates whether its justification follows the required format.",
+      "Add few-shot examples to the prompt showing the required justification format for each category label.",
+      "Add a preprocessing step to normalize the post text before classification.",
+      "Switch to a structured output schema with a required `justification` string field."
+    ],
+    "ans": 1,
+    "expl": "Format inconsistency across predictable categories is directly addressed by few-shot examples that demonstrate the target format — cheaper and more reliable than a second LLM call for self-critique. A is wrong because self-critique adds latency and is better suited to content gaps than format consistency issues. C is wrong because the problem is output format, not input quality. D is wrong because a required string field enforces presence but not the internal format of the justification."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An agent generating financial reports occasionally includes incorrect figures — using prior quarter data when current quarter data is available in the context. The errors are factual, not formatting problems. The figures that are wrong vary by report. What is the most effective fix?",
+    "opts": [
+      "Add few-shot examples showing correct reports for the two most common report types.",
+      "Add a self-critique pass asking the model to verify each figure in the draft against the source data.",
+      "Wrap the report prompt in XML tags to improve context parsing.",
+      "Add a preprocessing step to extract all numerical figures into a structured table before generation."
+    ],
+    "ans": 1,
+    "expl": "Factual accuracy errors that vary by report — using wrong figures — are the canonical use case for self-critique. The model has the correct data in context but uses the wrong value; a verification pass directly catches this. A is wrong because few-shot examples address format and pattern, not factual accuracy against live data. C is wrong because XML tags improve prompt parsing but do not address factual verification. D is wrong because preprocessing structures the input but does not prevent the model from using wrong values in output."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A sentiment classifier receives customer feedback that may be a single sentence, a multi-paragraph essay, or a table of ratings. The classifier works well when the input follows a consistent format. Performance degrades significantly on the multi-format inputs. What is the right approach?",
+    "opts": [
+      "Few-shot examples showing classifications for each of the three input formats.",
+      "Increase the system prompt specificity to describe all three input formats the model may encounter.",
+      "A self-critique step asking the model to reconsider its classification given input complexity.",
+      "A preprocessing layer that normalizes all input formats into a consistent structure before classification."
+    ],
+    "ans": 3,
+    "expl": "When performance degrades specifically due to input format variation, preprocessing is the correct tool — it transforms diverse inputs into a consistent structure the classifier handles reliably. A is wrong because few-shot examples help with output patterns, not input normalization across radically different formats. B is wrong because describing input formats in prose does not normalize them — the model still receives variable-format input. C is wrong because self-critique adds a second pass but doesn't address the root cause of inconsistent input structure."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A developer asks: \"I want to add few-shot examples to my prompt. Where should I place them relative to the task instructions?\" The examples are input→output demonstrations for a classification task. What is the documented best practice?",
+    "opts": [
+      "Place examples after the task instructions, wrapped in `<examples>` tags so Claude can distinguish them from instructions.",
+      "Place examples before task instructions so Claude reads them before encountering the constraints.",
+      "Place examples at the end of the human turn, after the actual input to classify.",
+      "Place examples in a separate system prompt turn, distinct from the task instructions turn."
+    ],
+    "ans": 0,
+    "expl": "Anthropic's documented guidance places examples after instructions, wrapped in ` ` tags (individual examples in ` ` tags) to clearly separate them from the instructions themselves. B is wrong because examples before instructions can cause Claude to over-weight example patterns before reading the full constraints. C is wrong because placing examples after the live input to classify creates ambiguity about which content is the target. D is wrong because splitting into separate system prompt turns is not the documented pattern and may reduce instruction coherence."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A team is debating how many few-shot examples to include. The task is a structured data extraction from support tickets. They currently have 1 example and are seeing inconsistent field population. The Anthropic documentation gives a specific recommendation. What is it?",
+    "opts": [
+      "Include 3–5 examples for best results, covering edge cases and format variation.",
+      "1–2 examples are sufficient for any task; more adds unnecessary token cost.",
+      "Include at least 10 examples to ensure full coverage of all task variations.",
+      "Use as many examples as fit within the context window without truncation."
+    ],
+    "ans": 0,
+    "expl": "Anthropic's prompt engineering documentation explicitly states \"Include 3–5 examples for best results.\" B is wrong because 1–2 examples often underconstrain format and miss edge cases. C is wrong because 10+ examples are not the recommendation and add significant token cost. D is wrong because maximizing example count is not the guidance — quality and diversity within a reasonable count is."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An agent that schedules calendar events receives requests like: \"Set up a sync with the team sometime next week, maybe Tuesday or Wednesday afternoon, keep it short.\" This request is ambiguous on date, time, and duration. The agent frequently books incorrect times. What is the correct diagnostic?",
+    "opts": [
+      "The agent needs few-shot examples showing how to handle ambiguous scheduling requests.",
+      "The agent needs a self-critique pass to re-evaluate its scheduled time before confirming.",
+      "The input needs a preprocessing step to extract and disambiguate intent (date range, duration, participants) before the scheduling prompt runs.",
+      "The agent needs chain-of-thought prompting to reason through the scheduling decision step by step."
+    ],
+    "ans": 2,
+    "expl": "The core problem is ambiguous input — the request has undefined date, time, and duration. Preprocessing extracts and normalizes intent before the scheduling prompt runs, addressing the root cause. A is wrong because few-shot examples don't resolve ambiguous input; the model still lacks definitive field values. B is wrong because self-critique checks the output, not the missing input fields that caused the wrong booking. D is wrong because chain-of-thought helps with reasoning complexity, not disambiguation of genuinely missing information."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A pipeline generates product descriptions. The engineering team finds that Claude's first-pass descriptions are 85% correct on content but 30% of them fail to follow the required tone and structure (brand voice, bullet-point format, maximum word count). A single-pass prompt is currently used. What is the most efficient improvement?",
+    "opts": [
+      "Switch to extended thinking to give the model more reasoning capacity for tone.",
+      "Add a self-critique step that checks the draft against a tone and format checklist.",
+      "Add few-shot examples demonstrating the target tone, structure, and word count for three product categories.",
+      "Add a preprocessing step to extract product attributes before description generation."
+    ],
+    "ans": 2,
+    "expl": "Format and tone inconsistency across predictable product categories is the use case for few-shot examples — they directly demonstrate what correct output looks like. B is wrong because self-critique adds latency and a second LLM call; when the issue is predictable format/tone, few-shot is cheaper and more reliable. A is wrong because extended thinking addresses reasoning depth, not output style. D is wrong because preprocessing helps with input quality; the product attributes are presumably already available."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A complex reasoning task involves a multi-step math proof with several dependent intermediate results. The model often makes errors in intermediate steps that propagate to the wrong final answer. What is the most effective technique?",
+    "opts": [
+      "Chain-of-thought prompting, explicitly instructing the model to show its work at each step.",
+      "Few-shot examples showing complete proofs for similar problem types.",
+      "A self-critique pass asking the model to re-check its final answer.",
+      "Preprocessing to reformat the problem statement into a structured form."
+    ],
+    "ans": 0,
+    "expl": "Multi-step reasoning with intermediate dependencies is the canonical use case for chain-of-thought — making reasoning explicit allows errors to surface at the step where they occur rather than propagating silently to the final answer. B is wrong because few-shot examples help with format and pattern but do not force explicit intermediate reasoning. C is wrong because self-critique at the final answer level may not surface where an intermediate step went wrong. D is wrong because the problem is reasoning quality, not input structure."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "Extended thinking (budget_tokens) is enabled on a Claude model for a complex analysis task. The team notices the model is spending most of its thinking budget deliberating on minor formatting decisions. How should this be addressed?",
+    "opts": [
+      "Increase the budget_tokens parameter to give the model more room.",
+      "Add prompt instructions telling the model that thinking should only be used for reasoning-intensive steps, not formatting decisions.",
+      "Disable extended thinking and add few-shot examples for format guidance instead.",
+      "Add a self-critique pass after the thinking block to fix the resulting format."
+    ],
+    "ans": 1,
+    "expl": "Anthropic's extended thinking documentation explicitly states the thinking trigger is steerable — adding guidance like \"Thinking adds latency and should only be used when it will meaningfully improve answer quality — typically for problems that require multi-step reasoning\" steers the model away from wasting budget on minor decisions. A is wrong because more budget tokens will not redirect where the model spends its thinking — it may spend more time on formatting. C is wrong because disabling thinking may hurt the complex reasoning the budget was intended for. D is wrong because a self-critique pass does not fix the root cause of misdirected thinking."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A customer support agent produces correct responses but the responses never include next-step instructions or escalation paths, even when the policy clearly requires them. The omission is consistent — every response is missing these elements, not just some. What is the most direct fix?",
+    "opts": [
+      "Few-shot examples where each demonstrated response includes next steps and escalation paths.",
+      "Self-critique pass asking the model to check whether its response includes required next steps.",
+      "Preprocessing to identify case types that require escalation before routing to the main prompt.",
+      "Extended thinking to allow the model to reason through policy requirements before responding."
+    ],
+    "ans": 0,
+    "expl": "A consistent, predictable omission — the same element is always missing — is the signal for few-shot examples. Showing the model what complete responses look like directly teaches it the required output structure. B is wrong because self-critique adds a second pass and is better suited for variable, case-specific gaps — not a consistent omission that examples can directly fix. C is wrong because preprocessing helps with input quality, not missing output elements. D is wrong because reasoning budget does not fix a structural gap in what the model outputs."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An architect is designing a pipeline where multiple independent sub-tasks (summarize, classify, extract entities) must all run on the same document. The tasks do not depend on each other's outputs. What is the preferred architectural approach?",
+    "opts": [
+      "Chain the tasks sequentially — summarize first, then classify, then extract — to keep context clean.",
+      "Send the document to a single prompt that performs all three tasks in one call.",
+      "Decompose into three parallel prompts, each receiving the shared document context and running independently.",
+      "Use a preprocessing step to create three versions of the document optimized for each task."
+    ],
+    "ans": 2,
+    "expl": "When tasks are independent and do not require each other's outputs, parallel decomposition with shared context eliminates sequential latency and reduces total wall-clock time. B is wrong because a single prompt handling three distinct tasks increases complexity and makes it harder to optimize or debug each task independently. A is wrong because sequential chaining on independent tasks is slower with no accuracy benefit. D is wrong because creating separate document versions adds preprocessing cost without addressing the parallelization opportunity."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "Two agents are running in parallel to research the same topic from different source types. Agent A searches academic papers; Agent B searches news articles. Both need the same user query, session ID, and research criteria. Neither needs to see the other's intermediate findings. What is the correct context management pattern?",
+    "opts": [
+      "Share the full conversation history with both agents so they have complete context.",
+      "Pass only the shared inputs (query, session ID, criteria) to each agent explicitly; do not pass each other's intermediate outputs.",
+      "Run agents sequentially — Agent A then Agent B — so B can incorporate A's findings.",
+      "Use a preprocessing step to merge both agents' inputs into a single context block before forking."
+    ],
+    "ans": 1,
+    "expl": "Parallel decomposition with shared context means each agent receives only what it needs (the common inputs) and is isolated from the other's intermediate work. Sharing full conversation history risks context pollution. A is wrong because sharing full history exposes intermediate outputs that could bias the parallel agent. C is wrong because sequential execution eliminates the latency benefit of parallelism when the tasks are independent. D is wrong because merging inputs before forking defeats the purpose of isolation."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A self-critique pass is added to a summarization pipeline. After running in production for a week, the team notices that the critique step often rewrites perfectly good summaries, increasing latency and sometimes introducing errors. What is the likely cause?",
+    "opts": [
+      "The critique prompt lacks specific evaluation criteria — it is too vague, causing the model to critique indiscriminately.",
+      "The model's base summarization capability is insufficient; a better base model is needed.",
+      "The self-critique pass needs more budget_tokens to evaluate the summary properly.",
+      "Few-shot examples should replace the self-critique step entirely."
+    ],
+    "ans": 0,
+    "expl": "A self-critique step without specific criteria (e.g., \"Check for factual accuracy, missing key points, and constraint compliance\") causes the model to apply arbitrary standards, rewriting good outputs. The fix is scoped criteria. B is wrong because the base summarization is presumably working — the problem is the unguided critique step. C is wrong because more budget tokens do not provide the missing evaluation criteria. D is wrong because replacing with few-shot addresses format consistency, not the broken self-critique configuration."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An e-commerce agent receives user messages that mix product questions, order status queries, and return requests in a single message — e.g., \"Where's my order #12345 and do you have the blue version in size M?\" The agent's accuracy on combined messages is 61% vs 94% on single-topic messages. A teammate suggests adding few-shot examples for multi-topic messages. Another suggests preprocessing to decompose multi-topic messages before routing. The baseline for single-topic is already strong. Which is correct?",
+    "opts": [
+      "Few-shot examples demonstrating the correct handling of 5–6 multi-topic message patterns.",
+      "Preprocessing to decompose multi-topic messages into individual requests before they reach the routing agent.",
+      "Extended thinking to allow the agent more reasoning tokens when processing complex messages.",
+      "Self-critique pass where the agent re-evaluates its initial routing decision for completeness."
+    ],
+    "ans": 0,
+    "expl": "The strong single-topic baseline (94%) indicates the agent already understands individual concerns well — it just needs guidance on multi-concern patterns. Few-shot examples for multi-topic handling provide that pattern guidance with minimal architectural change. B is wrong because preprocessing adds architectural complexity (latency, cost, new component) when the existing agent already handles individual topics well — this is over-engineering relative to the problem. C is wrong because extended thinking increases reasoning depth, not the agent's ability to identify and handle multiple topics per message. D is wrong because self-critique checks output quality, not whether all topics in a multi-concern message were addressed."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A pipeline generates medical triage summaries. Nurse reviewers report that summaries occasionally miss documenting patient-reported allergies even though the allergy information is present in the patient intake form attached to each case. The omission pattern is variable — some case types miss it, others don't. What is the best approach?",
+    "opts": [
+      "Few-shot examples showing complete summaries for the five most common triage case types.",
+      "A preprocessing step to extract allergy information into a structured field before summarization.",
+      "XML tags around the intake form to help the model locate allergy data.",
+      "A self-critique pass instructing the model to verify the draft against a checklist that includes: allergies, current medications, chief complaint, and vital signs."
+    ],
+    "ans": 3,
+    "expl": "Variable omissions across case types — sometimes missing allergies, sometimes not — match the self-critique pattern. A checklist-based review pass catches case-specific gaps regardless of type. A is wrong because few-shot examples help with predictable patterns; they cannot cover the variability described. B is wrong because preprocessing structured extraction is useful but doesn't prevent the model from ignoring the extracted field in its output. C is wrong because XML tags improve parsing but do not cause the model to include allergy information it might otherwise omit."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An agent is receiving user queries where the same entity appears with inconsistent spelling — \"OpenAI\", \"Open AI\", \"openai\", \"Open Ai\" — causing tool lookups to fail silently. The downstream lookup tool is case-sensitive and requires canonical company names. What is the correct fix?",
+    "opts": [
+      "Few-shot examples showing the agent how to handle each spelling variant.",
+      "A self-critique pass after the tool lookup to re-try with an alternative spelling if the first fails.",
+      "A preprocessing step that normalizes entity mentions to canonical form before the query reaches the lookup tool.",
+      "Prompt instructions telling the model to always use the correct spelling of company names."
+    ],
+    "ans": 2,
+    "expl": "Entity normalization — resolving spelling variants to canonical form — is a preprocessing responsibility. The input has a data quality problem that must be fixed before it reaches the case-sensitive tool. A is wrong because few-shot examples can't enumerate all spelling variants and don't fix the normalization problem. B is wrong because self-critique after failure is reactive; preprocessing prevents the failure. D is wrong because prompt instructions rely on the model knowing the correct spelling, which it may not for all entities."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A Q&A system is tasked with answering questions about a company's 50-page policy manual. The document is included in the context. The model sometimes answers with outdated policy language rather than the current version in the provided document. What is the best diagnostic and fix?",
+    "opts": [
+      "Add few-shot examples showing correct answers for the 10 most common question types.",
+      "Move the document to the top of the prompt (before instructions and query) per long-context best practices.",
+      "Add a preprocessing step to extract relevant policy sections before passing to the Q&A prompt.",
+      "Add a self-critique pass asking the model to verify its answer against the source document before responding."
+    ],
+    "ans": 1,
+    "expl": "Anthropic's long-context documentation specifically states placing longform data at the top of the prompt improves performance — \"queries at the end can improve response quality by up to 30% in tests, especially with complex, multi-document inputs.\" The model is using outdated internal knowledge rather than the provided document, which is a position-sensitivity issue. D is wrong because self-critique is a valid second choice but B directly addresses the root cause (position sensitivity) more efficiently. A is wrong because few-shot examples do not help the model prefer document content over training knowledge. C is wrong because extracting sections adds complexity; correct document positioning is simpler and addresses the root cause."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An agent that writes email responses has access to customer history, order data, and return policies. A product manager reports that 40% of emails use an overly formal tone that doesn't match the brand voice. The emails are factually correct. What is the most direct fix?",
+    "opts": [
+      "Enable extended thinking so the model deliberates on tone before writing.",
+      "Add a self-critique step asking the model to re-check the email's tone against brand guidelines.",
+      "Add few-shot examples that demonstrate the target brand voice across three common email types.",
+      "Add a preprocessing step to analyze the customer's communication style and adjust accordingly."
+    ],
+    "ans": 2,
+    "expl": "Tone inconsistency on predictable email types — where the content is correct but the voice is wrong — is directly addressed by few-shot examples that demonstrate the target voice. The Anthropic docs note \"positive examples showing how Claude can communicate with the appropriate level of concision tend to be more effective than negative examples.\" B is wrong because self-critique adds latency for a consistent, teachable style gap that few-shot handles more efficiently. A is wrong because extended thinking addresses reasoning complexity, not output style. D is wrong because analyzing customer style adds complexity without addressing the model's own default formality."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A research assistant is tasked with comparing two technical papers on a complex topic. It must identify agreements, contradictions, and evidence gaps. The team finds the model often confuses which paper made which claim. What technique is most targeted at this failure?",
+    "opts": [
+      "Chain-of-thought prompting where the model extracts all claims from Paper 1, then Paper 2, before comparing.",
+      "Few-shot examples showing correct comparisons for two prior paper pairs.",
+      "Self-critique pass asking the model to verify each claim is attributed to the correct paper.",
+      "Preprocessing to extract claims from both papers into labeled structured lists before comparison."
+    ],
+    "ans": 0,
+    "expl": "Cross-document attribution errors during comparison are a multi-step reasoning problem — the model needs to maintain separate claim sets before comparing them. Chain-of-thought with explicit intermediate steps (extract Paper 1 claims, extract Paper 2 claims, then compare) directly prevents mixing. D is also useful but addresses input preprocessing, not the reasoning structure; A is more targeted at the comparison reasoning itself. B is wrong because few-shot examples for comparison pairs don't prevent attribution mixing in novel paper pairs. C is wrong because self-critique after mixing claims doesn't reliably un-mix them."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A pipeline uses a self-critique step. The initial generation prompt and the self-critique prompt are fed to the same model in the same conversation session, with the original response visible. A reviewer notes the self-critique often approves poor outputs. What is the likely cause and fix?",
+    "opts": [
+      "The self-critique prompt needs more specific evaluation criteria.",
+      "The budget_tokens for the thinking step needs to be increased.",
+      "The self-critique prompt should include few-shot examples of good vs bad outputs.",
+      "The same model reviewing its own work in the same session is a known limitation — the model cannot objectively evaluate output it just generated; use a separate model or session."
+    ],
+    "ans": 3,
+    "expl": "Same-session self-review is a recognized anti-pattern — the model tends to confirm its own recent output rather than evaluate it objectively. The exam debrief explicitly flags \"same-session self-review\" as an anti-pattern. A is wrong because criteria specificity helps but doesn't overcome the fundamental same-session confirmation bias. B is wrong because more thinking tokens don't resolve the architectural issue of reviewing one's own work. C is wrong because few-shot examples of good/bad outputs help calibrate the critique but don't fix the same-session bias."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A complex agent task involves determining which of 12 possible action types to take based on a user request. The model must reason through eligibility rules, priority ordering, and constraint checks before selecting an action. Single-pass responses frequently pick ineligible actions. What is the best approach?",
+    "opts": [
+      "Preprocessing to extract the relevant eligibility fields from the user request before the action selection prompt.",
+      "Self-critique asking the model to verify its action selection is eligible.",
+      "Few-shot examples covering the 12 action types.",
+      "Chain-of-thought prompting instructing the model to work through eligibility rules, then priority, then constraints step by step before selecting."
+    ],
+    "ans": 3,
+    "expl": "Multi-step eligibility reasoning with ordered rules and constraints is the canonical chain-of-thought use case — making each reasoning step explicit prevents the model from jumping to an ineligible action. C is wrong because 12 few-shot examples cannot enumerate the combinatorial space of eligibility conditions. A is wrong because preprocessing helps with input structure but does not enforce the reasoning sequence. B is wrong because self-critique is a second pass; chain-of-thought addresses the reasoning process itself in the first pass."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A team wants to add few-shot examples to a long prompt that already contains system instructions, context documents, and variable user input. A teammate argues examples should go at the very top. Another argues they should go after instructions but before the variable input. Who is correct and why?",
+    "opts": [
+      "Top of the prompt — examples before instructions let the model learn by example before encountering rules.",
+      "In a separate system turn — examples belong in the system prompt, not the human turn.",
+      "After the variable input — examples should come last so they are freshest in context when the model responds.",
+      "After instructions, before the variable input — examples follow instructions and wrap them in `<examples>` tags, with the actual input at the end for processing."
+    ],
+    "ans": 3,
+    "expl": "Anthropic's prompt engineering guidance places examples after task instructions, wrapped in ` ` tags, with the actual variable input at the end. This structure: instructions → examples → input mirrors the documented pattern and aligns with long-context best practices (queries at the end). A is wrong because leading with examples before instructions causes the model to over-anchor on example patterns before reading constraints. B is wrong because splitting into separate turns is not the documented pattern. C is wrong because examples after the variable input create ambiguity about which content is the target."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An agent must perform a long-horizon task: research a topic, draft a report, verify factual claims, and format the output. These steps are strictly dependent — each step requires the previous one's output. A colleague suggests parallel decomposition. Is this appropriate here?",
+    "opts": [
+      "Yes — parallel decomposition always reduces latency and should be used when multiple steps are involved.",
+      "Yes — run all four agents in parallel and use a coordinator to merge outputs.",
+      "No — the task should use a single prompt to keep context unified.",
+      "No — because the steps are strictly sequential (each depends on the prior output), parallel decomposition would require passing undefined outputs to downstream steps."
+    ],
+    "ans": 3,
+    "expl": "Parallel decomposition is appropriate for independent tasks. When steps are strictly sequential (research → draft → verify → format), each step requires the prior step's output — parallelization is not viable without undefined inputs to downstream steps. A is wrong because parallelization only benefits independent tasks; it creates architectural problems on dependent chains. B is wrong because you cannot run verify before draft exists or format before verify is complete. C is wrong because single-prompt handling of long-horizon tasks hits context limits and mixes concerns; sequential chaining (not parallelism) is the right answer."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A classification agent is occasionally receiving inputs where the text is a mix of English and Vietnamese with no language tag. The agent is English-only trained and produces degraded output on the mixed-language inputs. What is the correct intervention?",
+    "opts": [
+      "Few-shot examples showing the agent how to handle bilingual inputs.",
+      "A self-critique step asking the agent to flag low-confidence classifications.",
+      "A preprocessing layer that detects the primary language, translates Vietnamese sections to English, and passes clean text to the classifier.",
+      "Extended thinking to give the model more capacity to process bilingual text."
+    ],
+    "ans": 2,
+    "expl": "Language mixing is an input quality problem — the classifier degrades because its input doesn't match what it was designed for. Preprocessing detects and normalizes the language before classification, fixing the root cause. A is wrong because few-shot examples can't teach the model to reliably process language it wasn't designed for. B is wrong because self-critique flags the output problem but doesn't fix the input. D is wrong because extended thinking does not compensate for language capability limitations."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "An evaluator-optimizer pattern is set up: a generator produces a draft and an evaluator critiques it. The evaluator is instructed to \"check the response.\" After a week, the team finds the evaluator approves nearly every draft, even mediocre ones. What is the most likely root cause?",
+    "opts": [
+      "The evaluator model needs to be a larger model than the generator.",
+      "The generator prompt needs more few-shot examples to produce better initial drafts.",
+      "The evaluator needs chain-of-thought instructions to deliberate before approving.",
+      "The evaluator instruction is too vague — without specific criteria, the model defaults to approving."
+    ],
+    "ans": 3,
+    "expl": "A vague instruction like \"check the response\" without criteria (accuracy, completeness, constraint compliance) gives the evaluator no basis to reject — it defaults to approval. Specific, enumerated criteria are required for effective self-critique. A is wrong because model size is not the documented issue; evaluation quality depends on criteria clarity. B is wrong because improving the generator does not fix the evaluator's lack of standards. C is wrong because chain-of-thought helps reasoning but doesn't replace the missing evaluation criteria."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A team is debating whether to decompose a complex multi-step task into parallel sub-agents or keep it as a single long prompt. The task involves analyzing a dataset, identifying anomalies, and writing a root cause explanation for each anomaly. The anomalies are independent of each other. What is the correct architectural choice?",
+    "opts": [
+      "Single prompt — parallel decomposition increases coordination complexity for marginal gain.",
+      "Parallel decomposition — each anomaly's analysis is independent, so all can run simultaneously with shared dataset context.",
+      "Parallel decomposition — but only if the number of anomalies exceeds 10.",
+      "Sequential chaining — anomaly identification must complete before any explanation is written."
+    ],
+    "ans": 1,
+    "expl": "When sub-tasks are independent — each anomaly analysis doesn't depend on others — parallel decomposition with shared context (the dataset) reduces total latency proportionally. A is wrong because the coordination overhead is low when tasks are clearly independent and outputs are structurally uniform (one explanation per anomaly). C is wrong because the threshold is not \"10 anomalies\" — independence of tasks is the criterion, not count. D is wrong because the identification phase can be structured to emit all anomalies first, then explanations for each run in parallel."
+  },
+  {
+    "source": "Few-Shot & Prompt Patterns",
+    "prompt": "A developer is tuning extended thinking on Claude Opus 4.7. They call the API with `thinking: {type: \"enabled\", budget_tokens: 10000}`. The API returns a 400 error. What is the correct diagnosis and fix?",
+    "opts": [
+      "The budget_tokens value is too high; lower it to 5000.",
+      "Extended thinking is not supported on the model being called. For Claude Opus 4.7, manual extended thinking (`type: \"enabled\"`) is deprecated — use adaptive thinking (`thinking: {type: \"adaptive\"}`) with the effort parameter instead.",
+      "The `thinking` parameter must be placed in the system prompt, not the API call body.",
+      "The model requires the `extended_thinking: true` flag in addition to the thinking configuration object."
+    ],
+    "ans": 1,
+    "expl": "The extended thinking documentation explicitly states: \"Manual extended thinking (`thinking: {type: 'enabled', budget_tokens: N}`) is no longer supported on Claude Opus 4.7 and returns a 400 error.\" The correct approach for Opus 4.7 is adaptive thinking with the effort parameter. A is wrong because the error is not caused by token budget size. C is wrong because the `thinking` parameter belongs in the API call body, not the system prompt. D is wrong because `extended_thinking: true` is not a documented parameter."
+  }
+];
+
+var MODULE_NAME = "Few-Shot & Prompt Patterns";
+var TAGS = ["Few-Shot", "Self-Critique", "Preprocessing", "Chain-of-Thought", "Prompt Boundaries", "Extended Thinking"];
+var PASS_STORAGE_KEY = 'cca_few_shot_patterns_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_few_shot_patterns_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

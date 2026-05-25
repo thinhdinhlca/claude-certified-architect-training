@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Claude Code for CI/CD Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #f43f5e;
+    --accent2: #e11d48;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "Your mobile app CI pipeline builds Android and iOS variants in parallel. Each variant produces a build log you want Claude to analyze for deprecation warnings. The build takes 12 minutes; the analysis is not blocking any developer. You want to cut analysis costs. Which approach is correct?",
+    "opts": [
+      "Use the synchronous API for each variant analysis so results arrive immediately and can be merged into a single report before the build artifact is uploaded",
+      "Use the Message Batches API to submit both analyses together, collecting results asynchronously since no developer is blocked on the output",
+      "Use the synchronous API because the Message Batches API does not support multi-item submissions from the same pipeline run",
+      "Use the Message Batches API for the iOS variant only, since Android builds are typically faster and their analysis must complete before artifact signing"
+    ],
+    "ans": 1,
+    "expl": "Both analyses are latency-tolerant post-build background work with no developer waiting on them. The Message Batches API delivers ~50% cost savings for exactly this pattern: fire-and-forget, non-blocking, deferred result collection. A is wrong because synchronous routing wastes ~50% cost on work nobody is waiting for. C is wrong because the Batches API explicitly supports submitting multiple requests in a single batch. D is wrong because there is no documented requirement to sequence Android and iOS analyses; signing depends on the artifact, not the analysis result."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A Terraform infrastructure-as-code pipeline runs Claude to validate plan output before `terraform apply`. The pipeline blocks apply until validation completes. A DevOps engineer proposes switching to the Message Batches API to reduce costs by ~50%. Should you make the switch?",
+    "opts": [
+      "Yes — the ~50% savings always justify the switch, and the apply step can be designed to poll for the batch result before proceeding",
+      "Yes — Message Batches API still supports fast responses for short prompts, so the blocking latency impact would be negligible",
+      "No — the Message Batches API is fire-and-forget with up to 24-hour processing time; a blocking gate requires a synchronous response",
+      "No — Terraform plan output often exceeds the token limits of the Message Batches API, making it unsuitable for IaC validation"
+    ],
+    "ans": 2,
+    "expl": "When a pipeline step is blocking (apply cannot proceed without the validation result), it requires a synchronous response. The Message Batches API offers no latency guarantee — processing can take up to 24 hours — which would stall the deployment pipeline indefinitely. A is wrong because polling for a batch result on a blocking gate defeats the purpose and introduces unpredictable delay. B is wrong because the Batches API has no fast-path for short prompts; latency is undefined. D is wrong because the Batches API has the same token limits as the synchronous API."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A nightly pipeline runs Claude against every merged PR from the past week to generate a changelog draft. Each PR produces one Claude request. The team processes roughly 200 PRs per week. Which API approach minimizes cost with acceptable trade-offs?",
+    "opts": [
+      "Synchronous API with a concurrency limit of 5 parallel requests to avoid rate limiting",
+      "Message Batches API to submit all 200 requests in one or more batches, collecting results the following morning",
+      "Synchronous API because 200 requests per week is too small a volume to justify the operational overhead of managing batch job state",
+      "Message Batches API for PRs with more than 10 file changes; synchronous API for smaller PRs to balance latency and cost"
+    ],
+    "ans": 1,
+    "expl": "A weekly nightly run generating changelog drafts is the ideal Message Batches use case: latency-tolerant, non-blocking, scheduled work. Submitting all 200 as a batch captures ~50% cost savings with no impact on any developer workflow. A loses the ~50% savings for no benefit since nobody is waiting overnight. C is wrong — 200 requests/week is precisely the volume where batch savings add up meaningfully, and batch job state management is simple (poll once the next morning). D is wrong because splitting by file count adds complexity without a principled reason; the latency tolerance applies to all 200."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline uses Claude with iterative tool-calling to traverse a dependency graph: Claude calls a `resolve_package` tool, receives the result, calls it again for transitive deps, and repeats until the full tree is resolved. The team wants to cut costs by moving this to the Message Batches API. Is this feasible?",
+    "opts": [
+      "Yes — submit the initial request as a batch item; when it returns with tool call results, submit the next batch item to continue the chain",
+      "Yes — the Message Batches API supports streaming partial results, so tool calls can be intercepted mid-batch and resolved by the CI server",
+      "No — the Message Batches API does not support mid-request tool interception; iterative tool-calling requires a synchronous back-and-forth loop",
+      "No — tool use is disabled in the Message Batches API regardless of the use case or model version"
+    ],
+    "ans": 2,
+    "expl": "Iterative tool-calling requires the client to receive a tool_use block, call the external tool, and send the result back before Claude continues. The Message Batches API is fire-and-forget with no mid-request interception; it cannot pause a batch item to wait for an external tool response. A is wrong because re-submitting follow-up batch items works only for independent requests, not for a stateful multi-turn conversation that depends on the previous turn's tool results. B is wrong because the Batches API does not support streaming. D overstates the restriction — tool use definitions can be included, but the iterative loop pattern specifically cannot work in batch mode."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A release pipeline has two post-merge stages: (1) a 2-minute lightweight lint check that generates inline PR comments a developer must acknowledge before the branch is marked clean, and (2) a full container image vulnerability scan that runs after merge and emails a security summary report. Which API routing is correct?",
+    "opts": [
+      "Synchronous for both — keeping consistent API usage simplifies the pipeline and avoids managing two polling loops",
+      "Message Batches for both — both stages run post-merge so neither is strictly blocking developer action",
+      "Synchronous for stage 1; Message Batches for stage 2 — the developer must acknowledge stage 1 findings before the branch is marked clean, making it blocking; stage 2 is an async report",
+      "Message Batches for stage 1; synchronous for stage 2 — vulnerability findings are high-severity and should be delivered as fast as possible"
+    ],
+    "ans": 2,
+    "expl": "Stage 1 requires a developer to read and acknowledge findings before the branch clears — that is a blocking human-in-the-loop gate requiring a synchronous response. Stage 2 produces an email report with no human waiting synchronously; the ~50% batch savings apply cleanly. A loses the cost savings on stage 2 for no benefit. B is wrong because stage 1 does block the developer (they must acknowledge before the branch is marked clean). D reverses the routing: stage 1 cannot tolerate batch latency since a developer is waiting; stage 2 has no interactive recipient."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "You integrate Claude into a GitHub Actions workflow to review database migration files before they are applied. The job runs `claude \"Review this migration for data-loss risks\"` and the process hangs indefinitely. The workflow has `ANTHROPIC_API_KEY` set correctly. What is the most likely cause and fix?",
+    "opts": [
+      "The API key lacks write permission; add the `migrations:read` scope to the key and retry",
+      "The `claude` command is missing the `-p` flag; without it the CLI waits for interactive input even in a non-TTY environment",
+      "GitHub Actions does not allocate a pseudo-TTY by default; add `shell: bash --login` to the step to fix TTY allocation",
+      "The migration file is too large for inline prompt injection; use `--file` to stream it instead of embedding it in the prompt string"
+    ],
+    "ans": 1,
+    "expl": "Without `-p` / `--print`, the Claude Code CLI enters interactive mode and waits for further input from the user, hanging indefinitely in a CI environment with no TTY. The fix is `claude -p \"Review this migration for data-loss risks\"`. A is wrong because the API key scope for Claude is not broken into sub-permissions like `migrations:read`. C is wrong because the issue is the CLI's interactive mode, not TTY allocation — `bash --login` would not change Claude's behavior. D is wrong because `--file` is not a documented Claude Code CLI flag for streaming file content."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI step runs `claude -p \"Generate release notes from this diff\"` and pipes the output to a shell script that extracts the version number using regex. The regex breaks whenever Claude changes its phrasing. What is the most robust fix?",
+    "opts": [
+      "Pin the Claude model version in the API call so output format does not change across model upgrades",
+      "Add \"respond only in plain text, no markdown\" to the prompt to eliminate formatting variability",
+      "Replace the natural-language prompt with a structured output contract: instruct Claude to return JSON with a `version` field, then parse the JSON in the script",
+      "Add a second Claude call that takes the first output and reformats it into a consistent template before the regex runs"
+    ],
+    "ans": 2,
+    "expl": "Regex over natural language output is inherently fragile because LLM phrasing varies. Defining a structured output contract (e.g., `{\"version\": \"2.4.1\", \"notes\": \"...\"}`) and parsing JSON is robust and survives rephrasing. A is wrong because even a pinned model may vary phrasing across requests. B reduces some variability but \"plain text, no markdown\" still allows Claude to phrase the version in many ways that break a specific regex. D adds cost and latency to work around a problem that structured output solves directly."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A documentation generation pipeline runs Claude to produce API reference docs from OpenAPI spec files. The output includes section headers, but their capitalization style varies across runs (e.g., \"Authentication Methods\" vs \"authentication methods\" vs \"Authentication methods\"). A downstream renderer depends on consistent casing. What prompt engineering technique best stabilizes this?",
+    "opts": [
+      "Add a sentence to the prompt: \"Capitalize section headers consistently\"",
+      "Provide 3–4 few-shot examples in the prompt that demonstrate exactly the expected capitalization style for headers",
+      "Post-process the output with a Python `str.title()` call to normalize all headers after generation",
+      "Enable `temperature=0` in the API call to make output fully deterministic"
+    ],
+    "ans": 1,
+    "expl": "Few-shot examples are the most reliable way to establish a consistent formatting convention in LLM output. Showing Claude concrete examples of the expected style anchors the behavior more strongly than a verbal instruction. A is wrong because \"capitalize consistently\" is ambiguous — it does not specify which style (title case, sentence case, all-caps). C is wrong because `str.title()` would corrupt headers like \"OAuth2\" or \"HTTP/2\" and does not apply to headers that appear mid-sentence. D is wrong because temperature=0 reduces randomness but does not define which casing convention Claude should follow."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A performance regression detection pipeline runs Claude on benchmark result diffs. In the first week, Claude repeatedly flags the same cold-start latency increase that the team already acknowledged and accepted. How should you modify the pipeline to stop these repeat findings?",
+    "opts": [
+      "Add a rule to the post-processing script to filter any finding that contains the word \"cold-start\"",
+      "Inject the list of previously acknowledged findings into the prompt context so Claude knows which regressions have already been reviewed and accepted",
+      "Increase the confidence threshold so only severe regressions above 30% degradation are reported",
+      "Switch to a two-pass architecture where the first pass identifies regressions and the second pass deduplicates against a static known-issues list"
+    ],
+    "ans": 1,
+    "expl": "Claude can only avoid repeating acknowledged findings if it can see what has already been accepted. Injecting prior findings as prompt context gives Claude the ground truth to reason against, directly solving the duplication problem. A is wrong because keyword filtering on \"cold-start\" is brittle — future cold-start regressions that should be flagged would also be suppressed. C is wrong because the threshold change would suppress legitimate regressions below 30% and does not address why acknowledged findings keep resurfacing. D is wrong because deduplication against a static list requires maintaining that list separately and still does not give Claude the context to reason about why something was accepted."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline posts Claude's code review findings as PR comments. A developer notices that Claude's output sometimes contains raw Markdown backtick code blocks with unescaped HTML entities from user-supplied variable names. These get rendered unexpectedly in the GitHub PR UI. What change addresses this safely?",
+    "opts": [
+      "Pass `--output-format plain` to the `claude -p` invocation to strip all Markdown from the response",
+      "Sanitize Claude's output in the pipeline script before posting it to the GitHub PR API, escaping or stripping unsafe HTML entities",
+      "Add to the prompt: \"Do not use HTML entities in your output\" to prevent the issue at generation time",
+      "Switch from inline PR comments to a separate PR summary comment so HTML rendering is isolated to one location"
+    ],
+    "ans": 1,
+    "expl": "Sanitizing output before posting to an external API is the correct defense-in-depth approach. Claude cannot reliably guarantee absence of user-controlled content that may contain HTML entities, so the pipeline layer must sanitize before forwarding to the GitHub API. A is wrong because `--output-format plain` is not a valid Claude Code CLI flag. C is wrong because the entities originate from user-supplied variable names in the analyzed code, not from Claude's own phrasing — a prompt instruction cannot prevent Claude from quoting code that already contains them. D is wrong because it moves the problem, not fixes it."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "You want Claude Code to run in a GitHub Actions job that reviews container Dockerfiles for security best practices. The job must read findings as structured data to decide whether to fail the build. Which invocation pattern is most appropriate?",
+    "opts": [
+      "`claude -p \"Review this Dockerfile\" | jq '.findings'`",
+      "`claude -p \"Review this Dockerfile\" --output-format json` and parse the JSON `result` field in the script",
+      "`claude -p \"Review this Dockerfile\" --output-format stream-json` and accumulate the streamed JSON lines until the `result` event appears",
+      "`claude -p \"Review this Dockerfile\" --json` and treat each line as an independent JSON object"
+    ],
+    "ans": 2,
+    "expl": "`--output-format stream-json` emits newline-delimited JSON events including a final `result` event; this is the correct machine-readable mode for CI scripts that need to parse structured output from Claude Code. B is partially right in concept but `--output-format json` is not the documented flag — the correct flag is `stream-json` for streaming or `json` depending on the CLI version, but `stream-json` is the documented CI-friendly mode. A is wrong because plain text output does not have a `.findings` JSON key to `jq` against. D is wrong because `--json` is not a valid Claude Code CLI flag."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A GitHub Actions workflow needs to limit how many tokens Claude Code can use per review to control costs. Which approach is correct for the Claude Code CLI?",
+    "opts": [
+      "Pass `--max-tokens 2000` to the `claude -p` invocation to cap the response length",
+      "Set the `CLAUDE_CODE_MAX_OUTPUT_TOKENS` environment variable in the workflow step before invoking `claude -p`",
+      "Add `max_tokens: 2000` to a `.claude-ci-config.yml` file in the repository root so it is auto-loaded",
+      "Use the `--budget 2000` flag to set a combined input+output token budget for the session"
+    ],
+    "ans": 1,
+    "expl": "`CLAUDE_CODE_MAX_OUTPUT_TOKENS` is the documented environment variable for controlling maximum output token count in Claude Code CLI invocations, making it the correct CI tuning mechanism. A is wrong because `--max-tokens` is not a documented Claude Code CLI flag; it is an API parameter, not a CLI flag. C is wrong because `.claude-ci-config.yml` is not an auto-loaded config file in Claude Code. D is wrong because `--budget` is not a valid Claude Code CLI flag."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A mobile release pipeline uses Claude to analyze crash symbolication reports after each TestFlight build. The analysis script exits with a non-zero code and the CI job fails, but the Claude output looks correct. You need to distinguish between a Claude processing error and a script logic error. What exit code indicates a Claude configuration or permission error specifically?",
+    "opts": [
+      "Exit code 1 — generic error covering both Claude and script failures",
+      "Exit code 2 — configuration or permission error from the Claude Code CLI",
+      "Exit code 3 — permission denied when Claude attempts to read a file outside the allowed path",
+      "Exit code 127 — command not found, indicating Claude Code is not installed in the CI environment"
+    ],
+    "ans": 1,
+    "expl": "The Claude Code CLI uses exit code 2 specifically for configuration and permission errors, distinguishing them from general runtime errors (exit code 1). This lets CI scripts branch on the exit code to detect misconfiguration separately from processing failures. A is wrong because exit code 1 is a general error, not specific to configuration issues. C is wrong because exit code 3 is not a documented Claude Code exit code. D is correct in what it means (command not found in shell) but is a shell-level error, not a Claude Code exit code."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A team deploys Claude Code in a Jenkins pipeline on a self-hosted agent. The agent has no internet access to Claude.ai but does have access to the Anthropic API endpoint. The `claude` CLI command is available. What configuration ensures the CLI uses the API correctly in this environment?",
+    "opts": [
+      "Set `ANTHROPIC_BASE_URL` to point to an internal proxy that forwards to `api.anthropic.com`",
+      "Set `ANTHROPIC_API_KEY` in the agent environment — the CLI uses the API endpoint directly and does not require claude.ai access",
+      "Add `--no-web` to the `claude -p` invocation to disable browser-based authentication flows",
+      "Configure `CLAUDE_CODE_USE_BEDROCK=1` to route through AWS Bedrock instead of the Anthropic API, which is accessible from the agent network"
+    ],
+    "ans": 1,
+    "expl": "The Claude Code CLI authenticates via `ANTHROPIC_API_KEY` and calls the Anthropic API endpoint directly. Claude.ai (the web product) is not required for CLI operation. A is unnecessary if the agent already has direct access to `api.anthropic.com`. C is wrong because `--no-web` is not a documented CLI flag. D is wrong because Bedrock routing requires AWS credentials and Bedrock-specific configuration; it is a separate deployment path, not a fix for network access."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline analyzes API compatibility between two versions of a service. The prompt instructs Claude to \"list breaking changes.\" Across 50 pipeline runs, Claude sometimes lists changes as bullets, sometimes as a numbered list, and sometimes as a prose paragraph. A downstream consumer parses the output programmatically. What is the most effective prompt fix?",
+    "opts": [
+      "Append \"Use bullet points only\" to the prompt to enforce a single list format",
+      "Run each analysis twice and compare outputs; use the majority format as the canonical result",
+      "Define an explicit JSON schema in the prompt (e.g., `{\"breaking_changes\": [\"...\", \"...\"]}`) and instruct Claude to return only valid JSON matching that schema",
+      "Add `--seed 42` to the `claude -p` invocation to make output formatting deterministic"
+    ],
+    "ans": 2,
+    "expl": "Defining a JSON schema in the prompt and requiring Claude to return valid JSON matching it is the only approach that reliably enforces machine-parseable structure. A reduces variability but bullets vs prose can still vary in nesting and punctuation that breaks parsers. B doubles API cost and still does not guarantee consistent format — two inconsistent outputs produce no majority. D is wrong because `--seed` is not a documented Claude Code CLI flag."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A security scanning pipeline flags a high number of false positives in the \"hardcoded secrets\" category. The team tunes the prompt by adding: \"Only report findings where you are highly confident a real secret is present.\" After the change, the false positive rate drops from 60% to 35%, but developers still distrust the category and ignore all findings. What additional change most restores developer trust?",
+    "opts": [
+      "Further lower the confidence threshold by adding \"Only report findings where you are certain beyond all doubt\"",
+      "Have Claude include a brief rationale and confidence percentage for each finding so developers can triage quickly in a single pass",
+      "Add a second Claude review pass that independently re-scores each finding to filter out remaining false positives",
+      "Switch to a rule-based regex scanner for secrets detection and remove Claude from this category entirely"
+    ],
+    "ans": 1,
+    "expl": "Including a rationale and confidence score per finding lets developers triage at a glance — high-confidence findings with clear reasons are acted on, and borderline ones can be reviewed with context. This restores signal without removing the category. A continues tightening verbal thresholds, which have diminishing returns at 35% FP and still give developers no basis to distinguish findings. C adds latency and cost for a second LLM pass that may not reduce FP significantly further. D abandons the AI capability entirely rather than improving trust in the output."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "An API compatibility test pipeline needs to decide which changes require a human approval gate before deployment. Claude assigns a severity field in its JSON output. The team debates whether to auto-block on severity >= \"high\" or require a second Claude pass to confirm. When is a second Claude pass worth the added cost and latency?",
+    "opts": [
+      "Always — two LLM evaluations always produce a more accurate result than one",
+      "When the first pass is a broad sweep (many files, low context per file) and the second pass does a focused deep-dive on candidate issues with full context",
+      "When the model used in the first pass is a smaller, cheaper model and the second pass upgrades to a larger model for confirmation",
+      "When the first pass prompt instructs Claude to reason step-by-step (chain-of-thought), making a second pass redundant"
+    ],
+    "ans": 1,
+    "expl": "A multi-pass architecture earns its cost when the passes are structurally different: the first pass is a broad, cheap triage over many files and the second pass does a focused, high-context deep-dive on the candidates surfaced by the first. This delivers better accuracy than one expensive full-context pass. A is wrong because two identical passes on the same input add cost without meaningful accuracy gain. C is a valid optimization pattern but is a subset of B — the key is context depth, not just model size. D is wrong because chain-of-thought in one pass does not eliminate the benefit of a second independent focused evaluation."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline reviews infrastructure Terraform modules. A single module can span 15 files. The team runs one Claude call with all 15 files concatenated. Review quality is poor for files that appear late in the context. Which architecture change addresses this?",
+    "opts": [
+      "Increase `CLAUDE_CODE_MAX_OUTPUT_TOKENS` to allow Claude more room to cover all files",
+      "Run a per-file pass first to collect per-file findings, then a second integration pass with only the cross-file summaries as context to identify integration-level issues",
+      "Randomize the file order on each run so no single file is always penalized by late-context attention decay",
+      "Split the module into separate smaller modules to reduce the number of files Claude needs to review simultaneously"
+    ],
+    "ans": 1,
+    "expl": "A multi-pass architecture solves late-context degradation: each file gets a focused first-pass review, and the integration pass uses only the condensed findings (not the full source), keeping the integration context small and high-signal. A is wrong because output token count does not affect attention over input context. C is wrong because randomizing order does not fix attention degradation — it just distributes it randomly. D changes the repository structure to work around a pipeline limitation, which is the wrong layer to fix."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A team runs Claude to review every pushed commit for security vulnerabilities. The pipeline runs cheaply but developers complain that obvious style and formatting issues are consuming finding slots that should be used for real security findings. What pipeline stage ordering change best addresses this?",
+    "opts": [
+      "Run both security and style checks in parallel, then merge the output and rank by severity before presenting findings",
+      "Run a cheap deterministic linter and formatter first; only invoke Claude for security review after linting passes, so Claude focuses exclusively on security",
+      "Add a prompt instruction: \"Ignore style and formatting issues, focus only on security\" and remove the linter from the pipeline entirely",
+      "Increase Claude's context window allocation so it can surface more findings per run without dropping security issues"
+    ],
+    "ans": 1,
+    "expl": "Running cheap deterministic tools first (linters, formatters) filters out the noise before Claude is invoked, so Claude's attention and output budget are not wasted on issues a rule-based tool catches more cheaply and reliably. A is wrong because parallel execution still spends Claude tokens on style issues. C is wrong because removing the linter eliminates reliable, cheap style enforcement; a prompt instruction is less reliable than a dedicated tool for rule-based checks. D is wrong because adding context does not change what Claude chooses to report when both style and security issues are present."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A new CI reviewer is added alongside an existing one. Both run Claude, but the new reviewer generates findings on code that the existing reviewer wrote in the same pipeline session. A senior engineer notices the new reviewer is systematically less critical of that code. What is the architectural cause and fix?",
+    "opts": [
+      "The new reviewer has a lower confidence threshold; raise its threshold to match the existing reviewer",
+      "Both reviewers share the same Claude session, so the new reviewer has implicit context that the code was written by the session's prior actions — use independent fresh Claude instances for reviewer roles",
+      "The new reviewer runs after the existing one, so it sees prior approved findings and anchors on them — reverse the execution order",
+      "The new reviewer's system prompt is shorter, giving it less guidance; expand the system prompt to match the existing reviewer's"
+    ],
+    "ans": 1,
+    "expl": "When a reviewer and the code author share a session, the reviewer inherits in-context knowledge of the authoring decisions, which creates confirmation bias — it is less likely to critique choices it \"made.\" The fix is the independent reviewer pattern: each reviewer is a fresh Claude instance with no session history of the code's creation. A is wrong because the issue is session context, not threshold calibration. C is wrong because execution order does not change the shared session context problem. D is wrong because system prompt length is not the cause; the session state is."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A Kubernetes deployment pipeline stores Claude's review context in `CLAUDE.md` at the repo root. The team wants Claude to know which environments are production vs staging to avoid flagging safe staging-only configurations as production risks. Where should this context be defined, and how does Claude Code load it?",
+    "opts": [
+      "In a `claude-context.json` file passed via `--context-file` flag at invocation time",
+      "In `.claude/settings.json` under a `environments` key that Claude Code reads automatically",
+      "In `CLAUDE.md` at the appropriate directory level — Claude Code automatically reads `CLAUDE.md` files to inject project and directory context into the session",
+      "In a `SYSTEM_PROMPT.txt` file that must be passed explicitly via `--system-prompt SYSTEM_PROMPT.txt`"
+    ],
+    "ans": 2,
+    "expl": "Claude Code automatically reads `CLAUDE.md` files from the current directory and parent directories to inject project context into the session. This is the designed mechanism for providing CI-specific, project-level, or directory-level context without modifying the invocation command. A is wrong because `--context-file` is not a documented Claude Code flag. B is wrong because `.claude/settings.json` manages tool permissions and settings, not free-form context injection. D is wrong because `--system-prompt` is not a documented Claude Code CLI flag for file-based system prompts."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A fintech CI pipeline stores the `ANTHROPIC_API_KEY` as a GitHub Actions secret. A security audit flags that all pipeline jobs, including documentation generation and style linting, share the same key. What is the recommended least-privilege approach?",
+    "opts": [
+      "Generate a separate API key for each job and store each as its own GitHub Actions secret, rotating all keys on a 90-day schedule",
+      "Use a single key but restrict it to specific IP addresses matching GitHub Actions runner IPs",
+      "Scope access by using separate keys for high-sensitivity (security review) and low-sensitivity (docs, linting) jobs, with different usage monitoring and rotation policies per tier",
+      "Store the API key in a `.env` file committed to the repository with restricted branch permissions"
+    ],
+    "ans": 2,
+    "expl": "Tiering keys by sensitivity level is a practical least-privilege approach: high-sensitivity jobs get a tightly monitored key; low-sensitivity jobs use a separate key with lower blast radius if compromised. A is operationally correct in principle but per-job keys for docs and linting creates unnecessary management overhead. B is wrong because Anthropic does not support IP-restricted API keys as a product feature. D is wrong because committing secrets to a repository, even with branch restrictions, is a security antipattern and violates secrets management best practices."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline for a Python library generates documentation from docstrings using Claude. After a model update, the pipeline starts producing docs with inconsistent section ordering (Parameters before Returns in some files, reversed in others). The team wants to enforce the order without re-running failed docs manually. What is the best prompt engineering fix?",
+    "opts": [
+      "Add `--deterministic` to the `claude -p` invocation to lock output ordering",
+      "Provide a concrete few-shot example in the prompt that demonstrates exactly one function's complete documentation with Parameters then Returns in the required order",
+      "Add \"Always output Parameters before Returns\" as a bulleted rule at the end of the system prompt",
+      "Post-process the documentation output with a parser that reorders sections alphabetically after generation"
+    ],
+    "ans": 1,
+    "expl": "A few-shot example showing the exact desired output structure anchors Claude's behavior more reliably than a textual rule. Seeing the correct section ordering demonstrated concretely is more effective than describing it. A is wrong because `--deterministic` is not a documented Claude Code CLI flag. C is a reasonable addition but verbal rules are less stable than concrete examples when formatting conventions need to be consistent across many files. D is wrong because alphabetical ordering does not match the required semantic ordering (Parameters then Returns)."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A mobile CI pipeline uses Claude to generate App Store release notes from git commit messages. Occasionally, Claude's output contains developer-internal shorthand (e.g., \"fixes JIRA-4521\", \"reverts hotfix from staging\") that should not appear in user-facing release notes. What prompt technique prevents this most reliably?",
+    "opts": [
+      "Post-filter the output with a regex that strips patterns matching `JIRA-\\d+` and known internal terms",
+      "Add \"Do not include internal ticket references or staging environment details\" as a constraint in the prompt",
+      "Provide few-shot examples where commits with internal references are transformed into user-facing language that focuses on user benefit, demonstrating the desired transformation explicitly",
+      "Run a second Claude pass instructed to \"remove internal developer references\" from the first pass output"
+    ],
+    "ans": 2,
+    "expl": "Few-shot examples that show the transformation from raw commits (including internal references) to clean user-facing language teach Claude the mapping concretely, covering both the inclusion rule and the tone. A handles known patterns but misses novel internal shorthand. B is a useful constraint but may not cover unfamiliar internal references Claude has not seen. D adds cost and latency for a task that well-designed few-shot examples handle in one pass."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline for a multi-service monorepo runs Claude security review on every service that changed in a PR. A PR touches 8 services. The team notices each service's review mentions the same global authentication library vulnerability that was already reported and tracked. How should the pipeline reduce this redundant finding across services?",
+    "opts": [
+      "Deduplicate the output post-hoc using a script that detects identical finding descriptions across service reports",
+      "Run one review for the authentication library independently, then inject a \"known tracked issues\" list into each service's review prompt so Claude omits already-tracked findings",
+      "Add \"Do not report vulnerabilities in shared libraries\" to the prompt so Claude focuses only on service-specific code",
+      "Merge all 8 service reviews into one large prompt so Claude can self-deduplicate across services in a single pass"
+    ],
+    "ans": 1,
+    "expl": "Injecting a known-issues list gives Claude the context to distinguish new findings from already-tracked ones, preventing redundant noise across all 8 service reviews. A catches exact duplicates but misses paraphrased variations of the same finding. C is wrong because suppressing all shared library findings would hide new vulnerabilities introduced in future library updates. D is wrong because merging 8 services into one prompt risks context window overflow, attention degradation across long context, and makes individual service findings harder to route."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "An iOS CI pipeline runs Claude to review Swift PRs for API compatibility breaks. The first run flags 12 issues with detailed reasoning. A developer fixes 3 issues and pushes a follow-up commit. The second pipeline run flags the same 9 remaining issues plus the same 3 the developer already fixed. What context injection prevents the re-flagging of already-fixed issues?",
+    "opts": [
+      "Inject the diff of the follow-up commit only, so Claude reviews only changed lines rather than the full file",
+      "Inject the list of previously flagged issues with their resolution status into the prompt context, so Claude knows which issues have been addressed",
+      "Cache the first run's output and skip the second run if fewer than 5 new files were changed",
+      "Increase `CLAUDE_CODE_MAX_OUTPUT_TOKENS` so Claude has room to reason about historical findings alongside new ones"
+    ],
+    "ans": 1,
+    "expl": "Providing the resolution status of prior findings gives Claude the context to avoid re-flagging closed issues. This is the context-injection pattern for reducing repeat suggestions. A only reviewing the diff solves re-flagging of fixed lines but may miss issues that regressed in unchanged code or require whole-file context. C is wrong because skipping the review entirely would miss new issues in the unchanged files. D is wrong because output token count does not provide Claude with knowledge of previous findings."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline posts Claude's review output directly to a PR comment via the GitHub API. A red team exercise shows that a malicious contributor could craft a commit message containing an HTML injection payload that gets embedded in Claude's output and rendered in the PR comment. What is the correct mitigation layer?",
+    "opts": [
+      "Add to the prompt: \"Do not include content from commit messages verbatim in your output\"",
+      "Enable HTML escaping on the GitHub API call by passing `mediaType: \"raw\"` instead of `mediaType: \"html\"` in the request",
+      "Sanitize Claude's output in the pipeline script — escape HTML entities before posting the string to the GitHub PR API",
+      "Switch from PR comments to a separate GitHub Check Run to isolate the output in a sandboxed UI element"
+    ],
+    "ans": 2,
+    "expl": "Sanitizing output before posting to any external API is the correct pipeline-layer defense. Claude will naturally quote user-supplied content (commit messages) in its reviews; a prompt instruction cannot reliably prevent quoting. The pipeline must escape HTML entities before forwarding Claude's output to GitHub. A is wrong because \"do not quote verbatim\" would degrade review quality and Claude may still paraphrase in ways that include injected content. B is wrong because the `mediaType` parameter controls response format from the GitHub API, not input sanitization. D moves the problem to a different UI but does not sanitize the content."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A team wants to add Claude-powered review to their CI pipeline but is concerned about rate limiting during high-traffic periods when many developers push simultaneously. The pipeline currently makes synchronous requests. What architectural change best handles rate limit spikes without dropping reviews?",
+    "opts": [
+      "Implement exponential backoff with jitter in the pipeline: on a 429 response, wait and retry with increasing intervals up to a maximum retry count",
+      "Switch to the Message Batches API, which is not subject to rate limits because requests are queued server-side",
+      "Add a fixed 5-second sleep before each Claude API call to spread requests over time",
+      "Cache identical prompt+code combinations so repeated pushes of the same diff reuse the prior Claude response"
+    ],
+    "ans": 0,
+    "expl": "Exponential backoff with jitter is the standard pattern for handling API rate limiting gracefully: it retries transient 429 errors without hammering the API, and jitter prevents thundering-herd re-collision. B is wrong because the Message Batches API is also subject to rate limits; it does not bypass them. C is wrong because a fixed sleep adds unnecessary latency during normal traffic and may still cause collisions during spikes. D is a valid cost optimization but does not handle rate limiting — identical diffs pushed simultaneously would still generate concurrent requests."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A Helm chart validation pipeline runs Claude to detect misconfigurations before deployment. The team wants to ensure that Claude has fresh knowledge of the company's internal Helm chart standards without changing the invocation command in every pipeline job. What is the cleanest configuration-as-code approach?",
+    "opts": [
+      "Create a `claude-standards.md` file and pass it via `--system-prompt claude-standards.md` in each pipeline job invocation",
+      "Place the Helm chart standards documentation in `CLAUDE.md` at the repository root so Claude Code automatically injects it as project context in every session",
+      "Store the standards in a GitHub Actions variable `CLAUDE_SYSTEM_CONTEXT` and reference it as `$CLAUDE_SYSTEM_CONTEXT` in the prompt string",
+      "Embed the standards as a comment block at the top of each Helm chart file so Claude reads them as part of the file context"
+    ],
+    "ans": 1,
+    "expl": "`CLAUDE.md` is the designed mechanism for project-level context injection in Claude Code. It is loaded automatically without any flag changes to the invocation command, satisfying the \"without changing the invocation command\" requirement. Standards updates are just file edits, not pipeline script changes. A requires every pipeline job to include a `--system-prompt` flag, which is the opposite of \"without changing the invocation command.\" C is wrong because `CLAUDE_SYSTEM_CONTEXT` is not a recognized Claude Code environment variable for system prompt injection. D embeds standards in source files, polluting the chart files with non-chart content and making standards updates require changes to every chart file."
+  },
+  {
+    "source": "Claude Code for CI/CD",
+    "prompt": "A CI pipeline generates a nightly dependency vulnerability report for a Node.js monorepo with 120 packages. Each package gets one Claude analysis request. The report is delivered by email each morning and no developer is waiting synchronously. The team currently spends $180/month on this pipeline. Which change most directly reduces cost for this workload?",
+    "opts": [
+      "Reduce the number of packages scanned by filtering to only packages that changed in the last 7 days",
+      "Switch from the synchronous API to the Message Batches API; the nightly, non-blocking nature of the job makes it an ideal batch workload that delivers ~50% cost savings",
+      "Cache analysis results for packages whose lock file has not changed since the last nightly run and skip re-analysis for those packages",
+      "Downgrade from Claude Sonnet to Claude Haiku for all 120 package analyses to reduce per-request cost"
+    ],
+    "ans": 1,
+    "expl": "The Message Batches API delivers ~50% cost reduction for exactly this pattern: 120 independent requests, nightly schedule, no synchronous consumer, latency-tolerant background job. At $180/month this saves approximately $90/month with no changes to the analysis quality or scope. A is a valid optimization but filtering to recently changed packages may miss vulnerabilities discovered in unchanged transitive dependencies. C is also a valid optimization that would reduce scope but requires maintaining cache state and may miss newly disclosed CVEs for unchanged packages. D reduces quality and may miss nuanced vulnerability analysis; it is a separate lever from the batch API cost optimization."
+  }
+];
+
+var MODULE_NAME = "Claude Code for CI/CD";
+var TAGS = ["Plan Mode", "CI/CD Pipelines", "Batch Processing", "Pre-merge Review", "Non-interactive", "Automation"];
+var PASS_STORAGE_KEY = 'cca_ci_cd_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_ci_cd_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

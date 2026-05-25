@@ -1,480 +1,850 @@
 {
-  "2026-05-09": {
-    "focus": "Week 1: Foundations + Domain 1 core",
-    "kind": "weekend_sat",
-    "reading": "Read: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/implement-tool-use ; Read: https://docs.anthropic.com/en/docs/build-with-claude/mcp ; Review: /Users/thinh/Developer/Projects/claude-certified-architect/README.md (Week 1-2 sections)",
-    "test_sources": [
-      "practice-tests/test-01-agentic-loops.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-09 --count 20 --timed-minutes 90",
-    "review_slot_4pm": [
-      "Mistake review + decision frameworks: /Users/thinh/Developer/Projects/claude-certified-architect/README.md"
-    ]
-  },
-  "2026-05-10": {
-    "focus": "Week 1: Foundations + Domain 1 core",
-    "kind": "weekend_sun",
-    "reading": "Read: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/implement-tool-use ; Read: https://docs.anthropic.com/en/docs/build-with-claude/mcp ; Review: /Users/thinh/Developer/Projects/claude-certified-architect/README.md (Week 1-2 sections)",
-    "test_sources": [
-      "practice-tests/test-02-multi-agent.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-10 --count 20 --timed-minutes 90",
-    "review_slot_4pm": [
-      "Mistake review + decision frameworks: /Users/thinh/Developer/Projects/claude-certified-architect/README.md"
-    ]
-  },
-  "2026-05-11": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
+  "2026-05-18": {
+    "focus": "Block 1: Context Isolation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
+    "reading": "Context isolation signals: docs/exam-debrief-1.md (Scenario 1 + anti-pattern notes) ; Artifact drill: practice-tests/real-exam-questions/scenario-01-code-generation.md (Q5, Q7, Q10, Q11, Q13, Q15) ; Scenario coverage add-on: README.md scenario 4 (Developer Productivity with Claude) ; 30m anti-pattern drill #1: Parsing natural language for loop termination instead of stop_reason ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Detect context-pollution signals and pick the right isolation primitive (`context: fork`, Explore subagent, on-demand skills). ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-11 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-12": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-12 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-13": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-13 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-14": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-14 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-15": {
-    "focus": "Week 2: Hooks, workflows, MCP integration",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/hooks-guide ; Read: https://docs.anthropic.com/en/docs/claude-code/hooks ; Course queue (Academy): Introduction to MCP, MCP Advanced Topics (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-03-hooks-workflows.md",
-      "practice-tests/test-04-tool-design-mcp.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-15 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-16": {
-    "focus": "Week 3: Claude Code config + workflows",
-    "kind": "weekend_sat",
-    "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Review: /Users/thinh/Developer/Projects/claude-certified-architect/README.md (Week 5-6 sections)",
-    "test_sources": [
+      "practice-tests/real-exam-questions/scenario-01-code-generation.md",
       "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-16 --count 20 --timed-minutes 90",
-    "review_slot_4pm": [
-      "Review wrong answers; convert to CLAUDE.md rule checklist"
-    ]
-  },
-  "2026-05-17": {
-    "focus": "Week 3: Claude Code config + workflows",
-    "kind": "weekend_sun",
-    "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Review: /Users/thinh/Developer/Projects/claude-certified-architect/README.md (Week 5-6 sections)",
-    "test_sources": [
-      "practice-tests/test-06-plan-mode-cicd.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-17 --count 20 --timed-minutes 90",
-    "review_slot_4pm": [
-      "Review wrong answers; convert to CLAUDE.md rule checklist"
-    ]
-  },
-  "2026-05-18": {
-    "focus": "Week 3: Claude Code config + workflows",
-    "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
-    "test_sources": [
-      "practice-tests/test-05-claude-code-config.md",
-      "practice-tests/test-06-plan-mode-cicd.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-18 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-18 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Detect context-pollution signals and pick the right isolation primitive (`context: fork`, Explore subagent, on-demand skills).",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-context-isolation-quiz.html"
   },
   "2026-05-19": {
-    "focus": "Week 3: Claude Code config + workflows",
+    "focus": "Block 1: Context Isolation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
+    "reading": "Context isolation signals: docs/exam-debrief-1.md (Scenario 1 + anti-pattern notes) ; Artifact drill: practice-tests/real-exam-questions/scenario-01-code-generation.md (Q5, Q7, Q10, Q11, Q13, Q15) ; Scenario coverage add-on: README.md scenario 4 (Developer Productivity with Claude) ; 30m anti-pattern drill #2: Using arbitrary iteration caps as primary loop control ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Differentiate always-loaded vs on-demand context (`CLAUDE.md` vs Skills vs `.claude/rules/`). ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-05-claude-code-config.md",
-      "practice-tests/test-06-plan-mode-cicd.md"
+      "practice-tests/real-exam-questions/scenario-01-code-generation.md",
+      "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-19 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-19 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Differentiate always-loaded vs on-demand context (`CLAUDE.md` vs Skills vs `.claude/rules/`).",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-context-isolation-quiz.html"
   },
   "2026-05-20": {
-    "focus": "Week 3: Claude Code config + workflows",
+    "focus": "Block 1: Context Isolation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
+    "reading": "Context isolation signals: docs/exam-debrief-1.md (Scenario 1 + anti-pattern notes) ; Artifact drill: practice-tests/real-exam-questions/scenario-01-code-generation.md (Q5, Q7, Q10, Q11, Q13, Q15) ; Scenario coverage add-on: README.md scenario 4 (Developer Productivity with Claude) ; 30m anti-pattern drill #3: Prompt-based enforcement for critical business rules ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Apply path-scoped rule selection with glob-style reasoning for mixed file types. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-05-claude-code-config.md",
-      "practice-tests/test-06-plan-mode-cicd.md"
+      "practice-tests/real-exam-questions/scenario-01-code-generation.md",
+      "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-20 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-20 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Apply path-scoped rule selection with glob-style reasoning for mixed file types.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-context-isolation-quiz.html"
   },
   "2026-05-21": {
-    "focus": "Week 3: Claude Code config + workflows",
+    "focus": "Block 1: Context Isolation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
+    "reading": "Context isolation signals: docs/exam-debrief-1.md (Scenario 1 + anti-pattern notes) ; Artifact drill: practice-tests/real-exam-questions/scenario-01-code-generation.md (Q5, Q7, Q10, Q11, Q13, Q15) ; Scenario coverage add-on: README.md scenario 4 (Developer Productivity with Claude) ; 30m anti-pattern drill #4: Trusting model self-reported confidence ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Resolve multi-symptom config failures with deterministic frontmatter (`argument-hint`, `allowed-tools`, `context: fork`). ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-05-claude-code-config.md",
-      "practice-tests/test-06-plan-mode-cicd.md"
+      "practice-tests/real-exam-questions/scenario-01-code-generation.md",
+      "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-21 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-21 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Resolve multi-symptom config failures with deterministic frontmatter (`argument-hint`, `allowed-tools`, `context: fork`).",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-context-isolation-quiz.html"
   },
   "2026-05-22": {
-    "focus": "Week 3: Claude Code config + workflows",
+    "focus": "Block 1: Context Isolation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/claude-code/overview ; Read: https://docs.anthropic.com/en/docs/claude-code/quickstart ; Read: https://docs.anthropic.com/en/docs/claude-code/settings ; Read: https://docs.anthropic.com/en/docs/claude-code/memory ; Read: https://docs.anthropic.com/en/docs/claude-code/slash-commands ; Read: https://docs.anthropic.com/en/docs/claude-code/sub-agents ; Course queue (Academy): Claude Code 101, Claude Code in Action, Introduction to Claude Cowork (https://anthropic.skilljar.com)",
+    "reading": "Context isolation signals: docs/exam-debrief-1.md (Scenario 1 + anti-pattern notes) ; Artifact drill: practice-tests/real-exam-questions/scenario-01-code-generation.md (Q5, Q7, Q10, Q11, Q13, Q15) ; Scenario coverage add-on: README.md scenario 4 (Developer Productivity with Claude) ; 30m anti-pattern drill #5: Escalating based on customer sentiment alone ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Practice context-preserving design tradeoffs under token pressure with concise output contracts. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
+      "practice-tests/real-exam-questions/scenario-01-code-generation.md",
+      "practice-tests/test-05-claude-code-config.md"
+    ],
+    "test_command": "./cca test --date 2026-05-22 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Practice context-preserving design tradeoffs under token pressure with concise output contracts.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-context-isolation-quiz.html"
+  },
+  "2026-05-23": {
+    "focus": "Full Scenario Exam 1/4 - Scenario 1 (Code Generation)",
+    "kind": "weekend_sat",
+    "reading": "Primary artifact: practice-tests/real-exam-questions/scenario-01-code-generation.md ; Construction constraints: PREPARATION-GUIDE.md patterns 1-7 ; Distractor rules + explanation rubric: PREPARATION-GUIDE.md (Distractor Design Rules, Explanation Rules) ; Cross-check gaps from first pass: docs/exam-debrief-1.md ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
+    "test_sources": [
+      "practice-tests/real-exam-questions/scenario-01-code-generation.md",
       "practice-tests/test-05-claude-code-config.md",
       "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-22 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
-  },
-  "2026-05-23": {
-    "focus": "Week 4: Prompt engineering + structured output",
-    "kind": "weekend_sat",
-    "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Review full scenario notes: /Users/thinh/Developer/Projects/claude-certified-architect/practice-tests/full-exam-01.md",
-    "test_sources": [
-      "practice-tests/test-07-prompt-engineering.md"
-    ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-23 --count 20 --timed-minutes 90",
+    "test_command": "./cca exam-html --seed 20260523 --modules 4 --per-module 15 --timed-minutes 90 --output quizzes/cca-prep-exam-2026-05-23.html",
     "review_slot_4pm": [
-      "Spot semantic-vs-schema errors; design retry prompts"
+      "Post-exam audit: log misses by pattern id and constraint keyword",
+      "Generate 8 flashcards from misses (term, trigger, right decision, anti-pattern)",
+      "Run single-file prep exam: open quizzes/cca-prep-exam-2026-05-23.html"
     ]
   },
   "2026-05-24": {
-    "focus": "Week 4: Prompt engineering + structured output",
+    "focus": "Block 2: Error Propagation - scenario-pattern sprint",
     "kind": "weekend_sun",
-    "reading": "Read: https://docs.anthropic.com/en/api/creating-message-batches ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Review full scenario notes: /Users/thinh/Developer/Projects/claude-certified-architect/practice-tests/full-exam-01.md",
+    "reading": "Error taxonomy + structured context: docs/exam-debrief-1.md (Failure Modes + Scenario 2) ; Artifact drill: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md (Q1, Q2, Q7, Q13, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 8-15 ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-24 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-24 --count 12 --timed-minutes 60",
     "review_slot_4pm": [
-      "Spot semantic-vs-schema errors; design retry prompts"
-    ]
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "html_quiz": "quizzes/cca-error-propagation-quiz.html"
   },
   "2026-05-25": {
-    "focus": "Week 4: Prompt engineering + structured output",
+    "focus": "Block 2: Error Propagation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Error taxonomy + structured context: docs/exam-debrief-1.md (Failure Modes + Scenario 2) ; Artifact drill: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md (Q1, Q2, Q7, Q13, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 8-15 ; 30m anti-pattern drill #6: Returning generic error messages without context ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Classify error outcomes: retryable access failure vs valid empty result vs policy gap. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-25 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-25 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Classify error outcomes: retryable access failure vs valid empty result vs policy gap.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-error-propagation-quiz.html"
   },
   "2026-05-26": {
-    "focus": "Week 4: Prompt engineering + structured output",
+    "focus": "Block 2: Error Propagation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Error taxonomy + structured context: docs/exam-debrief-1.md (Failure Modes + Scenario 2) ; Artifact drill: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md (Q1, Q2, Q7, Q13, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 8-15 ; 30m anti-pattern drill #7: Silently suppressing errors as success ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Return structured error context (failure type, attempted query, partial results, next options). ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-26 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-26 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Return structured error context (failure type, attempted query, partial results, next options).",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-error-propagation-quiz.html"
   },
   "2026-05-27": {
-    "focus": "Week 4: Prompt engineering + structured output",
+    "focus": "Block 2: Error Propagation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Error taxonomy + structured context: docs/exam-debrief-1.md (Failure Modes + Scenario 2) ; Artifact drill: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md (Q1, Q2, Q7, Q13, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 8-15 ; 30m anti-pattern drill #8: Giving agents too many tools instead of scoped access ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Apply local recovery before escalation and log exact attempted remediations. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-27 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-27 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Apply local recovery before escalation and log exact attempted remediations.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-error-propagation-quiz.html"
   },
   "2026-05-28": {
-    "focus": "Week 4: Prompt engineering + structured output",
+    "focus": "Block 2: Error Propagation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Error taxonomy + structured context: docs/exam-debrief-1.md (Failure Modes + Scenario 2) ; Artifact drill: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md (Q1, Q2, Q7, Q13, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 8-15 ; 30m anti-pattern drill #9: Same-session self-review as final QA ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Use coverage annotations to preserve value while exposing uncertainty. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-28 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-28 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Use coverage annotations to preserve value while exposing uncertainty.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-error-propagation-quiz.html"
   },
   "2026-05-29": {
-    "focus": "Week 4: Prompt engineering + structured output",
+    "focus": "Block 2: Error Propagation - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/prompt-engineering ; Read: https://docs.anthropic.com/en/docs/build-with-claude/develop-tests ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success ; Read: https://docs.anthropic.com/en/docs/build-with-claude/citations ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Error taxonomy + structured context: docs/exam-debrief-1.md (Failure Modes + Scenario 2) ; Artifact drill: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md (Q1, Q2, Q7, Q13, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 8-15 ; 30m anti-pattern drill #10: Using aggregate accuracy while ignoring per-category failures ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Partition tasks up-front to reduce duplicate work and improve error observability. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-29 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-05-29 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Partition tasks up-front to reduce duplicate work and improve error observability.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-error-propagation-quiz.html"
   },
   "2026-05-30": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Full Scenario Exam 2/4 - Scenario 2 (Multi-Agent Research)",
     "kind": "weekend_sat",
-    "reading": "Practice exam prep: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Read: What is NOT on exam (from your shared brief)",
+    "reading": "Primary artifact: practice-tests/real-exam-questions/scenario-02-multi-agent-research.md ; Construction constraints: PREPARATION-GUIDE.md patterns 8-15 ; Distractor rules + explanation rubric: PREPARATION-GUIDE.md (Distractor Design Rules, Explanation Rules) ; Cross-check gaps from first pass: docs/exam-debrief-1.md ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
+      "practice-tests/real-exam-questions/scenario-02-multi-agent-research.md",
+      "practice-tests/test-02-multi-agent.md",
       "practice-tests/test-09-context-reliability.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-30 --count 20 --timed-minutes 90",
+    "test_command": "./cca exam-html --seed 20260530 --modules 4 --per-module 15 --timed-minutes 90 --output quizzes/cca-prep-exam-2026-05-30.html",
     "review_slot_4pm": [
-      "Weak-domain matrix and escalation/error-propagation drills"
+      "Post-exam audit: log misses by pattern id and constraint keyword",
+      "Generate 8 flashcards from misses (term, trigger, right decision, anti-pattern)",
+      "Run single-file prep exam: open quizzes/cca-prep-exam-2026-05-30.html"
     ]
   },
   "2026-05-31": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Block 3: Batch vs Sync - scenario-pattern sprint",
     "kind": "weekend_sun",
-    "reading": "Practice exam prep: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Read: What is NOT on exam (from your shared brief)",
+    "reading": "Batch-vs-sync decision boundary: docs/exam-debrief-1.md (Scenario 3 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-03-ci-cd.md (Q2, Q9, Q10, Q11, Q12, Q13) ; Pattern linkage: PREPARATION-GUIDE.md patterns 16-20 ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
-      "practice-tests/test-10-advanced-context.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-05-31 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-05-31 --count 12 --timed-minutes 60",
     "review_slot_4pm": [
-      "Weak-domain matrix and escalation/error-propagation drills"
-    ]
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "html_quiz": "quizzes/cca-batch-vs-sync-quiz.html"
   },
   "2026-06-01": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Block 3: Batch vs Sync - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Batch-vs-sync decision boundary: docs/exam-debrief-1.md (Scenario 3 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-03-ci-cd.md (Q2, Q9, Q10, Q11, Q12, Q13) ; Pattern linkage: PREPARATION-GUIDE.md patterns 16-20 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Apply blocking vs deferred decision boundary for synchronous API vs Message Batches. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-09-context-reliability.md",
-      "practice-tests/test-10-advanced-context.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-01 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-01 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Apply blocking vs deferred decision boundary for synchronous API vs Message Batches.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-batch-vs-sync-quiz.html"
   },
   "2026-06-02": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Block 3: Batch vs Sync - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Batch-vs-sync decision boundary: docs/exam-debrief-1.md (Scenario 3 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-03-ci-cd.md (Q2, Q9, Q10, Q11, Q12, Q13) ; Pattern linkage: PREPARATION-GUIDE.md patterns 16-20 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Identify technical incompatibility: batch cannot support iterative tool-calling loops. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-09-context-reliability.md",
-      "practice-tests/test-10-advanced-context.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-02 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-02 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Identify technical incompatibility: batch cannot support iterative tool-calling loops.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-batch-vs-sync-quiz.html"
   },
   "2026-06-03": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Block 3: Batch vs Sync - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Batch-vs-sync decision boundary: docs/exam-debrief-1.md (Scenario 3 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-03-ci-cd.md (Q2, Q9, Q10, Q11, Q12, Q13) ; Pattern linkage: PREPARATION-GUIDE.md patterns 16-20 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Tune review trust by isolating high-FP categories instead of uniform threshold changes. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-09-context-reliability.md",
-      "practice-tests/test-10-advanced-context.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-03 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-03 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Tune review trust by isolating high-FP categories instead of uniform threshold changes.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-batch-vs-sync-quiz.html"
   },
   "2026-06-04": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Block 3: Batch vs Sync - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Batch-vs-sync decision boundary: docs/exam-debrief-1.md (Scenario 3 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-03-ci-cd.md (Q2, Q9, Q10, Q11, Q12, Q13) ; Pattern linkage: PREPARATION-GUIDE.md patterns 16-20 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Encode CI output contracts with `-p`, `--output-format json`, and `--json-schema` reasoning. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-09-context-reliability.md",
-      "practice-tests/test-10-advanced-context.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-04 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-04 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Encode CI output contracts with `-p`, `--output-format json`, and `--json-schema` reasoning.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-batch-vs-sync-quiz.html"
   },
   "2026-06-05": {
-    "focus": "Week 5: Context, reliability, and integrated scenarios",
+    "focus": "Block 3: Batch vs Sync - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Read: https://docs.anthropic.com/en/docs/build-with-claude/context-windows ; Read: https://docs.anthropic.com/en/docs/build-with-claude/token-counting ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+    "reading": "Batch-vs-sync decision boundary: docs/exam-debrief-1.md (Scenario 3 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-03-ci-cd.md (Q2, Q9, Q10, Q11, Q12, Q13) ; Pattern linkage: PREPARATION-GUIDE.md patterns 16-20 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Run multi-pass review architecture decisions (per-file pass then integration pass). ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/test-09-context-reliability.md",
-      "practice-tests/test-10-advanced-context.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-05 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-05 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Run multi-pass review architecture decisions (per-file pass then integration pass).",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-batch-vs-sync-quiz.html"
   },
   "2026-06-06": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Full Scenario Exam 3/4 - Scenario 3 (CI/CD)",
     "kind": "weekend_sat",
-    "reading": "Simulation protocol: 120-min, no Claude/docs/browser ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success and https://docs.anthropic.com/en/docs/build-with-claude/develop-tests",
+    "reading": "Primary artifact: practice-tests/real-exam-questions/scenario-03-ci-cd.md ; Construction constraints: PREPARATION-GUIDE.md patterns 16-20 ; Distractor rules + explanation rubric: PREPARATION-GUIDE.md (Distractor Design Rules, Explanation Rules) ; Cross-check gaps from first pass: docs/exam-debrief-1.md ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-03-ci-cd.md",
+      "practice-tests/test-06-plan-mode-cicd.md",
+      "practice-tests/test-08-validation-multipass.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-06 --count 20 --timed-minutes 90",
+    "test_command": "./cca exam-html --seed 20260606 --modules 4 --per-module 15 --timed-minutes 90 --output quizzes/cca-prep-exam-2026-06-06.html",
     "review_slot_4pm": [
-      "Post-mock error clustering by domain"
+      "Post-exam audit: log misses by pattern id and constraint keyword",
+      "Generate 8 flashcards from misses (term, trigger, right decision, anti-pattern)",
+      "Run single-file prep exam: open quizzes/cca-prep-exam-2026-06-06.html"
     ]
   },
   "2026-06-07": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Block 4: Tool Selection - scenario-pattern sprint",
     "kind": "weekend_sun",
-    "reading": "Simulation protocol: 120-min, no Claude/docs/browser ; Read: https://docs.anthropic.com/en/docs/test-and-evaluate/define-success and https://docs.anthropic.com/en/docs/build-with-claude/develop-tests",
+    "reading": "Tool-selection reliability and escalation: docs/exam-debrief-1.md (Scenario 4 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-04-customer-support.md (Q1, Q4, Q8, Q11, Q12, Q14, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 21-28 ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-07 --count 20 --timed-minutes 90",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-07 --count 12 --timed-minutes 60",
     "review_slot_4pm": [
-      "Post-mock error clustering by domain"
-    ]
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "html_quiz": "quizzes/cca-few-shot-patterns-quiz.html"
   },
   "2026-06-08": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Block 4: Tool Selection - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Tool-selection reliability and escalation: docs/exam-debrief-1.md (Scenario 4 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-04-customer-support.md (Q1, Q4, Q8, Q11, Q12, Q14, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 21-28 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Diagnose misrouting via tool-description ambiguity before adding architecture layers. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-08 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-08 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Diagnose misrouting via tool-description ambiguity before adding architecture layers.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-few-shot-patterns-quiz.html"
   },
   "2026-06-09": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Block 4: Tool Selection - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Tool-selection reliability and escalation: docs/exam-debrief-1.md (Scenario 4 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-04-customer-support.md (Q1, Q4, Q8, Q11, Q12, Q14, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 21-28 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Enforce prerequisite tool sequences programmatically for high-risk actions. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-09 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-09 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Enforce prerequisite tool sequences programmatically for high-risk actions.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-few-shot-patterns-quiz.html"
   },
   "2026-06-10": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Block 4: Tool Selection - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Tool-selection reliability and escalation: docs/exam-debrief-1.md (Scenario 4 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-04-customer-support.md (Q1, Q4, Q8, Q11, Q12, Q14, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 21-28 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Choose user disambiguation over heuristic confidence when identity ambiguity exists. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-10 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-10 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Choose user disambiguation over heuristic confidence when identity ambiguity exists.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-few-shot-patterns-quiz.html"
   },
   "2026-06-11": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Block 4: Tool Selection - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Tool-selection reliability and escalation: docs/exam-debrief-1.md (Scenario 4 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-04-customer-support.md (Q1, Q4, Q8, Q11, Q12, Q14, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 21-28 ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Detect keyword-steering prompt bias and correct root cause without overfitting. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-11 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-11 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Detect keyword-steering prompt bias and correct root cause without overfitting.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-few-shot-patterns-quiz.html"
   },
   "2026-06-12": {
-    "focus": "Week 6: Final readiness + proctored simulation",
+    "focus": "Block 4: Tool Selection - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Re-read strongest weak points + exam logistics: https://anthropic.skilljar.com/claude-certified-architect-foundations-access-request ; Practice exam portal: https://anthropic.skilljar.com/anthropic-certification-practice-exam ; Proctored rules recap: closed-book simulation",
+    "reading": "Tool-selection reliability and escalation: docs/exam-debrief-1.md (Scenario 4 update) ; Artifact drill: practice-tests/real-exam-questions/scenario-04-customer-support.md (Q1, Q4, Q8, Q11, Q12, Q14, Q15) ; Pattern linkage: PREPARATION-GUIDE.md patterns 21-28 ; Dedicated few-shot decision boundary practice (30m): choose among few-shot vs self-critique vs preprocessing across 6 mini-cases ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Design multi-concern handling with shared context and parallel decomposition. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md"
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-12 --count 12 --timed-minutes 60",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-12 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Write 6-case boundary log with chosen strategy + rejected alternatives"
+    ],
+    "weekday_learning_objective": "Design multi-concern handling with shared context and parallel decomposition.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-few-shot-patterns-quiz.html"
   },
   "2026-06-13": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Full Scenario Exam 4/4 - Scenario 4 (Customer Support)",
     "kind": "weekend_sat",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Primary artifact: practice-tests/real-exam-questions/scenario-04-customer-support.md ; Construction constraints: PREPARATION-GUIDE.md patterns 21-28 ; Distractor rules + explanation rubric: PREPARATION-GUIDE.md (Distractor Design Rules, Explanation Rules) ; Cross-check gaps from first pass: docs/exam-debrief-1.md ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
+      "practice-tests/real-exam-questions/scenario-04-customer-support.md",
+      "practice-tests/test-03-hooks-workflows.md",
       "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-09-context-reliability.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --full-sim --seed 42",
+    "test_command": "./cca exam-html --seed 20260613 --modules 4 --per-module 15 --timed-minutes 90 --output quizzes/cca-prep-exam-2026-06-13.html",
     "review_slot_4pm": [
-      "Review top 3 recurring misses and write correction rules"
+      "Post-exam audit: log misses by pattern id and constraint keyword",
+      "Generate 8 flashcards from misses (term, trigger, right decision, anti-pattern)",
+      "Run single-file prep exam: open quizzes/cca-prep-exam-2026-06-13.html"
     ]
   },
   "2026-06-14": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Block 5: Config Scope - scenario-pattern sprint",
     "kind": "weekend_sun",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Config scope synthesis: scenario-01 + README.md scenario 4/5 sections ; Artifact drill: practice-tests/test-04-tool-design-mcp.md + test-05-claude-code-config.md ; Flashcard seed list: PREPARATION-GUIDE.md anti-patterns + decision frameworks ; Weekend flexible: run timed quiz in any 22-90 minute window; keep one 30-minute review block",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-04-tool-design-mcp.md",
+      "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --full-sim --seed 42",
+    "test_command": "python3 tools/cca_quiz.py --date 2026-06-14 --count 14 --timed-minutes 60",
     "review_slot_4pm": [
-      "Review top 3 recurring misses and write correction rules"
-    ]
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "html_quiz": "quizzes/cca-claude-code-config-quiz.html"
   },
   "2026-06-15": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Block 5: Config Scope - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Config scope synthesis: scenario-01 + README.md scenario 4/5 sections ; Artifact drill: practice-tests/test-04-tool-design-mcp.md + test-05-claude-code-config.md ; Flashcard seed list: PREPARATION-GUIDE.md anti-patterns + decision frameworks ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Apply project vs user config precedence correctly across `.claude/*` and `~/.claude/*`. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-04-tool-design-mcp.md",
+      "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-15 --count 20 --timed-minutes 90",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-15 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Apply project vs user config precedence correctly across `.claude/*` and `~/.claude/*`.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-claude-code-config-quiz.html"
   },
   "2026-06-16": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Block 5: Config Scope - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Config scope synthesis: scenario-01 + README.md scenario 4/5 sections ; Artifact drill: practice-tests/test-04-tool-design-mcp.md + test-05-claude-code-config.md ; Flashcard seed list: PREPARATION-GUIDE.md anti-patterns + decision frameworks ; Dedicated few-shot decision boundary practice (30m): choose among few-shot vs self-critique vs preprocessing across 6 mini-cases ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Map commands, skills, rules, and MCP config to the correct shared scope. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
-      "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-04-tool-design-mcp.md",
+      "practice-tests/test-05-claude-code-config.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-16 --count 20 --timed-minutes 90",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-16 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Write 6-case boundary log with chosen strategy + rejected alternatives",
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Map commands, skills, rules, and MCP config to the correct shared scope.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-claude-code-config-quiz.html"
   },
   "2026-06-17": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Block 6: Prompt Boundaries - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Prompt-boundary drills: PREPARATION-GUIDE.md patterns 6, 22, 23, 25, 28 ; Few-shot boundary artifacts: scenario-01 Q2 + scenario-04 Q5/Q9 + test-07-prompt-engineering.md ; Scenario 6 coverage: practice-tests/test-08-validation-multipass.md + test-10-advanced-context.md ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Choose among few-shot vs self-critique vs preprocessing using case-variability signals. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
       "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-08-validation-multipass.md",
+      "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-17 --count 20 --timed-minutes 90",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-17 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Choose among few-shot vs self-critique vs preprocessing using case-variability signals.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-prompt-engineering-quiz.html"
   },
   "2026-06-18": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Block 6: Prompt Boundaries - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Prompt-boundary drills: PREPARATION-GUIDE.md patterns 6, 22, 23, 25, 28 ; Few-shot boundary artifacts: scenario-01 Q2 + scenario-04 Q5/Q9 + test-07-prompt-engineering.md ; Scenario 6 coverage: practice-tests/test-08-validation-multipass.md + test-10-advanced-context.md ; Dedicated few-shot decision boundary practice (30m): choose among few-shot vs self-critique vs preprocessing across 6 mini-cases ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Spot when \"add instructions to the prompt\" is a distractor and prefer deterministic controls. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
       "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-08-validation-multipass.md",
+      "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-18 --count 20 --timed-minutes 90",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-18 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [
+      "Write 6-case boundary log with chosen strategy + rejected alternatives",
+      "Generate/refresh flashcards for repeated cross-scenario concepts: stop_reason, context isolation, error taxonomy, batch-vs-sync, tool scoping, config precedence, few-shot boundaries"
+    ],
+    "weekday_learning_objective": "Spot when \"add instructions to the prompt\" is a distractor and prefer deterministic controls.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-prompt-engineering-quiz.html"
   },
   "2026-06-19": {
-    "focus": "Accelerated Buffer: Retest + Full Simulation",
+    "focus": "Block 6: Prompt Boundaries - scenario-pattern sprint",
     "kind": "weekday",
-    "reading": "Review weak areas from logs/cca_quiz_attempts.jsonl ; Re-read domain notes in Obsidian ; Revisit README decision frameworks for misses",
+    "reading": "Prompt-boundary drills: PREPARATION-GUIDE.md patterns 6, 22, 23, 25, 28 ; Few-shot boundary artifacts: scenario-01 Q2 + scenario-04 Q5/Q9 + test-07-prompt-engineering.md ; Scenario 6 coverage: practice-tests/test-08-validation-multipass.md + test-10-advanced-context.md ; Timebox: 8:00-8:50 PM artifacts, 8:50-9:20 PM drill, 9:20-10:00 PM timed quiz ; Weekday learning objective: Apply structured-output and validation-retry boundaries for extraction reliability. ; Quiz standard: see PREPARATION-GUIDE.md Distractor Design Rules + Explanation Rules",
     "test_sources": [
-      "practice-tests/full-exam-01.md",
       "practice-tests/test-07-prompt-engineering.md",
-      "practice-tests/test-08-validation-multipass.md"
+      "practice-tests/test-08-validation-multipass.md",
+      "practice-tests/test-10-advanced-context.md"
     ],
-    "test_command": "python3 tools/cca_quiz.py --date 2026-06-19 --count 20 --timed-minutes 90",
-    "review_slot_4pm": []
+    "test_command": "./cca test --date 2026-06-19 --count 8 --timed-minutes 20",
+    "review_slot_4pm": [],
+    "weekday_learning_objective": "Apply structured-output and validation-retry boundaries for extraction reliability.",
+    "small_quiz_standard": {
+      "name": "weekday_small_quiz_v1",
+      "question_count": 8,
+      "timed_minutes": 20,
+      "selection": "random sample from mapped test_sources",
+      "rules_ref": "PREPARATION-GUIDE.md -> Distractor Design Rules + Explanation Rules",
+      "constraints": [
+        "4 options of similar length",
+        "no all/none of the above, no extreme language",
+        "each wrong answer maps to a real misconception",
+        "question text includes a constraint that invalidates each distractor",
+        "\"Add instructions to the prompt\" treated as common distractor candidate",
+        "explanations include: why correct, why each distractor wrong, principle at work"
+      ]
+    },
+    "html_quiz": "quizzes/cca-prompt-engineering-quiz.html"
   }
 }

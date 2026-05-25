@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA - Multi-Agent Research System Quiz</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --surface: #10101a;
+    --surface2: #17172200;
+    --surface3: #1e1e2c;
+    --border: #252535;
+    --border2: #2e2e42;
+    --text: #e4e4f0;
+    --text2: #a8a8c0;
+    --text3: #7878a0;
+    --accent: #34d399;
+    --accent2: #059669;
+    --green: #4ade80;
+    --red: #fb7185;
+    --amber: #fbbf24;
+    --radius: 13px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem 1rem 2rem;
+  }
+  code {
+    font-family: ui-monospace, 'Cascadia Code', 'Fira Mono', monospace;
+    background: rgba(96,165,250,0.12);
+    color: #93c5fd;
+    padding: 0.1em 0.38em;
+    border-radius: 5px;
+    font-size: 0.855em;
+    border: 1px solid rgba(96,165,250,0.2);
+  }
+  .container { width: 100%; max-width: 780px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 28px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  }
+  .card h2 { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .card p { color: var(--text2); margin-bottom: 1rem; line-height: 1.7; }
+
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); transition: width 0.35s ease; border-radius: 2px; }
+
+  .pass-tracker { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem; }
+  .pass-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--border); transition: all 0.3s ease; }
+  .pass-dot.earned { background: var(--green); border-color: var(--green); box-shadow: 0 0 12px rgba(74,222,128,0.4); }
+  .pass-dot.current { border-color: var(--accent); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(96,165,250,0.4); } 50% { box-shadow: 0 0 0 8px rgba(96,165,250,0); } }
+
+  .domain-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 1.6rem; }
+  .domain-tag { font-size: 0.78rem; padding: 0.3rem 0.75rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 999px; color: var(--text2); }
+
+  .start-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.9rem; margin-bottom: 1.3rem; }
+  .stat { text-align: left; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; background: var(--surface2); }
+  .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .stat-label { font-size: 0.7rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 0.3rem; }
+
+  .timer { font-size: 0.85rem; font-variant-numeric: tabular-nums; text-align: right; margin-bottom: 0.5rem; color: var(--text2); }
+  .timer.warning { color: var(--amber); }
+  .timer.danger { color: var(--red); }
+
+  .quiz-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+  .quiz-top .progress-wrap { flex: 1; margin: 0; }
+  .timer-wrap { text-align: center; min-width: 90px; margin-left: 1rem; }
+
+  .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+  .q-num { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .q-source { font-size: 0.75rem; color: var(--text3); background: var(--surface2); padding: 0.2rem 0.55rem; border-radius: 4px; }
+  .q-prompt { font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 1.25rem; line-height: 1.65; }
+
+  .options { display: flex; flex-direction: column; gap: 0.65rem; }
+  .option {
+    display: flex; align-items: flex-start; gap: 0.75rem;
+    padding: 1rem 1.15rem; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s ease; font-size: 1rem;
+  }
+  .option:hover { border-color: rgba(96,165,250,0.5); background: var(--surface3); }
+  .option.selected { border-color: var(--accent); background: rgba(59,130,246,0.12); }
+  .option.correct { border-color: var(--green); background: rgba(74,222,128,0.1); }
+  .option.wrong { border-color: var(--red); background: rgba(251,113,133,0.1); }
+  .option.revealed-correct { border-color: var(--green); opacity: 0.7; }
+  .option.disabled { pointer-events: none; }
+  .option.disabled.selected { opacity: 1; }
+  .option .letter {
+    width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center;
+    background: var(--border); border-radius: 6px; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+  }
+  .option.selected .letter { background: var(--accent); color: #fff; }
+  .option.correct .letter { background: var(--green); color: #000; }
+  .option.wrong .letter { background: var(--red); color: #fff; }
+  .option.revealed-correct .letter { background: var(--green); color: #000; }
+
+  .explanation {
+    margin-top: 1.25rem; padding: 1.25rem; background: var(--surface2); border-radius: var(--radius);
+    border-left: 3px solid var(--border); font-size: 0.9rem; color: var(--text2); line-height: 1.7;
+    display: none;
+  }
+  .explanation.show { display: block; }
+  .explanation strong { color: #fff; }
+
+  .actions { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; gap: 1rem; }
+  .btn {
+    padding: 0.65rem 1.5rem; border-radius: var(--radius); border: none;
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--accent2); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.15); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--accent2); }
+  .btn-outline { background: transparent; color: var(--text3); border: 1px solid var(--border); font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+
+  .question-nav { display: flex; justify-content: center; gap: 0.4rem; flex-wrap: wrap; margin-top: 1rem; }
+  .qnav-dot {
+    width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text3); font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s ease;
+  }
+  .qnav-dot.active { border-color: var(--accent); background: var(--accent); color: #fff; font-weight: 700; }
+  .qnav-dot.answered-correct { border-color: var(--green); color: var(--green); }
+  .qnav-dot.answered-wrong { border-color: var(--red); color: var(--red); }
+  .qnav-dot.answered-correct.active { border-color: var(--green); background: var(--green); color: #fff; }
+  .qnav-dot.answered-wrong.active { border-color: var(--red); background: var(--red); color: #fff; }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; text-align: center; }
+  .result-score { font-size: 4rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .result-score.pass { color: var(--green); }
+  .result-score.fail { color: var(--red); }
+  .result-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); margin-bottom: 0.5rem; }
+  .result-detail { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
+  .result-detail span { color: #fff; font-weight: 600; }
+
+  .pass-summary { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; }
+  .pass-square {
+    width: 56px; height: 56px; border-radius: var(--radius); border: 2px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: 700; transition: all 0.3s ease;
+  }
+  .pass-square.cleared { border-color: var(--green); background: rgba(74,222,128,0.1); color: var(--green); }
+
+  .review-list { margin-top: 1.5rem; text-align: left; max-height: 400px; overflow-y: auto; }
+  .review-item {
+    padding: 0.65rem 1rem; background: var(--surface2); border-radius: 6px;
+    margin-bottom: 0.4rem; font-size: 0.825rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .review-item .rf { font-size: 0.65rem; flex-shrink: 0; font-weight: 700; letter-spacing: 0.08em; border-radius: 99px; padding: 0.15rem 0.5rem; border: 1px solid var(--border); }
+  .review-item .rf-ok { border-color: var(--green); color: var(--green); }
+  .review-item .rf-bad { border-color: var(--red); color: var(--red); }
+
+  .topic-breakdown { margin-top: 1.25rem; text-align: left; }
+  .topic-breakdown h3 { font-size: 0.85rem; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.65rem; }
+  .topic-item { display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: center; padding: 0.55rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.82rem; background: var(--surface2); }
+  .topic-item .topic-score { font-variant-numeric: tabular-nums; color: var(--text3); }
+  .topic-item .topic-score strong { color: #fff; }
+
+  .keyboard-hint { margin-top: 1rem; font-size: 0.75rem; color: var(--text3); text-align: center; }
+  .keyboard-hint kbd { font-family: inherit; border: 1px solid var(--border); border-radius: 4px; padding: 0.05rem 0.35rem; background: var(--surface2); color: var(--text2); }
+
+  .celebration { display: inline-block; margin-bottom: 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.22rem 0.65rem; border-radius: 999px; border: 1px solid var(--green); color: var(--green); background: rgba(74,222,128,0.12); }
+
+  .start-actions { text-align: center; }
+  .start-actions .btn { min-width: 280px; font-size: 1.15rem; padding: 0.9rem 2rem; border-radius: 14px; }
+  .pass-inline { display:flex; align-items:center; justify-content:center; gap:0.7rem; color:var(--text3); margin-bottom: 0.9rem; font-size: 0.95rem; }
+  .pass-inline .pass-tracker { margin: 0; }
+
+  @media (max-width: 600px) {
+    .start-stats { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .start-actions .btn { min-width: 0; width: 100%; }
+    .q-source { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="container" id="app">
+  <div style="text-align:center;padding:3rem;color:var(--text3)">Loading quiz...</div>
+</div>
+<script>
+(function() {
+'use strict';
+
+var BANK = [
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A legal contract analysis subagent retrieves a clause library from an internal repository. The HTTP request returns a 401 Unauthorized error. The subagent has a retry loop configured with exponential backoff. After 3 retries still returning 401, it escalates to the coordinator with a full attempt log. A junior engineer argues the subagent should have retried longer because authentication errors can be transient. What is the correct assessment?",
+    "opts": [
+      "The engineer is correct — 401 errors from OAuth systems are often transient when tokens expire mid-request and should be retried up to 10 times before escalation",
+      "The subagent is correct — a 401 is an access failure, but it is non-transient and non-retryable without credential refresh; retrying the same request will produce the same result",
+      "The subagent should have silently switched to a public fallback clause database and completed the task without escalating, since the coordinator's context is better used for business logic",
+      "The subagent is correct — any error after 3 retries should be escalated regardless of whether further retries could succeed, because local retry budgets are fixed at 3"
+    ],
+    "ans": 1,
+    "expl": "A 401 Unauthorized error signals that the request lacked valid credentials, not that the server was temporarily unavailable. Retrying an identical request with the same credentials will return the same 401 — the failure is deterministic, not transient. The correct local recovery path would be a token refresh, but if that is outside the subagent's capability, escalation with a full attempt log is the right move. A is wrong because 401 specifically means authentication failure — if the token expired, the fix is a token refresh, not blind retries of the same request with the same (expired) credentials. C is wrong because silently switching to an unapproved fallback database is a policy decision the subagent cannot make unilaterally — the coordinator must authorize alternative sources. D is wrong because the 3-retry rule is a heuristic for transient errors; the principled distinction is error type (retryable vs non-retryable), not retry count alone."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A patent database subagent completes a search for prior art on a medical device patent. It returns `status: \"complete\"`, `patents_found: 0`, `query: \"piezoelectric bone anchoring 2018-2024\"`. The coordinator triggers its error-recovery path and resubmits the identical query three times, consuming 12 additional seconds. The final report notes \"prior art search inconclusive due to retrieval failures.\" What is the coordinator's error?",
+    "opts": [
+      "The coordinator failed to verify that the patent database was online before dispatching the subagent, allowing a potentially unavailable source to cause downstream failures",
+      "The coordinator conflated a valid empty result — no matching patents exist — with a retrieval failure, triggering unnecessary retries and mislabeling the finding",
+      "The coordinator's retry logic did not implement exponential backoff, causing it to hammer the patent database in rapid succession and triggering a rate limit on the third attempt",
+      "The coordinator should have dispatched a second subagent to cross-validate the zero-result finding against a separate database before accepting the empty result"
+    ],
+    "ans": 1,
+    "expl": "`patents_found: 0` with `status: \"complete\"` is an informative finding: the database was reachable, the query was processed, and the result is \"no matching prior art exists in this scope.\" Treating this as a retrieval failure triggers unnecessary retries and ultimately misrepresents the finding in the report. \"No prior art found\" is a meaningful legal finding; labeling it \"inconclusive due to retrieval failures\" changes the legal interpretation entirely. A is wrong because pre-flight database availability checks add overhead and don't prevent failures mid-request — the actual result showed the database was accessible and responded correctly. C is wrong because rate limiting would produce a 429 error, not `status: \"complete\"` — the described behavior does not match rate limiting. D is wrong because cross-validation is a valid research strategy for high-stakes findings, but the first step is correctly interpreting the result before deciding whether validation is warranted — not defaulting to validation because the result is zero."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A scientific literature synthesis coordinator dispatches 6 parallel subagents to review recent oncology research. After all return, the coordinator observes that subagents 2, 4, and 5 each retrieved and analyzed the same 3 landmark NEJM papers, producing 34,000 tokens of redundant output. Subagent 1 covered a distinct set of conference proceedings with no overlap. What should the coordinator have done differently?",
+    "opts": [
+      "Implemented a shared citation registry that subagents could write to and read from during execution, allowing later agents to skip sources already claimed by earlier agents",
+      "Run the subagents sequentially so each could inspect the previous agent's source list before selecting its own sources, preventing overlap",
+      "Partitioned the research space before delegation — assigning distinct publication venues, date ranges, or subtopics to each subagent — so overlap was structurally impossible",
+      "Added a deduplication pass after collection that merged identical analyses of the same paper into a single representative summary before synthesis"
+    ],
+    "ans": 2,
+    "expl": "The root cause is ambiguous task boundaries at delegation time. When 3 of 6 agents independently converge on the same 3 landmark papers, the coordinator assigned them overlapping or identical scopes. Explicit pre-delegation partitioning — e.g., agent 2 covers NEJM 2020-2021, agent 4 covers NEJM 2022, agent 5 covers JAMA 2020-2022 — makes overlap structurally impossible without shared runtime state or sequential coordination. A is wrong because a shared citation registry during parallel execution introduces race conditions (two agents may claim the same paper simultaneously) and requires agents to coordinate runtime state, adding complexity and latency to what should be stateless parallel execution. B is wrong because sequential execution eliminates the throughput benefit of parallel dispatching — the correct fix is pre-delegation partitioning, not serialization. D is wrong because post-collection deduplication addresses the symptom (redundant output tokens) without preventing the redundant work from happening — all 34,000 tokens were already generated."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A regulatory compliance research system uses a `fetch_url` general-purpose tool to retrieve documents. A subagent tasked with analyzing EU GDPR guidance is observed fetching competitor privacy policies from public websites after the GDPR documents mention them as comparison examples. The behavior was not explicitly prohibited in the subagent's prompt. What is the most robust fix?",
+    "opts": [
+      "Add a monitoring hook to the coordinator that intercepts all tool calls from subagents and blocks any URL not in a pre-approved domain whitelist",
+      "Expand the subagent's system prompt with explicit instructions prohibiting external navigation beyond the originally assigned document set",
+      "Replace `fetch_url` with a scoped `load_regulatory_document` tool that accepts only document IDs from the internal compliance repository, making external URL fetching structurally impossible",
+      "Instruct the subagent to log every URL it intends to fetch and wait for coordinator approval before making each request, creating an approval gate for unanticipated fetches"
+    ],
+    "ans": 2,
+    "expl": "The problem is that the agent has a capability — fetching arbitrary URLs — that exceeds what its task requires. Prompt instructions are probabilistic controls; a sufficiently compelling in-context reference (like a GDPR document explicitly mentioning a competitor policy) can rationalize the behavior. A scoped `load_regulatory_document` tool that only accepts known internal document IDs makes the undesired behavior structurally impossible: the tool simply cannot process an external URL regardless of the model's reasoning. A is wrong because coordinator-level URL interception adds latency on every document fetch and couples the coordinator to implementation details of every subagent's tool use — it's a runtime filter rather than a structural constraint. B is wrong because prompt-level prohibitions are bypassed when the model constructs a plausible rationale; the external URL was explicitly cited in the source document, providing exactly that rationale. D is wrong because requiring coordinator approval on every URL fetch serializes what should be autonomous operation and adds significant latency overhead for a problem that tool scoping already solves cleanly."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A financial market intelligence subagent encounters a connection timeout when querying a real-time equity data feed. It retries twice with 2-second delays, both also timing out. It then switches to a cached snapshot from 4 hours ago, completes its analysis using the stale data, and returns results to the coordinator without mentioning the data source switch. The coordinator publishes the analysis to a trading desk. What principle did the subagent violate?",
+    "opts": [
+      "The subagent should have retried at least 5 times before switching data sources, since persistent timeouts on high-frequency financial feeds are often caused by brief network partitions",
+      "The subagent violated the principle of transparent failure reporting — switching to a degraded data source without informing the coordinator stripped the coordinator of information needed to assess result validity",
+      "The subagent should have requested coordinator authorization before accessing the cached data source, since cached snapshots require explicit permission not covered by the real-time feed authorization",
+      "The subagent was wrong to perform local recovery at all; all data source fallback decisions for financial data should be made by the coordinator, never by the subagent autonomously"
+    ],
+    "ans": 1,
+    "expl": "For time-sensitive financial analysis, the age of the data is material to the result's validity. Using a 4-hour-old snapshot without disclosure means the coordinator — and downstream consumers — have no way to assess whether the analysis is still valid. The coordinator may have access to alternative real-time sources, may know that market conditions changed significantly in the past 4 hours, or may decide to hold publication. Transparent failure reporting with structured context (failure type, attempted source, fallback source used, data timestamp) gives the coordinator the information it needs to make that call. A is wrong because additional retries on a timeout condition may be warranted, but the primary violation here is non-disclosure of the data source switch, not the retry count. C is wrong because data source authorization is a permissions concern separate from the disclosure issue — the main violation is opacity, not unauthorized access. D is wrong because local recovery is appropriate for many conditions; the problem is not that the subagent acted autonomously, but that it acted opaquely."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A supply chain monitoring coordinator assigns three subagents to research disruption risks: agent A covers geopolitical events, agent B covers weather and natural disasters, and agent C covers logistics capacity constraints. After completion, the final report contains strong coverage of geopolitical and weather risks but entirely omits port congestion and shipping rate volatility — topics that fall within logistics capacity. Agent C's logs show it completed successfully. What is the correct diagnosis?",
+    "opts": [
+      "Agent C's web search tool returned no results for port congestion queries, indicating a search API gap that requires a different search provider for logistics data",
+      "The synthesis agent applied topic relevance filtering that inadvertently excluded logistics content as less strategically significant than geopolitical or weather topics",
+      "The coordinator's task specification for agent C was underspecified — \"logistics capacity constraints\" did not enumerate port congestion and shipping rates as required subtopics",
+      "Agent C deprioritized shipping rate data because it encountered sources of lower credibility than geopolitical or weather sources and applied internal quality filtering"
+    ],
+    "ans": 2,
+    "expl": "Agent C completed successfully — it executed its assigned task without errors. When a correctly executing agent produces output that misses expected subtopics, the cause is an underspecified task prompt. \"Logistics capacity constraints\" is a broad label that agent C interpreted without guidance about which specific dimensions to cover. Explicit enumeration (port congestion, shipping rates, rail capacity, warehouse availability) would have produced the expected coverage. A is wrong because there is no evidence of search API failure — the agent completed successfully, meaning it found and analyzed content within its interpreted scope. B is wrong because synthesis filtering can only exclude findings the agents actually produced — if the synthesis agent filtered port congestion content, agent C must have produced it; the logs would show it. D is wrong because quality filtering is an internal subagent behavior not indicated by the available evidence — the parsimonious explanation is underspecification of scope."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "An enterprise knowledge base query subagent is designed for simple single-document lookups. Instrumentation shows 88% of requests are single-document retrievals averaging 200ms, while 12% involve cross-referencing 5+ documents and require 3-4 seconds. Currently all queries go through a powerful but expensive orchestrated multi-step retrieval agent, adding 800ms overhead to every simple lookup. What tool configuration best optimizes this system?",
+    "opts": [
+      "Give the knowledge base subagent access to the full multi-step retrieval tool for all queries, since having more capability available never degrades performance for simple cases",
+      "Provide the knowledge base subagent with a scoped `lookup_document` tool for the 88% of simple retrievals, while routing complex cross-reference requests to the multi-step retrieval agent through the coordinator",
+      "Build a classifier agent that inspects each query before routing it, directing simple queries to a fast lookup path and complex queries to the multi-step agent, adding one classification round-trip to each request",
+      "Cache all single-document results with a TTL of 24 hours to eliminate the 800ms overhead for repeat lookups, while routing all cache misses through the multi-step retrieval agent"
+    ],
+    "ans": 1,
+    "expl": "This is the scoped-capability principle: 88% of requests are well-served by a lightweight `lookup_document` tool that executes quickly without coordinator involvement. Giving the subagent this scoped tool for its common case reduces latency for the vast majority of requests while preserving the multi-step agent path for genuinely complex queries. The coordinator only sees complex requests, preserving its bandwidth. A is wrong because adding full multi-step capability to every subagent invocation does add overhead — capability breadth increases the model's reasoning burden about which approach to use, and may route simple lookups through unnecessarily complex paths. C is wrong because a classifier agent adds at least one additional round-trip to every request — a fixed overhead applied to 100% of queries to save overhead on 88% is net negative. D is wrong because caching helps with repeated queries but doesn't reduce latency for first-time lookups, which may represent the majority of a knowledge base's query load in a research context."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A competitive product research system has two agents with similar tool names: a pricing analyst agent with a `compare_products` tool and a feature analyst agent with a `compare_features` tool. The coordinator routes analysis tasks to the wrong agent 38% of the time. An engineer proposes fixing this by adding detailed descriptions to both tools explaining what each covers. A second engineer proposes renaming `compare_products` to `analyze_pricing_and_market_position`. Which fix is more effective?",
+    "opts": [
+      "The first engineer's fix is sufficient — detailed descriptions give the coordinator enough semantic context to route correctly without changing names that other system components may depend on",
+      "The second engineer's fix is more effective — renaming eliminates the shared prefix \"compare_\" that creates semantic ambiguity at the routing stage, making misrouting structurally less likely",
+      "Both fixes together are required — renamed tools without updated descriptions still leave routing ambiguous because the coordinator relies equally on both names and descriptions for routing decisions",
+      "Neither fix addresses the root cause — the coordinator needs few-shot routing examples in its system prompt showing correct agent selection for 20+ task types to achieve reliable routing"
+    ],
+    "ans": 1,
+    "expl": "The routing confusion stems from the shared \"compare_\" prefix, which creates semantic overlap that the coordinator cannot resolve without deep reasoning about the full description. Renaming `compare_products` to `analyze_pricing_and_market_position` eliminates the ambiguous prefix — the two tool names now have no lexical overlap, making correct routing significantly more reliable even before reading descriptions. A is wrong because descriptions reduce ambiguity but don't eliminate the lexical overlap in the name itself — under novel task phrasings, a coordinator may still anchor on the shared \"compare_\" prefix. C is wrong because the question asks which fix is more effective, and renaming alone provides structural disambiguation; descriptions are supplementary. D is wrong because few-shot examples are a training signal, not a fix for a naming design problem — they add complexity without addressing the root cause of ambiguous tool names."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A legal contract review coordinator dispatches 4 subagents to review different sections of a merger agreement in parallel. After completion, the coordinator sends all 4 results to a synthesis agent. The synthesis agent returns a report. The coordinator has no mechanism to verify that all 4 contract sections were actually covered in the synthesis output. Two days later, a lawyer notices that indemnification clauses from section 3 are absent from the report, despite subagent 3 returning complete findings. What should the coordinator have implemented?",
+    "opts": [
+      "Required the synthesis agent to sign off on each subagent's findings with an acceptance confirmation before producing the final report",
+      "Implemented post-synthesis coverage verification: cross-checking that each assigned section appears at least once in the synthesis output, with a gap flag if any section is absent",
+      "Dispatched a separate review agent to audit the synthesis agent's output against the original contract sections after each synthesis run",
+      "Run the synthesis agent twice on the same inputs and compared outputs for consistency, flagging divergences for human review"
+    ],
+    "ans": 1,
+    "expl": "The coordinator is responsible for verifying that the research space it delegated was actually reflected in the output. A coverage check — mapping each assigned section (e.g., section 3: indemnification) to at least one reference in the synthesis output — would have caught the gap programmatically before publication. This is cheaper and more reliable than downstream human review. A is wrong because a synthesis agent \"signing off\" on inputs it received is circular — it confirms receipt, not that the content was incorporated; the synthesis agent can receive section 3 findings and still fail to include them in output. C is wrong because a separate review agent adds a full additional reasoning step and cost to every run; structured coverage verification by the coordinator is simpler and does not require LLM reasoning. D is wrong because running synthesis twice addresses output consistency, not coverage — a synthesis agent that misses section 3 will likely miss it consistently across runs."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A scientific literature subagent is retrying a query to a genomics database. The first attempt failed with a 429 Too Many Requests response. The subagent waits 30 seconds and retries; the second attempt returns a 503 Service Unavailable. The subagent waits 60 seconds and retries; the third attempt again returns 503. The subagent logs all three attempts with their error codes and escalates to the coordinator. Is the escalation appropriate?",
+    "opts": [
+      "No — the subagent should continue retrying indefinitely with increasing backoff until the service recovers, since 503 errors are always temporary outages that resolve without coordinator involvement",
+      "Yes — after multiple retries with different error types (429 then 503), the failure pattern suggests a persistent service issue that the subagent cannot resolve locally; escalation with the full attempt log is correct",
+      "No — the subagent should switch to an alternative genomics database from its fallback list before escalating, since escalation is only appropriate when all available sources have been exhausted",
+      "Yes — any 503 error should immediately trigger coordinator escalation without local retry, since 503 errors indicate server-side failures outside the subagent's control"
+    ],
+    "ans": 1,
+    "expl": "The subagent correctly applied local recovery: it attempted retries with appropriate delays, exhausted a reasonable retry budget, and escalated with a full attempt log. The escalation is appropriate because the failure persisted through multiple attempts with different error signatures (rate limit then service unavailable), suggesting conditions the subagent cannot resolve locally. The coordinator, with broader context, can decide whether to try an alternative database, delay the task, or surface the gap. A is wrong because indefinite retries with no escalation can block the research pipeline indefinitely — a bounded retry budget with escalation on exhaustion is the correct design. C is wrong because whether to use a fallback database is a policy decision the coordinator should make, not an automatic subagent behavior — the subagent may not know which alternatives are approved, and the coordinator needs the full failure context regardless. D is wrong because 503 errors can be transient; the first 503 does not justify immediate escalation — the subagent's retry attempts were appropriate before escalation."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A competitive product research coordinator needs to cover 9 product categories. An engineer proposes dispatching 9 subagents simultaneously, one per category. A second engineer argues the categories are grouped into 3 strategic clusters (enterprise software, consumer hardware, cloud services) where findings in one category often inform research priorities in related categories. Which dispatch strategy is more appropriate?",
+    "opts": [
+      "Dispatch all 9 simultaneously — the coordinator should always maximize parallelism and handle cross-category dependencies at synthesis time to avoid unnecessary serialization",
+      "Dispatch in 3 waves of 3 by cluster — findings from the first wave's cluster leaders can inform search strategies for the remaining categories in waves 2 and 3",
+      "Dispatch all 9 simultaneously but configure each subagent to monitor a shared findings registry and update its search queries in real time based on what other agents discover",
+      "Dispatch 3 cluster-lead subagents first, then have those agents spawn their own sub-subagents for the remaining 6 categories based on their initial findings"
+    ],
+    "ans": 1,
+    "expl": "When findings in one category meaningfully change how you'd research related categories in the same cluster, sequential waves allow the coordinator to use wave-1 findings to write better wave-2 prompts. Dispatching all 9 simultaneously means the dependent categories run with uninformed search strategies — synthesis cannot retroactively improve the quality of already-completed research. A is wrong because \"handle cross-category dependencies at synthesis\" only works for integrating results; it cannot improve the research that went into those results — if category 4's search strategy would have been different given category 1's findings, that opportunity is permanently lost in a fully parallel dispatch. C is wrong because shared registry updates during parallel execution introduce coordination complexity, race conditions, and require subagents to dynamically modify in-flight research plans — this is far more complex than the coordinator directing wave-2 prompts after wave-1 results. D is wrong because having subagents spawn their own sub-subagents moves orchestration responsibility out of the coordinator, reducing visibility and control — the coordinator should manage all dispatching."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research subagent is tasked with finding merger and acquisition activity in the pharmaceutical sector and returns results as free-form prose: \"Based on my analysis, there were several notable acquisitions including Pfizer's purchase of Arena Pharmaceuticals for approximately $6.7 billion, which closed in early 2022, alongside AstraZeneca's acquisition of Alexion which was valued at around $39 billion. Both deals reflect strategic moves toward rare disease portfolios...\" The coordinator's synthesis agent processes 6 such inputs and produces a report with inconsistent citation formatting and missing deal values. What is the most direct fix?",
+    "opts": [
+      "Replace the free-form prose output with a structured schema: each acquisition as a JSON object with fields for acquirer, target, value, close date, and strategic rationale, enforced across all subagents",
+      "Add an intermediate normalization agent between the research subagents and the synthesis agent that extracts structured data from prose before forwarding to synthesis",
+      "Prompt the synthesis agent with explicit extraction instructions to parse acquirer names, deal values, and dates from prose inputs before constructing the report",
+      "Require each subagent to append a structured appendix to its prose output listing key data points in a consistent tabular format alongside its narrative analysis"
+    ],
+    "ans": 0,
+    "expl": "The root cause is unstructured output format — prose requires the synthesis agent to perform implicit extraction, which is error-prone. The fix is a schema contract: all subagents return the same JSON structure with explicit fields, making the synthesis agent's job a deterministic merge rather than natural language interpretation. Consistency in citation formatting and numeric values follows automatically from structured fields. B is wrong because a normalization agent compensates for a fixable upstream problem by adding a component, latency, and potential extraction errors at an intermediate layer — fixing the source is cleaner and more reliable. C is wrong because prompting the synthesis agent to parse prose introduces a secondary extraction step that is still error-prone, and the synthesis agent must now parse 6 different prose styles — the problem is just moved downstream. D is wrong because a dual-format output (prose + structured appendix) adds token overhead and still requires the synthesis agent to know to use the appendix rather than the prose — consistency is not guaranteed."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A supply chain monitoring system assigns a subagent to track raw material price fluctuations across 15 commodity types. The coordinator receives the subagent's report but has no record of which of the 15 commodities were successfully covered vs skipped due to missing data. Three commodities with known data quality issues were silently omitted from the report. What mechanism should the coordinator have required from the subagent?",
+    "opts": [
+      "A pre-execution checklist submitted to the coordinator before the subagent begins, listing all 15 commodities and their expected data sources, so the coordinator can verify the plan before work starts",
+      "Coverage annotations in the output: an explicit accounting of which commodities were successfully researched, which had partial data, and which were not covered and why",
+      "A confidence score for each commodity in the final output, allowing the coordinator to infer which commodities had data quality issues from low confidence values",
+      "A separate audit run after the main research pass where the subagent re-verifies each commodity's data availability and flags any that were omitted in the primary pass"
+    ],
+    "ans": 1,
+    "expl": "The coordinator assigned 15 commodities and must be able to verify that all 15 were addressed. Coverage annotations — structured records of what was covered, what was partially covered, and what was omitted and why — give the coordinator the information it needs to assess completeness and decide next steps (re-dispatch for missing commodities, proceed with partial coverage, etc.). This is the transparency principle: gaps must be surfaced explicitly, not omitted silently. A is wrong because a pre-execution checklist verifies the plan before work, not the execution after work — it doesn't help the coordinator detect what was actually omitted during execution. C is wrong because confidence scores communicate result quality, not coverage — a missing commodity has no confidence score at all, which the coordinator cannot distinguish from a low-confidence result that was included. D is wrong because a separate audit run doubles the work and adds latency; the correct design is for the subagent to produce coverage annotations as part of its normal output, not as a separate verification pass."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research coordinator receives outputs from 5 subagents. Four return complete findings. One returns a structured error: `{\"type\": \"rate_limit_exceeded\", \"query\": \"FDA drug approval filings Q3 2024\", \"retries\": 3, \"partial_results\": [\"FDA-2024-089\", \"FDA-2024-092\"]}`. The coordinator proceeds to synthesis using only the 4 complete results, discarding the error object. Is this correct?",
+    "opts": [
+      "Yes — synthesis agents should only receive verified complete results; passing structured error objects to synthesis would contaminate the output quality assessment",
+      "No — the error object contains two partial results and should be passed to synthesis with a gap annotation indicating incomplete coverage of FDA Q3 2024 filings",
+      "Yes — the coordinator has fulfilled its responsibility by attempting the query; routing failures to synthesis adds complexity without improving the final output",
+      "No — the coordinator should immediately retry the failed subagent before proceeding to synthesis, since partial results indicate the data source was accessible"
+    ],
+    "ans": 1,
+    "expl": "The error object contains two partial results (`FDA-2024-089` and `FDA-2024-092`) that represent real data — discarding them discards findings that were successfully retrieved. The coordinator should pass the partial results to synthesis with an explicit gap annotation: \"FDA Q3 2024 coverage is incomplete — 2 filings retrieved, remainder unavailable due to rate limiting.\" This gives the synthesis agent factual content to work with and transparency about what's missing. A is wrong because structured error objects with partial results are not \"unverified\" — the partial results were successfully retrieved and are as valid as results from the complete subagents. C is wrong because \"routing failures to synthesis adds complexity\" is not a valid reason to discard partial results that contain real findings — the coordinator's job is to route what exists, with appropriate annotations. D is wrong because immediate retry is one option, but the coordinator may have other priorities (deadline constraints, availability of the rate-limited source) — the first step is to preserve the partial results, not reflexively retry."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A knowledge base research subagent runs a query against an internal policy document store. The store returns an error: `403 Forbidden - Tool 'search_policy_documents' requires scope 'policy:read' not present in current token`. The subagent retries twice with the same credentials, both returning 403. It escalates to the coordinator with the error message. The coordinator logs the escalation and asks the subagent to try a different query formulation. What has the coordinator misunderstood?",
+    "opts": [
+      "The coordinator should have recognized the 403 as a permissions error — a policy gap where the subagent structurally lacks the required authorization — and addressed the permission configuration rather than suggesting a query change",
+      "The coordinator correctly identified that different query formulations may bypass authorization checks on some policy document stores, and the suggestion to reformulate is a valid recovery strategy",
+      "The coordinator should have escalated the 403 to the end user for manual intervention, since authorization errors require human approval to resolve and are outside automated system handling",
+      "The coordinator's error was in not attempting the query itself using its own higher-privilege credentials, since coordinators in multi-agent systems typically hold broader permissions than subagents"
+    ],
+    "ans": 0,
+    "expl": "A 403 Forbidden with an explicit missing scope message is a policy gap: the subagent's token does not have `policy:read`, full stop. No query reformulation can change what scopes are present in the token. The coordinator misclassified this as a retrieval problem (fixable by changing the query) when it is actually a permissions problem (fixable only by adding the required scope to the token). The correct response is to address the credential configuration — either grant the scope or inform a human who can. B is wrong because 403 errors with explicit scope messages are not bypassed by query reformulation — the authorization check happens before any query processing. C is wrong because while human intervention may ultimately be needed to grant permissions, the coordinator first needs to correctly diagnose the problem and can take preparatory steps (documenting the gap, completing other research tasks) while awaiting resolution. D is wrong because the coordinator using its own credentials to perform the subagent's task defeats the purpose of the subagent and violates the separation of concerns — the fix is to grant the subagent the permission it needs."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A multi-agent competitive intelligence system completes a research run. The coordinator produces a final report. A post-run review finds that 4 of the 7 subagents completed their tasks and returned findings, but the report presents all findings as equally authoritative without indicating that 3 subagent results are missing. The coordinator logged the 3 failures but did not surface them in the report. What is the correct behavior?",
+    "opts": [
+      "The coordinator acted correctly — including failure metadata in the final report would undermine consumer confidence in the findings that were successfully retrieved",
+      "The coordinator should have blocked publication of the report until all 7 subagents completed, ensuring that no report is published with known gaps",
+      "The coordinator should have included coverage annotations in the report identifying which research areas have findings, which have partial coverage, and which are absent due to subagent failures",
+      "The coordinator should have dispatched replacement subagents for the 3 failures and waited for them to complete before generating the report"
+    ],
+    "ans": 2,
+    "expl": "Transparency about coverage is mandatory when presenting research findings. A report that presents 4 of 7 coverage areas as a complete picture is misleading — the reader cannot distinguish between \"no significant findings in this area\" and \"this area was not researched due to a failure.\" Coverage annotations give the consumer the information needed to weight the findings appropriately and identify gaps that warrant follow-up. A is wrong because transparency about gaps does not undermine valid findings — it contextualizes them. Concealing known gaps is the reliability failure. B is wrong because blocking publication may be unacceptable under time constraints, and partial-coverage reports with explicit annotations are often more useful than delayed complete reports. D is wrong because re-dispatching is one option the coordinator can consider, but the decision depends on time, cost, and whether the gaps are critical — the immediate requirement is to surface the gaps in the output."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research subagent is dispatched to collect and summarize academic citations for a literature review on carbon capture technologies. It retrieves 40 papers, processes the first 22, and then receives a context window warning indicating it has 800 tokens remaining. Each remaining paper requires approximately 1,500 tokens to process. What should the subagent do?",
+    "opts": [
+      "Attempt to compress its in-context summaries of the first 22 papers to free up tokens for the remaining 18, then continue processing until context is fully exhausted",
+      "Continue processing papers until it receives a hard context limit error, then return whatever state it has at termination",
+      "Return the completed analyses of all 22 processed papers with a structured notation indicating 18 papers were not processed due to context limits, including their citation identifiers",
+      "Discard all 22 completed summaries and return only a request to the coordinator for a larger context window before proceeding with the task"
+    ],
+    "ans": 2,
+    "expl": "With only 800 tokens remaining and 1,500 required per paper, the subagent cannot process even one more paper. It should preserve and return the maximum useful work completed — 22 high-quality paper analyses — with an explicit structured notation identifying the 18 unprocessed papers and the reason (context limit). This gives the coordinator the completed work and the information it needs to dispatch a continuation subagent for the remaining 18. A is wrong because compressing already-completed summaries risks quality degradation of the most complete part of the work — the 22 summaries are the primary output and should not be sacrificed. B is wrong because continuing until a hard error risks returning a garbled or incomplete mid-paper analysis as the final output; a graceful early return with clear completion state is more reliable. D is wrong because discarding 22 completed analyses discards the majority of the task's output — the subagent should return what it has, not nothing, while communicating the gap."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A financial market intelligence workflow uses a coordinator that passes the complete accumulated output of each subagent to the next subagent in a sequential chain. After 5 subagents, the 6th subagent receives 98,000 tokens of prior context. The 6th subagent's actual task — cross-reference sector trends from agents 1 and 3 — requires approximately 4,000 tokens from those two agents. What is the structural problem?",
+    "opts": [
+      "Sequential chaining prevents the coordinator from tracking which subagent produced which findings, since outputs accumulate without attribution metadata",
+      "Passing full accumulated context causes uncontrolled context growth — by subagent 6, the context includes 5 agents' complete reasoning chains, when only targeted extracts from agents 1 and 3 were needed",
+      "The 6th subagent cannot process outputs from non-adjacent agents in a sequential chain, since it can only reference the immediately preceding agent's output reliably",
+      "Sequential chains cannot exceed 5 agents due to cumulative context entropy, which degrades model reasoning quality past a threshold that compound accumulation makes unavoidable"
+    ],
+    "ans": 1,
+    "expl": "This is uncontrolled context accumulation: each subagent receives not just the information it needs but the entire reasoning history of all prior agents. By subagent 6, 94,000 of its 98,000-token context is noise relative to its actual task. The fix is coordinator-mediated extraction: the coordinator passes only the relevant outputs from agents 1 and 3 (approximately 4,000 tokens) to agent 6, not the full accumulated chain. A is wrong because attribution can be maintained regardless of context structure — well-designed structured outputs include agent IDs and source metadata independent of how context is passed. C is wrong because there is no architectural constraint preventing a chain-based agent from reasoning about non-adjacent outputs — the issue is the context cost, not the accessibility of prior agents' outputs. D is wrong because there is no fixed 5-agent limit or \"cumulative entropy\" threshold — the problem is design (full context accumulation), not a fundamental property of sequential chains."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research system is designed so that when a subagent fails, the coordinator immediately dispatches a replacement with the same task parameters. During a run, a downstream API experiences an outage affecting all subagents that query it. 6 subagents fail, 6 replacements are dispatched, all 6 replacements fail, triggering 6 more replacements. The coordinator enters a replacement loop. What design principle was violated?",
+    "opts": [
+      "Idempotency — the replacement subagents should have detected that their task was already attempted and returned the prior subagent's failure log rather than re-executing",
+      "Stop conditions — the replacement policy lacked a circuit-breaker that detects systematic correlated failures and halts replacement loops before they consume unbounded resources",
+      "Least privilege — if subagents had been granted narrower tool permissions, the API outage would have affected fewer agents and the replacement loop would have been smaller in scope",
+      "Coverage annotation — the coordinator lacked mechanisms to annotate which research areas were affected by the outage, causing it to treat each failure as independent rather than correlated"
+    ],
+    "ans": 1,
+    "expl": "The replacement loop violates the stop conditions principle: a well-designed system must have circuit-breakers that detect correlated failures (multiple agents failing for the same reason in a short window) and halt automatic replacement before the loop consumes unbounded compute and API capacity. Six simultaneous failures followed by six simultaneous replacement failures is a clear signal of a systemic issue, not independent subagent errors. A is wrong because idempotency addresses whether a repeated operation produces duplicate side effects — it does not prevent a coordinator from dispatching replacements; that requires stop conditions. C is wrong because least privilege reduces blast radius but does not prevent the replacement loop itself — even if fewer agents were affected, the pattern of automatic replacement without termination logic would still create a smaller loop. D is wrong because coverage annotation describes output metadata — it is a transparency mechanism, not a mechanism for detecting and halting replacement loops."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A multi-tier research system has a top-level coordinator, mid-level domain coordinators (legal, financial, technical), and leaf-level research subagents. The system is being designed with permission scopes. An engineer proposes giving mid-level domain coordinators the same permissions as the top-level coordinator so they can handle any tool call without escalating. What is the risk of this design?",
+    "opts": [
+      "Mid-level coordinators with top-level permissions would have authority to modify task assignments for subagents in other domains, creating cross-domain interference outside their designed scope",
+      "Identical permission scopes across all coordinator tiers eliminate the ability to audit which level of the hierarchy authorized a specific action, creating an untraceable authorization chain",
+      "Top-level permissions at mid-level coordinators violate the least-privilege principle — domain coordinators should have only the permissions their domain tasks require, limiting blast radius if a coordinator is compromised or misbehaves",
+      "Equal permissions across coordinator tiers prevent the top-level coordinator from distinguishing coordinator-level tool calls from subagent-level tool calls in the audit log"
+    ],
+    "ans": 2,
+    "expl": "The least-privilege principle requires that every component has exactly the permissions its task requires, no more. A legal domain coordinator needs access to legal databases, contract tools, and case law APIs — not financial data feeds or technical architecture tools. Granting top-level permissions at every tier means a misbehaving or compromised mid-level coordinator can access resources across all domains, dramatically increasing blast radius. A is wrong because cross-domain interference is a specific consequence of over-permissioning, not the primary principle — the broader concern is any overstep beyond the domain coordinator's legitimate scope. B is wrong because authorization traceability is a logging/auditing design concern, not a permissions design concern — well-structured audit logs can distinguish authorization levels regardless of permission scope overlap. D is wrong because audit log clarity is a monitoring concern, not a permissions principle — the primary argument against equal permissions across tiers is blast radius and access control, not log readability."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A regulatory compliance research subagent is tasked with checking whether a software product meets HIPAA technical safeguards requirements. The subagent completes its analysis and finds no violations. The coordinator marks the compliance check as passed and proceeds. Later, an auditor finds 3 HIPAA requirements that the subagent never checked because they were added to the HIPAA technical safeguard list in a 2023 update, while the subagent's knowledge and tool definitions reference the 2019 version. What architectural improvement would have most directly prevented this gap?",
+    "opts": [
+      "The coordinator should have verified the subagent's knowledge cutoff date before dispatching it on compliance tasks, since outdated agent knowledge is a known risk in regulatory domains",
+      "The subagent's compliance checklist tool should have been defined against a live, versioned regulatory database rather than a hardcoded checklist, making the requirements authoritative and current",
+      "The synthesis agent should have flagged the compliance analysis as potentially incomplete by cross-referencing the subagent's findings against a known regulatory update log",
+      "The coordinator should have dispatched two independent subagents to check compliance in parallel, with discrepancies between their outputs triggering a third tiebreaker agent"
+    ],
+    "ans": 1,
+    "expl": "The root cause is a static tool definition referencing outdated requirements. If the compliance checklist tool queries a live, versioned regulatory database maintained by the compliance team, the subagent automatically works against current requirements on every run — no manual tool updates required when regulations change. This is the principle of binding tools to authoritative live sources rather than hardcoded static data. A is wrong because checking a subagent's \"knowledge cutoff\" is impractical for tool-based tasks — the subagent uses tools, not training memory, to perform compliance checks; the issue is the tool definition, not the agent's training. C is wrong because a synthesis agent cross-referencing against a \"regulatory update log\" adds a downstream check on symptoms rather than fixing the tool that generates the compliance assessment — and requires maintaining yet another static list of updates. D is wrong because two independent subagents using the same outdated checklist will produce identical (equally incomplete) outputs — parallel redundancy catches execution errors, not shared knowledge gaps."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research coordinator dispatches a subagent with the instruction: \"Search for recent legal precedents on data privacy liability.\" The subagent executes a broad web search and returns 47 results including blog posts, news articles, opinion pieces, and 3 actual court decisions. The coordinator passes all 47 to a synthesis agent. The synthesis agent produces an analysis mixing authoritative case law with opinion content without distinguishing them. What should the coordinator have specified?",
+    "opts": [
+      "The coordinator should have instructed the synthesis agent to apply credibility weighting, scoring each source by domain authority before incorporating its findings",
+      "The coordinator's task prompt should have specified the output schema required: court decisions as primary sources with case citation, jurisdiction, and holding; secondary sources clearly labeled and separated",
+      "The coordinator should have dispatched a source-filtering subagent after the search subagent, tasked with separating court decisions from non-authoritative sources before synthesis",
+      "The coordinator should have replaced the general web search tool with a legal database tool (e.g., Westlaw, LexisNexis API) that returns only verified case law by design"
+    ],
+    "ans": 3,
+    "expl": "For legal precedent research, the task requires authoritative court decisions, not general web content. Replacing the general web search tool with a legal database tool that only returns verified case law solves the problem at the source: the subagent structurally cannot return blog posts or opinion pieces because the tool doesn't index them. This is the scoped tool design principle. A is wrong because credibility weighting at the synthesis layer is downstream mitigation — it adds reasoning complexity to synthesis and still allows low-credibility content to enter the pipeline, risking quality degradation. B is wrong because specifying output schema helps the synthesis agent organize what it receives, but doesn't prevent the search subagent from retrieving and passing non-authoritative sources in the first place — the 47 mixed results still arrive. C is wrong because a source-filtering subagent is an intermediate compensating component for a tool design problem — replacing the search tool is simpler, more reliable, and more direct."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research workflow runs daily. The same query parameters are submitted each morning to a patent database subagent as part of routine monitoring. On days 1, 3, and 5, the subagent returns results normally. On day 2, the subagent fails mid-run due to an API timeout. On day 3, the subagent is re-dispatched for day 2's query and retrieves the same patents it retrieved on day 1. The coordinator stores duplicate patent records. What design property would have prevented the duplication?",
+    "opts": [
+      "The coordinator should have verified that day 3's subagent was not running before dispatching the day 2 retry, since parallel subagent runs against the same query parameter set cause duplication",
+      "The subagent's results should have been idempotent by design — the same query at the same target date range always returns the same set of results, and the coordinator's storage layer should upsert by patent ID rather than append",
+      "The coordinator should have locked the patent database to the subagent's exclusive session on day 2, preventing other subagents from querying the same records until the retry resolved",
+      "The day 2 subagent should have written a lock file before querying and checked for existing lock files at startup, preventing re-execution until the lock was explicitly cleared"
+    ],
+    "ans": 1,
+    "expl": "Idempotency in research tasks means a subagent safe to re-run produces the same logical results, and the storage layer handles them correctly via upsert (insert-or-update-by-unique-key) rather than blind append. Since patent IDs are unique, upserting by patent ID on the day 2 retry would update existing records or insert new ones without creating duplicates — the coordinator can safely re-dispatch failed subagents without auditing every prior result. A is wrong because ensuring no parallel runs addresses one scenario (concurrent execution) but doesn't prevent the duplication caused by sequential re-dispatch, which is the described case. C is wrong because database locking at the session level is an extreme measure that blocks other legitimate queries — idempotent storage design is the correct architectural pattern for retry safety. D is wrong because file-based locking is a fragile, ad-hoc coordination mechanism that breaks on crashes (stale lock files) and doesn't address the storage-level duplication that idempotent upserts would solve."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A coordinator is building a research pipeline for enterprise software competitive analysis. It plans to use centralized coordination — all subagent tasks flow through the coordinator. A colleague proposes a distributed peer-to-peer design where domain experts agents can directly request information from each other. The research topics are largely independent with minimal cross-domain dependencies. Which design is more appropriate?",
+    "opts": [
+      "Distributed peer-to-peer, because independent research topics benefit from direct agent-to-agent sharing of findings as they emerge, reducing total research time via early discovery propagation",
+      "Centralized coordination, because the research topics are largely independent — the coordinator provides state visibility, consistent error handling, and audit capability without imposing significant coordination overhead on independent tasks",
+      "Distributed peer-to-peer, because centralized coordinators become bottlenecks when many subagents are working in parallel and the coordinator must process every result before any other work can proceed",
+      "Centralized coordination only if the number of subagents is fewer than 5; for larger research teams, distributed coordination is required to prevent coordinator context window saturation"
+    ],
+    "ans": 1,
+    "expl": "When topics are largely independent, the primary benefit of peer-to-peer (sharing emerging findings to inform parallel research) doesn't apply — agents don't need each other's findings during execution. Centralized coordination provides the coordinator's core value — full state visibility, consistent error handling, and a clear audit trail — without adding the complexity of peer-to-peer topology. The overhead of centralized routing is minimal when tasks are independent. A is wrong because \"early discovery propagation\" is only beneficial when agents can use each other's findings to adjust their own research; for independent topics, propagation adds communication overhead without improving output quality. C is wrong because the coordinator does not need to process every result before other work can proceed — in well-designed coordinators, subagent results are stored and synthesis happens after all complete; the coordinator does not block parallel execution. D is wrong because there is no principled threshold at which centralized coordination becomes inappropriate based on agent count alone — context window management is a solvable engineering challenge, not an architectural constraint."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A synthesis agent receives outputs from 7 research subagents and must combine them into a final briefing. An engineer proposes that instead of the synthesis agent processing all 7 outputs together, each research subagent should first condense its own findings into a 2-paragraph executive summary before sending to synthesis. The synthesis agent then combines 7 summaries instead of 7 full reports. When does this intermediate summarization design add value vs when does it not?",
+    "opts": [
+      "Intermediate summarization always adds value by reducing synthesis agent token consumption — the tradeoff is always favorable since shorter inputs produce faster and more reliable synthesis",
+      "Intermediate summarization adds value when full research outputs are verbose and context window capacity is a constraint; it adds latency and component complexity without benefit when research outputs are already structured and concise",
+      "Intermediate summarization only adds value when more than 5 subagents are involved, since below this threshold the synthesis agent can process full outputs without quality degradation",
+      "Intermediate summarization never adds value because the quality loss from compressing subagent findings outweighs the context savings at the synthesis stage in all research domains"
+    ],
+    "ans": 1,
+    "expl": "The value of intermediate summarization depends on the situation. When subagents return verbose, loosely structured outputs and the synthesis agent's context window is at risk of overflow, pre-summarization reduces the load and focuses synthesis on distilled findings. However, when subagent outputs are already structured and concise (e.g., JSON with key fields), intermediate summarization adds a processing layer without reducing context load significantly, while introducing latency and an additional component that can introduce errors. The design decision should be driven by actual output volume and structure, not applied universally. A is wrong because shorter inputs do not always produce better synthesis — compressing nuanced research findings can lose the detail the synthesis agent needs for accurate cross-source integration; the tradeoff is not always favorable. C is wrong because there is no principled 5-agent threshold — the relevant factor is total token volume and output format, not agent count. D is wrong because in contexts with genuinely verbose subagent outputs (full web page content, extended reasoning chains), intermediate summarization does improve synthesis performance — the claim that it \"never adds value\" is too absolute."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A financial market research subagent is dispatched to analyze earnings reports for 20 companies. While processing company 14's report, it discovers evidence of a potential accounting irregularity — a pattern that, if real, would be highly material to the research question. Verifying the irregularity would require fetching 3 additional regulatory filings not in its original task scope, taking an estimated additional 8 minutes. What should the subagent do?",
+    "opts": [
+      "Independently fetch and analyze the 3 additional regulatory filings since the evidence is material to the research question and completing the analysis is more valuable than strict task adherence",
+      "Note the potential irregularity with its basis in the earnings report, flag it explicitly as requiring further investigation with specific citations needed, and return this finding to the coordinator along with its completed analysis",
+      "Skip the irregularity entirely and complete analysis of all 20 companies within the original task scope, since scope creep from individual agents undermines the coordinator's research plan",
+      "Pause all remaining analysis and immediately escalate only the irregularity finding to the coordinator before continuing, treating material evidence as a workflow interrupt"
+    ],
+    "ans": 1,
+    "expl": "The subagent should complete its assigned scope, surface the material finding with explicit context (what was found, what additional filings would verify it, why it's significant), and return everything to the coordinator. The coordinator — not the subagent — should decide whether the verification work is worth 8 additional minutes, whether to dispatch a targeted subagent for those filings, or whether to note it as a follow-up item. Surfacing the finding with actionable context preserves the coordinator's decision authority. A is wrong because the subagent autonomously expanding its scope violates the principle that the coordinator controls task scope — even when the rationale is good, unilateral scope expansion removes the coordinator's ability to manage resources and priorities. C is wrong because skipping the irregularity and completing only within the rigid original scope treats the finding as irrelevant when it may be the most important discovery in the run — the correct action is to surface it, not suppress it. D is wrong because interrupting the entire analysis workflow for a preliminary signal adds unnecessary latency; the subagent can continue its other analyses while flagging the finding for the coordinator to handle after the run."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A multi-agent patent analysis system performs research runs that take 45 minutes each. A coordinator dispatches subagents, collects results, and passes them to a synthesis agent. During a post-run analysis, the engineering team finds they cannot determine which specific claims from the final patent analysis were derived from which subagent's output, because the synthesis agent merged all inputs into flowing prose without source tracking. What is the correct fix?",
+    "opts": [
+      "Require the synthesis agent to append a full reference section to its output listing every source document each subagent analyzed, regardless of whether those documents contributed to specific claims",
+      "Enforce a structured output schema on the synthesis agent requiring explicit citation fields for each claim (e.g., `{\"claim\": \"...\", \"source_agent\": \"...\", \"source_document\": \"...\", \"confidence\": 0.92}`), making claim provenance traceable",
+      "Record the complete input and output of every subagent in an external log store, allowing post-hoc attribution by searching the log for content matching each claim in the synthesis output",
+      "Add a separate attribution agent that runs after synthesis, consuming both the synthesis output and all subagent inputs, and annotates each claim with its likely source agent"
+    ],
+    "ans": 1,
+    "expl": "The fix is a structured output schema at the synthesis agent that binds each claim to its source at generation time. Requiring `source_agent` and `source_document` fields in the output schema makes provenance traceable by design — the synthesis agent produces auditable output rather than flowing prose. This is more reliable than any post-hoc approach. A is wrong because a global reference section lists documents analyzed by subagents, not which specific claims came from which sources — it provides bibliography, not claim-level provenance. C is wrong because post-hoc attribution by content matching is error-prone — synthesis agents paraphrase and combine findings, making content matching unreliable for tracing specific claims back to specific subagent outputs. D is wrong because an attribution agent adds a full LLM reasoning step (plus latency and cost) to reconstruct information that should have been recorded at synthesis time — source tracking at generation is more reliable than retrospective attribution."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A research coordinator is told the research task is complete when \"all topics have been sufficiently explored.\" The coordinator's termination logic checks each subagent's output for the phrase \"sufficient\" or \"complete\" as a proxy for this condition. During a run, a subagent analyzing pharmaceutical patents writes: \"The patent landscape appears sufficiently crowded in this therapeutic area to warrant caution.\" The coordinator terminates the entire workflow, treating this as a completion signal. What design flaw caused the premature termination?",
+    "opts": [
+      "The coordinator relied on natural language sentiment parsing for termination decisions rather than structural completion signals such as a `status` field or a task completion registry",
+      "The subagent violated output formatting conventions by using hedging language that could be ambiguous to downstream consumers processing its output",
+      "The coordinator's termination threshold was too low — requiring a single agent to signal completion rather than requiring all agents to signal completion simultaneously",
+      "The termination logic was not given enough context about the research domain, causing it to misinterpret domain-specific language as workflow status signals"
+    ],
+    "ans": 0,
+    "expl": "Natural language parsing for workflow termination is inherently fragile. The word \"sufficiently\" appears in domain-specific analysis language with completely different semantics from workflow completion signals. Structural termination signals — a dedicated `status: \"complete\"` field, a boolean `task_done` flag, or explicit removal from a pending-tasks registry — are unambiguous because they are purpose-built for workflow control and cannot be confused with domain vocabulary. A is the direct and complete diagnosis. B is wrong because subagents should not be constrained from using natural professional language in their analysis outputs — the problem is the coordinator's fragile parsing logic, not the subagent's word choice. C is wrong because requiring consensus across all agents would not prevent the false positive — if any single subagent uses domain language containing trigger words, the coordinator still misfires; the issue is the parsing approach. D is wrong because adding domain context to the termination logic is a patch on a fundamentally flawed approach — no amount of context can prevent all natural language ambiguity in termination signals."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A scientific literature coordinator dispatches subagents to review papers and return findings. Each subagent returns a verbose response including the full paper abstract, its reasoning steps (\"First I identified the key variables... then I checked the sample size... I noticed the confidence interval...\"), a summary of findings, and a relevance score. The coordinator's synthesis agent receives 180,000 tokens from 9 subagents and produces lower-quality integration than when processing 40,000 tokens from 4 subagents on a similar task. The coordinator is considering adding an intermediate summarizer agent. Is this the right fix?",
+    "opts": [
+      "Yes — an intermediate summarizer is the standard solution for synthesis context overflow and should be applied whenever the synthesis agent's input exceeds 100,000 tokens",
+      "No — the better fix is modifying the upstream subagent output format to return only the structured finding (key claims, citations, relevance score) without the verbose abstract and reasoning chain, eliminating token inflation at the source",
+      "Yes — intermediate summarizers allow the coordinator to preserve full subagent reasoning chains in storage while passing only distilled content to synthesis, achieving both auditability and synthesis quality",
+      "No — the coordinator should instead split the 9 subagent outputs into 3 batches of 3 and run 3 sequential synthesis passes, merging the intermediate syntheses in a final fourth pass"
+    ],
+    "ans": 1,
+    "expl": "The root cause is upstream verbosity: subagents are returning full abstracts and internal reasoning chains that the synthesis agent doesn't need. Fixing the subagent output format to return only structured findings (key claims, citations, relevance score) eliminates the token inflation at the source without adding a component. Each subagent's output becomes 3,000-5,000 tokens of useful structured data instead of 20,000 tokens of padded content. A is wrong because intermediate summarizers are a downstream compensating mechanism, not the standard solution — they add latency and a reasoning layer without fixing the upstream verbosity that causes the problem. C is wrong because \"preserving full reasoning chains in storage\" is a logging concern, not an argument for the intermediate summarizer — the output format fix allows logging of full chains to a store while passing structured output to synthesis. D is wrong because splitting into sequential synthesis batches loses cross-subagent integration — findings from batch 1 and batch 3 cannot be cross-referenced at synthesis time, producing a lower-quality result than a single synthesis over structured inputs."
+  },
+  {
+    "source": "Multi-Agent Research System",
+    "prompt": "A supply chain intelligence system has a coordinator and 5 regional research subagents. During a run, 4 subagents complete and return findings. The 5th subagent (covering the Asia-Pacific region) encounters a transient authentication error, retries twice unsuccessfully, and returns a structured error to the coordinator. The coordinator continues to synthesis and produces a final risk assessment report. A reviewer notes the APAC region is completely absent from the report with no indication of missing coverage. The coordinator's synthesis prompt did not include instructions about handling partial inputs. What is the combined failure?",
+    "opts": [
+      "The subagent failed to implement sufficient retry logic, and the synthesis agent applied improper content filtering that removed the error signal before it reached the report",
+      "The coordinator passed the structured error to synthesis without instructions for handling it, and the synthesis agent silently omitted the APAC coverage gap rather than surfacing it with an annotation",
+      "The synthesis agent exceeded its authority by making coverage decisions — all gap handling should have been implemented in the coordinator before synthesis was invoked",
+      "The subagent should have returned an empty result set instead of a structured error, which would have allowed the synthesis agent to note the absence of APAC findings naturally"
+    ],
+    "ans": 1,
+    "expl": "There are two failures working together: the coordinator passed the error object to synthesis without instructions on how to represent it in output, and the synthesis agent defaulted to omitting the gap rather than annotating it. The correct coordinator behavior is to include explicit synthesis instructions: \"The APAC subagent returned a retrieval error — include an explicit coverage gap annotation for the APAC region in the final report.\" The synthesis agent's correct default when receiving a structured error would be to surface it as a coverage gap rather than silently exclude it. A is wrong because the subagent did implement retry logic (two retries) and properly returned a structured error — it behaved correctly; the subagent's behavior is not a failure in this scenario. C is wrong because synthesis agents legitimately produce output shape decisions — the issue isn't that synthesis made a decision, but that the coordinator didn't provide guidance and the synthesis agent defaulted to omission rather than annotation. D is wrong because returning an empty result set instead of a structured error would make the failure invisible — structured errors are preferable to empty results precisely because they carry the context needed for appropriate handling."
+  }
+];
+
+var MODULE_NAME = "Multi-Agent Research System";
+var TAGS = ["Coordinator/Subagent", "Synthesis", "Coverage Partitioning", "Context Reliability", "Multi-Agent Trust", "Orchestration"];
+var PASS_STORAGE_KEY = 'cca_multi_agent_research_pass_count';
+var WRONGS_STORAGE_KEY = 'cca_multi_agent_research_wrong_answers';
+var QUESTIONS_PER_ATTEMPT = 20;
+var TIMER_MINUTES = 60;
+var PASS_SCORE = 1000;
+
+function loadPassCount() {
+  try {
+    var raw = window.localStorage.getItem(PASS_STORAGE_KEY);
+    var parsed = parseInt(raw, 10);
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+  } catch (err) {}
+  return 0;
+}
+
+function savePassCount(n) {
+  try { window.localStorage.setItem(PASS_STORAGE_KEY, String(n)); } catch (err) {}
+}
+
+function loadWrongs() {
+  try {
+    var raw = window.localStorage.getItem(WRONGS_STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (err) {}
+  return [];
+}
+
+function saveWrongs(arr) {
+  try { window.localStorage.setItem(WRONGS_STORAGE_KEY, JSON.stringify(arr)); } catch (err) {}
+}
+
+function clearWrongs() {
+  try { window.localStorage.removeItem(WRONGS_STORAGE_KEY); } catch (err) {}
+}
+
+var S = {
+  screen: 'start',
+  pool: [],
+  ix: 0,
+  answers: {},
+  revealed: false,
+  timeLeft: TIMER_MINUTES * 60,
+  timerId: null,
+  score: null,
+  review: [],
+  passCount: loadPassCount(),
+  warnedTwoMin: false
+};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function fmtTime(s) {
+  var m = Math.floor(s / 60);
+  var sec = s % 60;
+  return m + ':' + (sec < 10 ? '0' : '') + sec;
+}
+
+function shuffleOpts(q) {
+  var indices = [0,1,2,3];
+  var shuffled = shuffle(indices);
+  // shuffled[newIdx] = origIdx  →  origToNew[origIdx] = newIdx
+  var origToNew = {};
+  for (var ni = 0; ni < shuffled.length; ni++) origToNew[shuffled[ni]] = ni;
+  return {
+    opts: shuffled.map(function(i) { return q.opts[i]; }),
+    correctIdx: shuffled.indexOf(q.ans),
+    origToNew: origToNew
+  };
+}
+
+function buildDeck() {
+  var picked = shuffle(BANK).slice(0, QUESTIONS_PER_ATTEMPT);
+  return picked.map(function(q) {
+    var so = shuffleOpts(q);
+    return {
+      source: q.source,
+      prompt: q.prompt,
+      opts: so.opts,
+      correctIdx: so.correctIdx,
+      origToNew: so.origToNew,
+      expl: q.expl
+    };
+  });
+}
+
+function startQuiz() {
+  S.screen = 'quiz';
+  S.pool = buildDeck();
+  S.ix = 0;
+  S.answers = {};
+  S.revealed = false;
+  S.score = null;
+  S.review = [];
+  S.timeLeft = TIMER_MINUTES * 60;
+  S.warnedTwoMin = false;
+  if (S.timerId) clearInterval(S.timerId);
+  S.timerId = setInterval(function() {
+    S.timeLeft--;
+    if (S.timeLeft === 120 && !S.warnedTwoMin) {
+      S.warnedTwoMin = true;
+      window.alert('2 minutes remaining. Any unanswered questions will be marked incorrect at 0:00.');
+    }
+    if (S.timeLeft <= 0) finishQuiz();
+    render();
+  }, 1000);
+  render();
+}
+
+function select(optIdx) {
+  if (S.revealed) return;
+  S.answers[S.ix] = optIdx;
+  S.revealed = true;
+  render();
+}
+
+function goNext() {
+  if (S.ix < S.pool.length - 1) {
+    S.ix++;
+    S.revealed = S.answers[S.ix] !== undefined;
+  }
+  else { finishQuiz(); }
+  render();
+}
+
+function goPrev() {
+  if (S.ix > 0) {
+    S.ix--;
+    S.revealed = S.answers[S.ix] !== undefined;
+    render();
+  }
+}
+
+function goTo(idx) {
+  S.ix = idx;
+  S.revealed = S.answers[idx] !== undefined;
+  render();
+}
+
+function finishQuiz() {
+  if (S.timerId) clearInterval(S.timerId);
+  var correct = 0;
+  S.review = [];
+  var wrongs = loadWrongs();
+  S.pool.forEach(function(q, i) {
+    var sel = S.answers[i];
+    var isCorrect = sel === q.correctIdx;
+    if (isCorrect) correct++;
+    S.review.push({ q: q, selected: sel, isCorrect: isCorrect });
+    if (!isCorrect && sel !== undefined) {
+      wrongs.push({
+        source: q.source,
+        prompt: q.prompt,
+        selected: sel,
+        correct: q.correctIdx,
+        timestamp: Date.now()
+      });
+    }
+  });
+  saveWrongs(wrongs);
+  S.score = Math.round((correct / S.pool.length) * 1000);
+  if (S.score >= PASS_SCORE) {
+    S.passCount++;
+    savePassCount(S.passCount);
+  }
+  S.screen = 'results';
+  render();
+}
+
+function restart() {
+  if (S.timerId) clearInterval(S.timerId);
+  S = {
+    screen: 'start', pool: [], ix: 0, answers: {}, revealed: false,
+    timeLeft: TIMER_MINUTES * 60, timerId: null, score: null, review: [], passCount: 0, warnedTwoMin: false
+  };
+  savePassCount(0);
+  render();
+}
+
+function render() {
+  var app = document.getElementById('app');
+  if (S.screen === 'start') app.innerHTML = renderStart();
+  else if (S.screen === 'quiz') app.innerHTML = renderQuiz();
+  else if (S.screen === 'results') app.innerHTML = renderResults();
+}
+
+function letters() { return ['A','B','C','D']; }
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Inline markdown: escape HTML, render backtick code spans, bold, and newlines
+function md(s) {
+  return escapeHtml(String(s))
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/[*][*]([^*]+)[*][*]/g, '<strong>$1</strong>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function relabelSegment(seg, origToNew) {
+  return seg.replace(/^([A-D])\s+(is\s+(?:wrong|incorrect))/i, function(_, letter, rest) {
+    var origIdx = letter.toUpperCase().charCodeAt(0) - 65;
+    var newIdx = origToNew[origIdx];
+    return letters()[newIdx] + ' ' + rest;
+  });
+}
+
+function buildVerboseExplanation(q, answered) {
+  var correctIdx = q.correctIdx;
+  var correctLetter = letters()[correctIdx];
+  var selectedLetter = answered >= 0 ? letters()[answered] : '-';
+  var isCorrect = answered === correctIdx;
+
+  var raw = q.expl || 'No explanation provided.';
+  var segments = raw
+    .replace(/\.\s+([A-D])\s+is\s+(wrong|incorrect)/gi, '.\n$1 is $2')
+    .replace(/\.\s+Option\s+([A-D])/gi, '.\nOption $1')
+    .split('\n')
+    .map(function(s) { return s.trim(); })
+    .filter(Boolean);
+
+  if (q.origToNew) {
+    segments = segments.map(function(seg, i) {
+      return i === 0 ? seg : relabelSegment(seg, q.origToNew);
+    });
+    // Sort wrong-option segments A→B→C→D by their remapped leading letter
+    var first = segments[0];
+    var rest = segments.slice(1).sort(function(a, b) {
+      var la = a.match(/^([A-D])\s+is/i); var lb = b.match(/^([A-D])\s+is/i);
+      if (!la || !lb) return 0;
+      return la[1].toUpperCase().charCodeAt(0) - lb[1].toUpperCase().charCodeAt(0);
+    });
+    segments = [first].concat(rest);
+  }
+
+  var segHTML = '';
+  for (var si = 0; si < segments.length; si++) {
+    if (si === 0) {
+      segHTML += '<div style="margin-top:0.6rem">' + md(segments[si]) + '</div>';
+    } else {
+      segHTML += '<div style="margin-top:0.55rem;border-top:1px solid rgba(255,255,255,0.07);padding-top:0.5rem">' + md(segments[si]) + '</div>';
+    }
+  }
+
+  return (
+    '<div class="explanation show" style="border-left-color:' + (isCorrect ? 'var(--green)' : 'var(--red)') + '">' +
+      '<strong>' + (isCorrect ? 'Correct' : 'Incorrect') + ' — Correct answer: ' + correctLetter + '</strong><br>' +
+      (isCorrect
+        ? '<span style="color:var(--green);font-weight:600">Your answer: ' + selectedLetter + '.</span>'
+        : '<span style="color:var(--red);font-weight:600">Your answer: ' + selectedLetter + '.</span>') +
+      segHTML +
+    '</div>'
+  );
+}
+
+function renderStart() {
+  return '<div class="card start-main" style="text-align:center">' +
+    '<h2>CCA — ' + escapeHtml(MODULE_NAME) + '</h2>' +
+    '<p>' + BANK.length + '-question bank. Each attempt randomly selects <strong>' + QUESTIONS_PER_ATTEMPT + '</strong> questions with <strong>shuffled answer orders</strong>.<br>Pass = <strong>' + PASS_SCORE + '/1000</strong> (perfect). You must pass <strong>2 times</strong>.</p>' +
+    '<div class="pass-tracker" id="passTracker">' +
+      [1,2].map(function(n) {
+        return '<div class="pass-dot' + (n <= S.passCount ? ' earned' : '') + (n === S.passCount + 1 ? ' current' : '') + '"></div>';
+      }).join('') +
+    '</div>' +
+    (S.passCount >= 2 ? '<p style="color:var(--green);font-weight:700;margin-bottom:1rem">Module pass requirement complete: 2 perfect passes achieved.</p>' : '') +
+    '<div class="domain-tags">' + TAGS.map(function(t) { return '<span class="domain-tag">' + escapeHtml(t) + '</span>'; }).join('') + '</div>' +
+    '<div class="start-stats">' +
+      '<div class="stat"><div class="stat-value">' + BANK.length + '</div><div class="stat-label">Question Bank</div></div>' +
+      '<div class="stat"><div class="stat-value">' + QUESTIONS_PER_ATTEMPT + '</div><div class="stat-label">Per Test</div></div>' +
+      '<div class="stat"><div class="stat-value">' + TIMER_MINUTES + '</div><div class="stat-label">Minutes</div></div>' +
+      '<div class="stat"><div class="stat-value">' + PASS_SCORE + '/1000</div><div class="stat-label">Pass Score</div></div>' +
+    '</div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-bottom:1.5rem">Pass policy: ' + QUESTIONS_PER_ATTEMPT + ' questions per attempt, perfect score required, two successful runs needed.</p>' +
+    '<div class="start-actions"><button class="btn btn-primary" id="btnStart">Start Quiz (' + QUESTIONS_PER_ATTEMPT + ' Questions)</button></div>' +
+    '<p style="font-size:0.8rem;color:var(--text3);margin-top:0.95rem">Progress is saved in this browser until you reset it.</p>' +
+  '</div>';
+}
+
+function renderQuiz() {
+  var q = S.pool[S.ix];
+  var answered = S.answers[S.ix] !== undefined ? S.answers[S.ix] : -1;
+  var progress = ((S.ix + (answered >= 0 ? 1 : 0)) / S.pool.length) * 100;
+  var tc = S.timeLeft < 120 ? 'danger' : S.timeLeft < 300 ? 'warning' : '';
+
+  var optHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    var cls = 'option';
+    if (answered === i) cls += ' selected';
+    if (S.revealed) {
+      cls += ' disabled';
+      if (i === q.correctIdx) cls += answered === i ? ' correct' : ' revealed-correct';
+      else if (answered === i) cls += ' wrong';
+    }
+    optHTML += '<div class="' + cls + '" data-opt="' + i + '"><span class="letter">' + letters()[i] + '</span><span>' + md(q.opts[i]) + '</span></div>';
+  }
+
+  var expHTML = '';
+  if (S.revealed) {
+    expHTML = buildVerboseExplanation(q, answered);
+  }
+
+  return (
+    '<div class="quiz-top">' +
+      '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div></div>' +
+      '<div class="timer-wrap"><div class="timer ' + tc + '">' + fmtTime(S.timeLeft) + '</div></div>' +
+    '</div>' +
+    '<div class="card quiz-card">' +
+      '<div class="q-header"><span class="q-num">Q ' + (S.ix + 1) + ' / ' + S.pool.length + '</span><span class="q-source">' + escapeHtml(q.source) + '</span></div>' +
+      '<div class="q-prompt">' + md(q.prompt) + '</div>' +
+      '<div class="options" id="optGroup">' + optHTML + '</div>' +
+      expHTML +
+      '<div class="actions">' +
+        '<button class="btn btn-secondary" id="btnPrev"' + (S.ix === 0 ? ' disabled' : '') + '>Previous</button>' +
+        '<span>' + (S.revealed ? '<button class="btn btn-primary" id="btnNext">' + (S.ix === S.pool.length - 1 ? 'See Results' : 'Next') + '</button>' : '<span style="color:var(--text3);font-size:0.92rem">Select an answer to reveal feedback</span>') + '</span>' +
+      '</div>' +
+      '<div class="keyboard-hint"><kbd>1-4</kbd> answer <kbd>Enter</kbd> next <kbd>Left/Right</kbd> navigate</div>' +
+    '</div>' +
+    '<div class="question-nav" id="qNav">' +
+      S.pool.map(function(_, i) {
+        var cls2 = 'qnav-dot';
+        if (i === S.ix) cls2 += ' active';
+        if (S.answers[i] !== undefined) cls2 += S.answers[i] === S.pool[i].correctIdx ? ' answered-correct' : ' answered-wrong';
+        return '<div class="' + cls2 + '" data-idx="' + i + '">' + (i + 1) + '</div>';
+      }).join('') +
+    '</div>'
+  );
+}
+
+function renderResults() {
+  var s = S.score;
+  var passed = s >= PASS_SCORE;
+  var correctN = 0;
+  for (var i = 0; i < S.review.length; i++) { if (S.review[i].isCorrect) correctN++; }
+
+  var reviewHTML = '';
+  for (var i2 = 0; i2 < S.review.length; i2++) {
+    var r = S.review[i2];
+    reviewHTML += '<div class="review-item"' + (r.isCorrect ? ' style="border-left:3px solid var(--green);background:rgba(74,222,128,0.05);"' : ' style="border-left:3px solid var(--red);background:rgba(251,113,133,0.06);"') + '><span class="rf ' + (r.isCorrect ? 'rf-ok">OK' : 'rf-bad">MISS') + '</span><span><strong>Q' + (i2 + 1) + ':</strong> ' + (r.isCorrect ? 'Correct' : 'Picked ' + (r.selected >= 0 ? letters()[r.selected] : '-') + ', answer was ' + letters()[r.q.correctIdx]) + ' — ' + escapeHtml(r.q.source) + '</span></div>';
+  }
+
+  var passHTML = '';
+  for (var n = 1; n <= 2; n++) {
+    passHTML += '<div class="pass-square' + (n <= S.passCount ? ' cleared' : '') + '">' + (n <= S.passCount ? 'OK' : n) + '</div>';
+  }
+
+  var bySource = {};
+  for (var j = 0; j < S.review.length; j++) {
+    var src = S.review[j].q.source;
+    if (!bySource[src]) bySource[src] = { total: 0, correct: 0 };
+    bySource[src].total++;
+    if (S.review[j].isCorrect) bySource[src].correct++;
+  }
+  var sourceRows = Object.keys(bySource).sort(function(a, b) {
+    var aRate = bySource[a].correct / bySource[a].total;
+    var bRate = bySource[b].correct / bySource[b].total;
+    return aRate - bRate;
+  }).map(function(src2) {
+    var item = bySource[src2];
+    return '<div class="topic-item"><span>' + escapeHtml(src2) + '</span><span class="topic-score"><strong>' + item.correct + '</strong> / ' + item.total + '</span></div>';
+  }).join('');
+
+  var weakHTML = '';
+  var allWrongs = loadWrongs();
+  if (allWrongs.length > 0) {
+    var wrongsBySource = {};
+    allWrongs.forEach(function(w) {
+      if (!wrongsBySource[w.source]) wrongsBySource[w.source] = [];
+      wrongsBySource[w.source].push(w);
+    });
+    var sortedSources = Object.keys(wrongsBySource).sort(function(a, b) {
+      return wrongsBySource[b].length - wrongsBySource[a].length;
+    });
+    weakHTML = '<div class="topic-breakdown"><h3>Weak Areas (' + allWrongs.length + ' total misses)</h3>';
+    sortedSources.forEach(function(src3) {
+      var items = wrongsBySource[src3];
+      weakHTML += '<div style="margin-bottom:0.8rem"><div class="topic-item"><span>' + escapeHtml(src3) + '</span><span class="topic-score"><strong>' + items.length + '</strong> miss' + (items.length > 1 ? 'es' : '') + '</span></div>';
+      var seen = {};
+      items.forEach(function(w) {
+        var key = w.prompt.substring(0, 60);
+        if (!seen[key]) seen[key] = 0;
+        seen[key]++;
+      });
+      Object.keys(seen).forEach(function(k) {
+        weakHTML += '<div style="font-size:0.75rem;color:var(--text3);padding:0.2rem 0.8rem;margin-left:0.5rem;border-left:2px solid var(--border)">Missed ' + seen[k] + 'x: ' + escapeHtml(k) + '…</div>';
+      });
+      weakHTML += '</div>';
+    });
+    weakHTML += '</div>';
+  }
+
+  return (
+    '<div class="result-card">' +
+      (passed && S.passCount >= 2
+        ? '<div class="celebration">Playbook Complete</div><p style="color:var(--green);font-size:1.25rem;font-weight:700">All 2 perfect passes complete.</p>'
+        : passed
+          ? '<div class="celebration">Perfect Pass</div><p style="color:var(--green);font-size:1.1rem;font-weight:700">Perfect this run. ' + (2 - S.passCount) + ' more perfect run' + (2 - S.passCount > 1 ? 's' : '') + ' required.</p>'
+          : '<p style="color:var(--red);font-size:1rem;font-weight:700;margin-bottom:0.6rem">Below threshold. Retake immediately after reviewing misses.</p>') +
+      '<div class="result-label">Your Score</div>' +
+      '<div class="result-score ' + (passed ? 'pass' : 'fail') + '">' + s + '<span style="font-size:1.5rem">/1000</span></div>' +
+      '<div class="result-detail"><span>' + correctN + '</span> of <span>' + S.pool.length + '</span> correct <span>' + (passed ? 'PASS' : 'RETEST') + '</span></div>' +
+      '<div class="pass-summary">' + passHTML + '</div>' +
+      '<div class="topic-breakdown"><h3>Topic Breakdown</h3>' + sourceRows + '</div>' +
+      weakHTML +
+      '<div class="review-list">' + reviewHTML + '</div>' +
+      '<div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">' +
+        '<button class="btn btn-primary" id="btnRetry">Retake (New Shuffled Set)</button>' +
+        '<button class="btn btn-secondary" id="btnReview">Review Answers</button>' +
+        '<button class="btn btn-outline" id="btnReset">Reset Progress</button>' +
+        (allWrongs.length > 0 ? '<button class="btn btn-outline" id="btnClearWrongs" style="border-color:var(--amber);color:var(--amber)">Clear Weak Areas</button>' : '') +
+      '</div>' +
+    '</div>'
+  );
+}
+
+document.getElementById('app').addEventListener('click', function(e) {
+  var t = e.target;
+  if (t.id === 'btnStart') startQuiz();
+  if (t.closest) {
+    var opt = t.closest('.option');
+    if (opt && !S.revealed) {
+      select(parseInt(opt.getAttribute('data-opt'), 10));
+    }
+  }
+  if (t.id === 'btnNext') goNext();
+  if (t.id === 'btnPrev') goPrev();
+  if (t.closest) {
+    var dot = t.closest('.qnav-dot');
+    if (dot) goTo(parseInt(dot.getAttribute('data-idx'), 10));
+  }
+  if (t.id === 'btnRetry') startQuiz();
+  if (t.id === 'btnReview') {
+    S.screen = 'quiz'; S.ix = 0; S.revealed = true;
+    for (var k = 0; k < S.pool.length; k++) {
+      if (S.answers[k] === undefined) S.answers[k] = S.review[k].selected;
+    }
+    render();
+  }
+  if (t.id === 'btnReset') restart();
+  if (t.id === 'btnClearWrongs') {
+    clearWrongs();
+    render();
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (S.screen !== 'quiz') return;
+  if (e.key.length === 1 && ((e.key >= '1' && e.key <= '4') || (e.key >= 'a' && e.key <= 'd') || (e.key >= 'A' && e.key <= 'D'))) {
+    var idx = -1;
+    if (e.key >= '1' && e.key <= '4') idx = parseInt(e.key, 10) - 1;
+    else idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx <= 3 && !S.revealed) {
+      select(idx);
+      e.preventDefault();
+    }
+  }
+  if (e.key === 'Enter') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowLeft') {
+    goPrev();
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight') {
+    if (S.revealed) goNext();
+    e.preventDefault();
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCA Exam — First Pass Insights</title>
+
+<style>
+  /* ===== FOUNDATIONS ===== */
+  :root {
+    --ink: #0f0f0f;
+    --paper: #fafaf8;
+    --surface: #ffffff;
+    --border: #e6e4e0;
+    --muted: #787670;
+    --accent: #1a56db;
+    --accent-soft: #e8effb;
+    --warn: #c2410c;
+    --warn-soft: #fff7ed;
+    --success: #166534;
+    --success-soft: #f0fdf4;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+
+  body {
+    font-family: var(--font);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== LAYOUT ===== */
+  .container { max-width: 960px; margin: 0 auto; padding: 0 2rem; }
+
+  /* ===== HERO ===== */
+  .hero {
+    padding: 6rem 0 4rem;
+    text-align: center;
+  }
+  .hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: var(--ink);
+  }
+  .hero .accent-line {
+    width: 48px; height: 4px;
+    background: var(--accent);
+    margin: 1.5rem auto;
+    border-radius: 2px;
+  }
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--muted);
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ===== CARDS ===== */
+  .section { padding: 5rem 0; }
+  .section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .section-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .section-header p { color: var(--muted); margin-top: 0.5rem; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.25rem; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card .card-icon { width: 40px; height: 40px; margin-bottom: 1rem; color: var(--accent); }
+  .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+  .card p { font-size: 0.875rem; color: var(--muted); line-height: 1.55; }
+  .card .tag {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.75rem;
+  }
+  .tag-blue { background: var(--accent-soft); color: var(--accent); }
+  .tag-amber { background: var(--warn-soft); color: var(--warn); }
+  .tag-green { background: var(--success-soft); color: var(--success); }
+
+  /* ===== PATTERN CARDS ===== */
+  .pattern-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem; overflow: hidden;
+  }
+  .pattern-card h3 {
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; letter-spacing: -0.01em;
+  }
+  .pattern-card .pattern-subtitle { font-size: 0.8rem; color: var(--accent); font-weight: 600; margin-bottom: 1rem; }
+  .pattern-card p { font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem; line-height: 1.55; }
+  .pattern-card svg { width: 100%; max-height: 140px; margin: 0.5rem 0; }
+
+  /* ===== DECISION TABLE ===== */
+  .decision-grid { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .decision-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .decision-row > * { padding: 1rem 1.5rem; font-size: 0.875rem; background: var(--surface); }
+  .decision-left { font-weight: 600; }
+  .decision-right { color: var(--accent); font-weight: 500; }
+
+  /* ===== ANTI-PATTERNS ===== */
+  .ap-list { display: grid; gap: 0.5rem; }
+  .ap-item {
+    display: flex; align-items: flex-start; gap: 0.85rem;
+    padding: 0.9rem 1rem; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.875rem; line-height: 1.5;
+  }
+  .ap-num {
+    width: 24px; height: 24px;
+    background: var(--warn-soft); color: var(--warn);
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+  }
+  .ap-item .ap-fix { color: var(--accent); font-weight: 600; }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    width: 100%; height: 1px; background: var(--border); margin: 1rem 0 3rem;
+    position: relative;
+  }
+  .divider::after {
+    content: "✦";
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    background: var(--paper); padding: 0 0.75rem;
+    color: var(--muted); font-size: 0.75rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container">
+    <h1>CCA Exam<br>First Pass Insights</h1>
+    <div class="accent-line"></div>
+    <p>A field report on what the exam actually tests, what tripped me up, and what you should focus on instead of just reading docs.</p>
+  </div>
+</section>
+
+<!-- ===== EXAM FORMAT ===== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-header">
+      <h2>Exam Reality</h2>
+      <p>The format shapes how you prepare</p>
+    </div>
+    <div class="grid-3">
+      <div class="card">
+        <svg class="card-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="4" y="6" width="14" height="12" rx="2" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+          <rect x="22" y="6" width="14" height="12" rx="2" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+          <rect x="4" y="22" width="14" height="12" rx="2" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+          <rect x="22" y="22" width="14" height="12" rx="2" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+        </svg>
+        <h3>60 Qs · 90 min</h3>
+        <p>1.5 min per question. You'll finish with buffer — slow down from the start, not the end.</p>
+      </div>
+      <div class="card">
+        <svg class="card-icon" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="15" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+          <path d="M20 10v10l7 7" stroke="#1a56db" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <h3>4 of 6 Scenarios</h3>
+        <p>Random draw. Each scenario has its own gravitational pull — different concepts dominate each one.</p>
+      </div>
+      <div class="card">
+        <svg class="card-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="4" y="4" width="32" height="32" rx="4" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+          <path d="M14 16l4 4 8-8" stroke="#1a56db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M15 28h10" stroke="#787670" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <h3>Micro-Scenarios</h3>
+        <p>Each question is self-contained with its own constraints. No continuing narrative between questions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- ===== FOUR SCENARIOS ===== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-header">
+      <h2>What Each Scenario Actually Tests</h2>
+      <p>Not the surface topic — the real decision-making underneath</p>
+    </div>
+    <div class="grid-2">
+      <!-- S1 -->
+      <div class="card">
+        <span class="tag tag-blue">Scenario 1</span>
+        <svg width="100%" height="130" viewBox="0 0 440 130" fill="none">
+          <rect x="0" y="0" width="440" height="130" rx="8" fill="#e8effb" fill-opacity="0.4"/>
+          <rect x="60" y="22" width="90" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="105" y="44" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">CLAUDE.md</text>
+          <rect x="175" y="22" width="90" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="220" y="44" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">.mcp.json</text>
+          <rect x="290" y="22" width="90" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="335" y="44" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">rules/</text>
+          <rect x="110" y="74" width="100" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="160" y="96" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">skills/</text>
+          <rect x="235" y="74" width="100" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="285" y="96" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">commands/</text>
+        </svg>
+        <h3>Code Generation w/ Claude Code</h3>
+        <p>Config locations, where things live, project vs user scope, <code>context: fork</code>, skills vs commands, when to use plan mode.</p>
+      </div>
+      <!-- S2 -->
+      <div class="card">
+        <span class="tag tag-green">Scenario 2</span>
+        <svg width="100%" height="130" viewBox="0 0 440 130" fill="none">
+          <circle cx="220" cy="40" r="18" fill="#ffffff" stroke="#16a34a" stroke-width="1.5"/>
+          <text x="220" y="44" text-anchor="middle" font-size="10" fill="#166534" font-weight="600" font-family="system-ui,sans-serif">Coord</text>
+          <circle cx="140" cy="90" r="14" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="140" y="94" text-anchor="middle" font-size="9" fill="#0f0f0f" font-family="system-ui,sans-serif">Web</text>
+          <circle cx="220" cy="105" r="14" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="220" y="109" text-anchor="middle" font-size="9" fill="#0f0f0f" font-family="system-ui,sans-serif">Doc</text>
+          <circle cx="300" cy="90" r="14" fill="#ffffff" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="300" y="94" text-anchor="middle" font-size="9" fill="#0f0f0f" font-family="system-ui,sans-serif">Synth</text>
+          <line x1="220" y1="58" x2="145" y2="78" stroke="#16a34a" stroke-width="1" opacity="0.4"/>
+          <line x1="220" y1="58" x2="220" y2="91" stroke="#16a34a" stroke-width="1" opacity="0.4"/>
+          <line x1="220" y1="58" x2="295" y2="78" stroke="#16a34a" stroke-width="1" opacity="0.4"/>
+        </svg>
+        <h3>Multi-Agent Research System</h3>
+        <p>Error propagation, structured error context, coordinator hub-spoke, task partitioning, local recovery before escalation.</p>
+      </div>
+      <!-- S3 -->
+      <div class="card">
+        <span class="tag tag-amber">Scenario 3</span>
+        <svg width="100%" height="130" viewBox="0 0 440 130" fill="none">
+          <rect x="40" y="28" width="160" height="60" rx="8" fill="#ffffff" stroke="#c2410c" stroke-width="1.5"/>
+          <text x="120" y="53" text-anchor="middle" font-size="11" fill="#c2410c" font-weight="600" font-family="system-ui,sans-serif">Sync</text>
+          <text x="120" y="72" text-anchor="middle" font-size="9" fill="#787670" font-family="system-ui,sans-serif">Blocking · Immediate</text>
+          <rect x="240" y="28" width="160" height="60" rx="8" fill="#ffffff" stroke="#c2410c" stroke-width="1.5"/>
+          <text x="320" y="53" text-anchor="middle" font-size="11" fill="#c2410c" font-weight="600" font-family="system-ui,sans-serif">Batch</text>
+          <text x="320" y="72" text-anchor="middle" font-size="9" fill="#787670" font-family="system-ui,sans-serif">24h · 50% savings</text>
+          <line x1="200" y1="58" x2="235" y2="58" stroke="#c2410c" stroke-width="1.5" stroke-dasharray="4 3"/>
+        </svg>
+        <h3>CI/CD with Claude Code</h3>
+        <p>Batch vs synchronous decisions, <code>-p</code> and <code>--json-schema</code>, multi-pass review, false positive trust erosion.</p>
+      </div>
+      <!-- S4 -->
+      <div class="card">
+        <span class="tag tag-blue">Scenario 4</span>
+        <svg width="100%" height="130" viewBox="0 0 440 130" fill="none">
+          <rect x="50" y="22" width="140" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="120" y="44" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">get_customer</text>
+          <rect x="250" y="22" width="140" height="34" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.5"/>
+          <text x="320" y="44" text-anchor="middle" font-size="11" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">lookup_order</text>
+          <rect x="160" y="74" width="120" height="34" rx="6" fill="#fff7ed" stroke="#c2410c" stroke-width="1.5"/>
+          <text x="220" y="96" text-anchor="middle" font-size="11" fill="#c2410c" font-weight="600" font-family="system-ui,sans-serif">escalate?</text>
+        </svg>
+        <h3>Customer Support Agent</h3>
+        <p>Tool selection reliability, escalation criteria, programmatic prerequisites, when prompts are enough vs when they're not.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- ===== SIX PATTERNS ===== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-header">
+      <h2>6 Patterns That Repeat Across Every Scenario</h2>
+      <p>These showed up in nearly every question regardless of domain</p>
+    </div>
+    <div class="grid-2">
+      <!-- Pattern 1 -->
+      <div class="pattern-card">
+        <span class="tag tag-blue" style="margin-bottom:1rem;display:inline-block;">Pattern 1</span>
+        <h3>Context Isolation</h3>
+        <p>Something is polluting another thing's context. The answer is structural — fork, subagent delegation, conditional loading. Never "add more instructions."</p>
+        <svg viewBox="0 0 440 70" fill="none">
+          <rect x="30" y="15" width="160" height="40" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.2"/>
+          <text x="110" y="40" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600" font-family="system-ui,sans-serif">Verbose Output</text>
+          <rect x="250" y="15" width="160" height="40" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="330" y="40" text-anchor="middle" font-size="10" fill="#166534" font-weight="600" font-family="system-ui,sans-serif">Isolated Subagent</text>
+          <line x1="190" y1="35" x2="245" y2="35" stroke="#0f0f0f" stroke-width="1.5" marker-end="url(#arrow1)"/>
+          <text x="217" y="28" text-anchor="middle" font-size="9" fill="#1a56db" font-weight="600" font-family="system-ui,sans-serif">context: fork</text>
+          <defs><marker id="arrow1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#0f0f0f"/></marker></defs>
+        </svg>
+      </div>
+      <!-- Pattern 2 -->
+      <div class="pattern-card">
+        <span class="tag tag-green" style="margin-bottom:1rem;display:inline-block;">Pattern 2</span>
+        <h3>Error Handling</h3>
+        <p>"Something failed. Now what?" Structured context wins: failure type + what was attempted + partial results. Never generic messages or silent suppression.</p>
+        <svg viewBox="0 0 440 70" fill="none">
+          <rect x="30" y="15" width="100" height="40" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.2"/>
+          <text x="80" y="40" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600" font-family="system-ui,sans-serif">Tool fails</text>
+          <rect x="170" y="15" width="100" height="40" rx="6" fill="#ffffff" stroke="#1a56db" stroke-width="1.2"/>
+          <text x="220" y="33" text-anchor="middle" font-size="9" fill="#0f0f0f" font-family="system-ui,sans-serif">type: timeout</text>
+          <text x="220" y="47" text-anchor="middle" font-size="8" fill="#787670" font-family="system-ui,sans-serif">partial: [...], retry: true</text>
+          <rect x="310" y="15" width="100" height="40" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="360" y="40" text-anchor="middle" font-size="10" fill="#166534" font-weight="600" font-family="system-ui,sans-serif">Recover</text>
+          <line x1="130" y1="35" x2="165" y2="35" stroke="#0f0f0f" stroke-width="1.5" marker-end="url(#arrow2)"/>
+          <line x1="270" y1="35" x2="305" y2="35" stroke="#0f0f0f" stroke-width="1.5" marker-end="url(#arrow3)"/>
+          <defs><marker id="arrow2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#0f0f0f"/></marker><marker id="arrow3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#0f0f0f"/></marker></defs>
+        </svg>
+      </div>
+      <!-- Pattern 3 -->
+      <div class="pattern-card">
+        <span class="tag tag-amber" style="margin-bottom:1rem;display:inline-block;">Pattern 3</span>
+        <h3>Tool Selection</h3>
+        <p>Agent picks the wrong tool. Start with tool descriptions. Fix root cause before adding routers, classifiers, or pre-processors.</p>
+        <svg viewBox="0 0 440 70" fill="none">
+          <rect x="30" y="15" width="180" height="40" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.2"/>
+          <text x="120" y="40" text-anchor="middle" font-size="10" fill="#dc2626" font-weight="600" font-family="system-ui,sans-serif">Wrong tool selected</text>
+          <rect x="260" y="15" width="150" height="40" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="335" y="33" text-anchor="middle" font-size="9" fill="#166534" font-weight="600" font-family="system-ui,sans-serif">Fix descriptions</text>
+          <text x="335" y="47" text-anchor="middle" font-size="8" fill="#787670" font-family="system-ui,sans-serif">inputs · edges · boundaries</text>
+          <line x1="210" y1="35" x2="255" y2="35" stroke="#0f0f0f" stroke-width="1.5" marker-end="url(#arrow4)"/>
+          <defs><marker id="arrow4" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#0f0f0f"/></marker></defs>
+        </svg>
+      </div>
+      <!-- Pattern 4 -->
+      <div class="pattern-card">
+        <span class="tag tag-green" style="margin-bottom:1rem;display:inline-block;">Pattern 4</span>
+        <h3>Batch vs Sync</h3>
+        <p>Someone waiting = sync. Overnight/deferred = batch. Iterative tool-calling can't use batch at all — it's fire-and-forget, no mid-request interceptions.</p>
+        <svg viewBox="0 0 440 70" fill="none">
+          <rect x="30" y="15" width="180" height="40" rx="6" fill="#ffffff" stroke="#0f0f0f" stroke-width="1.2"/>
+          <text x="120" y="33" text-anchor="middle" font-size="10" fill="#0f0f0f" font-weight="600" font-family="system-ui,sans-serif">Blocking</text>
+          <text x="120" y="47" text-anchor="middle" font-size="9" fill="#1a56db" font-weight="500" font-family="system-ui,sans-serif">→ Synchronous API</text>
+          <rect x="250" y="15" width="160" height="40" rx="6" fill="#ffffff" stroke="#0f0f0f" stroke-width="1.2"/>
+          <text x="330" y="33" text-anchor="middle" font-size="10" fill="#0f0f0f" font-weight="600" font-family="system-ui,sans-serif">Overnight</text>
+          <text x="330" y="47" text-anchor="middle" font-size="9" fill="#1a56db" font-weight="500" font-family="system-ui,sans-serif">→ Batch API</text>
+        </svg>
+      </div>
+      <!-- Pattern 5 -->
+      <div class="pattern-card">
+        <span class="tag tag-amber" style="margin-bottom:1rem;display:inline-block;">Pattern 5</span>
+        <h3>Few-Shot Boundaries</h3>
+        <p>Few-shot is right for consistent, predictable patterns. When gaps vary unpredictably across cases, the answer is self-critique or structural change. Don't default to few-shot.</p>
+        <svg viewBox="0 0 440 70" fill="none">
+          <rect x="20" y="15" width="180" height="40" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.2"/>
+          <text x="110" y="33" text-anchor="middle" font-size="9" fill="#166534" font-weight="600" font-family="system-ui,sans-serif">Consistent gaps</text>
+          <text x="110" y="47" text-anchor="middle" font-size="8" fill="#787670" font-family="system-ui,sans-serif">→ Few-shot</text>
+          <rect x="240" y="15" width="180" height="40" rx="6" fill="#fef2f2" stroke="#ef4444" stroke-width="1.2"/>
+          <text x="330" y="33" text-anchor="middle" font-size="9" fill="#dc2626" font-weight="600" font-family="system-ui,sans-serif">Variable gaps</text>
+          <text x="330" y="47" text-anchor="middle" font-size="8" fill="#787670" font-family="system-ui,sans-serif">→ Self-critique</text>
+          <line x1="200" y1="35" x2="235" y2="35" stroke="#0f0f0f" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <!-- Pattern 6 -->
+      <div class="pattern-card">
+        <span class="tag tag-blue" style="margin-bottom:1rem;display:inline-block;">Pattern 6</span>
+        <h3>Config Scope</h3>
+        <p>Project scope (.claude/) = shared via git, team gets it. User scope (~/.claude/) = personal, not shared. Same-name skills: project takes precedence.</p>
+        <svg viewBox="0 0 440 70" fill="none">
+          <rect x="30" y="15" width="180" height="40" rx="6" fill="#e8effb" stroke="#1a56db" stroke-width="1.2"/>
+          <text x="120" y="33" text-anchor="middle" font-size="10" fill="#0f0f0f" font-weight="600" font-family="system-ui,sans-serif">.claude/</text>
+          <text x="120" y="47" text-anchor="middle" font-size="8" fill="#787670" font-family="system-ui,sans-serif">Project · Shared · Git</text>
+          <rect x="250" y="15" width="160" height="40" rx="6" fill="#e8effb" fill-opacity="0.4" stroke="#787670" stroke-width="1"/>
+          <text x="330" y="33" text-anchor="middle" font-size="10" fill="#787670" font-weight="600" font-family="system-ui,sans-serif">~/.claude/</text>
+          <text x="330" y="47" text-anchor="middle" font-size="8" fill="#787670" font-family="system-ui,sans-serif">User · Personal</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- ===== ANTI-PATTERNS ===== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-header">
+      <h2>Anti-Patterns to Internalize</h2>
+      <p>At least a third of questions test whether you can spot these. The fix column is the correct answer pattern.</p>
+    </div>
+    <div class="ap-list">
+      <div class="ap-item"><span class="ap-num">1</span> Parsing natural language for when the agent is done <span class="ap-fix">&nbsp;→ check <code>stop_reason</code></span></div>
+      <div class="ap-item"><span class="ap-num">2</span> Using iteration caps as the primary stop mechanism <span class="ap-fix">&nbsp;→ safety fallback only</span></div>
+      <div class="ap-item"><span class="ap-num">3</span> Putting critical business rules in prompts <span class="ap-fix">&nbsp;→ programmatic hooks / frontmatter</span></div>
+      <div class="ap-item"><span class="ap-num">4</span> Using self-reported confidence for decisions <span class="ap-fix">&nbsp;→ never reliable, don't use</span></div>
+      <div class="ap-item"><span class="ap-num">5</span> Escalating based on customer sentiment <span class="ap-fix">&nbsp;→ sentiment ≠ complexity</span></div>
+      <div class="ap-item"><span class="ap-num">6</span> Returning generic error messages <span class="ap-fix">&nbsp;→ structured context (type + attempted + partials)</span></div>
+      <div class="ap-item"><span class="ap-num">7</span> Silently suppressing errors, returning empty as success <span class="ap-fix">&nbsp;→ propagate errors with context</span></div>
+      <div class="ap-item"><span class="ap-num">8</span> Giving agents too many tools <span class="ap-fix">&nbsp;→ cap at 4-5, least privilege</span></div>
+      <div class="ap-item"><span class="ap-num">9</span> Same session reviewing its own code <span class="ap-fix">&nbsp;→ separate instance (confirmation bias)</span></div>
+      <div class="ap-item"><span class="ap-num">10</span> Aggregate accuracy masking per-category failures <span class="ap-fix">&nbsp;→ per-category breakdown</span></div>
+    </div>
+    <div class="card" style="text-align:center;margin-top:1.5rem;background:var(--warn-soft);border-color:var(--warn);border-width:1px;">
+      <p style="color:var(--warn);font-weight:600">#1 Trap: "Add instructions to the prompt" as an answer option. When you see it, verify: is there a deterministic fix instead?</p>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- ===== DECISION RULES ===== -->
+<section class="section" style="padding-top: 0;">
+  <div class="container">
+    <div class="section-header">
+      <h2>Quick Decision Framework</h2>
+      <p>When you're stuck between two plausible answers</p>
+    </div>
+    <div class="decision-grid">
+      <div class="decision-row"><div class="decision-left">Blocking pre-merge check</div><div class="decision-right">Synchronous API</div></div>
+      <div class="decision-row"><div class="decision-left">Overnight or weekly job</div><div class="decision-right">Batch API</div></div>
+      <div class="decision-row"><div class="decision-left">Multi-file architectural change</div><div class="decision-right">Plan mode</div></div>
+      <div class="decision-row"><div class="decision-left">Single-file, obvious fix</div><div class="decision-right">Direct execution</div></div>
+      <div class="decision-row"><div class="decision-left">Financial or safety impact</div><div class="decision-right">Programmatic enforcement</div></div>
+      <div class="decision-row"><div class="decision-left">Verbose output polluting session</div><div class="decision-right">context: fork / Explore subagent</div></div>
+      <div class="decision-row"><div class="decision-left">Context only for specific tasks</div><div class="decision-right">Skill (on-demand), not CLAUDE.md</div></div>
+      <div class="decision-row"><div class="decision-left">Context by file type/path</div><div class="decision-right">.claude/rules/ glob patterns</div></div>
+      <div class="decision-row"><div class="decision-left">Wrong tool consistently selected</div><div class="decision-right">Fix tool descriptions first</div></div>
+      <div class="decision-row"><div class="decision-left">Customer explicitly requests human</div><div class="decision-right">Escalate immediately</div></div>
+      <div class="decision-row"><div class="decision-left">Policy gap, can't fabricate rule</div><div class="decision-right">Escalate</div></div>
+      <div class="decision-row"><div class="decision-left">Customer is angry or frustrated</div><div class="decision-right">Do NOT escalate on sentiment</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="divider"></div></div>
+
+<!-- ===== CLOSER ===== -->
+<section class="section" style="padding-top: 0; padding-bottom: 6rem;">
+  <div class="container" style="text-align:center;">
+    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" style="margin-bottom:2rem;">
+      <circle cx="32" cy="32" r="28" fill="#e8effb" stroke="#1a56db" stroke-width="1.5"/>
+      <path d="M22 32l6 6 14-14" stroke="#1a56db" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.75rem;">Focus on understanding, not memorizing</h2>
+    <p style="color:var(--muted);max-width:480px;margin:0 auto;font-size:0.95rem;">
+      The exam tests whether you can make good decisions about Claude-based systems. Build a mental model of how things actually work — what fails, how context flows, why one mechanism beats another. Read carefully. You have time.
+    </p>
+    <p style="color:var(--muted);margin-top:2rem;font-size:0.8rem;">
+      Created by Thinh · May 2026 · First pass insights
+    </p>
+  </div>
+</section>
+
+</body>
+</html>
