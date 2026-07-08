@@ -111,6 +111,7 @@
   - `docs/prep-guides/cca-f-what-it-tests.html` — Diataxis explanation/reference page covering exam format, target candidate, scenarios, domain weights, and excluded topics.
   - `docs/prep-guides/cca-f-how-to-prepare.html` — Diataxis how-to page covering official guide first, Academy courses, exam-guide exercises, practice exam readiness, community resources, and final booking checks.
 - Browser-render QA covered desktop `1440x1200` and mobile `390x1200`; both pages had no horizontal overflow.
+- Refreshed the `cca-f-how-to-prepare.html` resource section with `last30days` + GitHub API checks for CCA-F repositories. Added primary, targeted, and extra-drill repo tiers plus a caution against dump-style repos.
 
 ### 2026-05-10
 - Accelerated schedule update after Week 1 completed in 2 days: moved Week 2 start to 2026-05-11 by shifting upcoming plan one week earlier for 2026-05-11..2026-06-12.
