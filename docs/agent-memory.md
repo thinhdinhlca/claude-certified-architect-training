@@ -106,6 +106,12 @@
 - Add a dated entry under `Recent Fixes and Pitfalls` after each meaningful study-system/tooling change.
 - Do not rewrite old entries; add clarifications as new dated bullets.
 
+### 2026-07-08
+- Added two shareable standalone prep-guide HTML files for a colleague:
+  - `docs/prep-guides/cca-f-what-it-tests.html` — Diataxis explanation/reference page covering exam format, target candidate, scenarios, domain weights, and excluded topics.
+  - `docs/prep-guides/cca-f-how-to-prepare.html` — Diataxis how-to page covering official guide first, Academy courses, exam-guide exercises, practice exam readiness, community resources, and final booking checks.
+- Browser-render QA covered desktop `1440x1200` and mobile `390x1200`; both pages had no horizontal overflow.
+
 ### 2026-05-10
 - Accelerated schedule update after Week 1 completed in 2 days: moved Week 2 start to 2026-05-11 by shifting upcoming plan one week earlier for 2026-05-11..2026-06-12.
 - Added 2026-06-13..2026-06-19 as optional buffer/retest window (full sim + weak-area corrections).
