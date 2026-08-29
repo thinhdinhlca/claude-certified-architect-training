@@ -23,7 +23,8 @@ One fact lives in exactly one file. If two files could hold it, pick the row bel
 
 | Kind of fact | File |
 |---|---|
-| Domain glossary, architecture map, known hotspots, startup/playbook protocol, dated fixes (append-only) | `docs/agent-memory.md` |
+| Domain glossary, architecture map, known hotspots, startup/playbook protocol (curated, kept small) | `docs/agent-memory.md` |
+| Dated fixes and tooling changes | `docs/agent-memory/deltas/<year-month>.md` — not required reading, fold a fact up into `docs/agent-memory.md` once it's durable |
 | Base curriculum, anti-patterns, decision frameworks | `README.md` |
 | Full CLI reference | `docs/cli.md` |
 | Quiz question construction patterns | `docs/PREPARATION-GUIDE.md` |
@@ -38,5 +39,5 @@ This is enforced, not just documented: `.githooks/pre-commit` blocks a commit th
 
 ## Boundaries
 
-- `docs/agent-memory.md` is explicitly append-only per its own "Next-Pass Update Rule" — add dated bullets, don't rewrite old entries.
+- `docs/agent-memory.md`'s curated sections stay small; add a dated bullet to `docs/agent-memory/deltas/<year-month>.md` instead, don't rewrite old entries there either.
 - This repo has real uncommitted work in progress (calendar/plan edits, quiz HTML drafts) — do not discard it.
