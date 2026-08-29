@@ -42,7 +42,7 @@
 1. Confirm today's scope:
    - `./cca read --date YYYY-MM-DD`
 2. Generate or refresh the topic HTML quiz artifact (for example `quizzes/cca-hooks-quiz.html`) using:
-   - `tools/QUIZ-GENERATION-FLOW.md`
+   - `docs/quiz-generation/QUIZ-GENERATION-FLOW.md`
 3. Run the timed quiz block (CLI date test or the HTML quiz flow).
 
 ### B) When pass criteria is achieved
@@ -91,7 +91,7 @@
 - Domain 1.1 (Agentic Loops) completed: 2/2 perfect passes.
 - Changed all HTML quiz timers from 90 minutes to 15 minutes (with 2-minute warning).
 - Created Obsidian daily note: `02-Lanes/CCA-Cert/Daily/2026-05-10.md`.
-- Created `tools/QUIZ-GENERATION-FLOW.md` — standardized process for generating HTML quizzes from practice-test markdown banks.
+- Created `tools/QUIZ-GENERATION-FLOW.md` (later moved to `docs/quiz-generation/QUIZ-GENERATION-FLOW.md` in a reorg) — standardized process for generating HTML quizzes from practice-test markdown banks.
 - Fetched all MCP docs (intro, architecture, build-server, build-client, debugging, apps).
 - Created Obsidian domain note: `03-Knowledge/CCA-Domains/domain-2.md` — MCP Integration with metaphors (USB-C, Restaurant), architecture, transports, lifecycle, debugging, MCP apps vs web apps, glossary (uv, stdio, absolute paths).
 - Created `quizzes/cca-mcp-quiz.html` — 30-question HTML quiz for Domain 2 (MCP Integration) with amber accent, 15min timer, 2 perfect passes. localStorage keys: `cca_mcp_pass_count`, `cca_mcp_wrong_answers`. Topics: architecture, primitives, transports, lifecycle, debugging, MCP apps, configuration, client patterns, security.

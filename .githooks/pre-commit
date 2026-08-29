@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Blocks a new top-level knowledge/context file that AGENTS.md does not reference.
+#
+# Runs as a git hook, so it fires for any tool or agent that runs `git commit`
+# in this checkout (Claude Code, Codex, Cursor, a human, a CI bot) -- not just
+# one specific coding assistant. See AGENTS.md's "Where facts live" table: one
+# fact belongs in exactly one file, and every file that holds durable project
+# facts must be named there.
+#
+# Install once per project: copy this file to .githooks/pre-commit, chmod +x
+# it, then run `git config core.hooksPath .githooks`. A fresh clone must run
+# that same `git config` command once before the hook takes effect.
+set -euo pipefail
+
+allowlist="README.md CHANGELOG.md LICENSE.md CONTRIBUTING.md AGENTS.md CLAUDE.md GEMINI.md"
+
+new_root_md_files=$(git diff --cached --name-only --diff-filter=A -- '*.md' | grep -v '/' || true)
+
+if [ -z "$new_root_md_files" ] || [ ! -f AGENTS.md ]; then
+  exit 0
+fi
+
+blocked=0
+for f in $new_root_md_files; do
+  case " $allowlist " in
+    *" $f "*) continue ;;
+  esac
+  if ! grep -qF "$f" AGENTS.md; then
+    echo "BLOCKED: new top-level file '$f' is not referenced in AGENTS.md." >&2
+    echo "  A new knowledge/context file usually means a fact that already" >&2
+    echo "  belongs in an existing file. Check AGENTS.md's 'Where facts live'" >&2
+    echo "  table first." >&2
+    echo "  - If an existing file owns this fact, put it there instead and drop '$f'." >&2
+    echo "  - If '$f' is genuinely a new category, add a row for it to that table" >&2
+    echo "    in this same commit, then retry." >&2
+    blocked=1
+  fi
+done
+
+exit "$blocked"
